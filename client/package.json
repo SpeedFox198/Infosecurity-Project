@@ -23,6 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"socket.io-client": "^4.5.3",
 		"ws": "^8.11.0"
 	}
 }

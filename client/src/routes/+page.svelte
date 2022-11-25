@@ -1,28 +1,49 @@
 <script>
 import { onMount } from "svelte";
+import { io } from "socket.io-client";
 
+let socketio;
 let socket;
 let allMsgs = [];
 let content = "";
 
 onMount(async () => {
-    socket = new WebSocket("ws://localhost:5000/ws");
+    const namespace = "localhost:8000";
+    const transports = {transports: ["websocket"]}
+    socketio = io(namespace, transports);
 
-    // Connection opened
-    socket.addEventListener("open", event => {
-        socket.send("Hello Server!");
-    });
+    socketio.on("connect", () => {
+        socketio.emit("test", {data: "connected to the SocketServer..."});
+    })
 
-    // Listen for messages
-    socket.addEventListener("message", event => {
-        allMsgs.push(event.data);
+    socketio.on("response", (msg, cb) => {
+        allMsgs.push("from socketio server: " + msg.data);
         allMsgs = allMsgs;
-        console.log(allMsgs);
+        if (cb) cb();
     });
+
+
+    // socket = new WebSocket("ws://localhost:8000/ws");
+
+    // // Connection opened
+    // socket.addEventListener("open", event => {
+    //     socket.send("Hello Server!");
+    // });
+
+    // // Listen for messages
+    // socket.addEventListener("message", event => {
+    //     allMsgs.push("Received: " + event.data);
+    //     allMsgs = allMsgs;
+    // });
 });
 
 async function sendMsg(event) {
-    socket.send(content);
+    // socket.send(content);
+    // allMsgs.push("Sent: " + content);
+    // allMsgs = allMsgs;
+    socketio.emit("test", {data: content});
+    allMsgs.push("Sent via socketio: " + content);
+    allMsgs = allMsgs;
     content = "";
 }
 
