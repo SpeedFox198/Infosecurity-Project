@@ -1,0 +1,4 @@
+DEBUG = True
+PORT = 5000
+ASYNC_MODE = "asgi"
+CORS_ALLOWED_ORIGINS = "*"
