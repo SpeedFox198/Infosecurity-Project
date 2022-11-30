@@ -1,12 +1,33 @@
+<script>
+let nav;
+let burger;
+let navLinks;
+function navSlide() {
+  //Toggle Nav
+  nav.classList.toggle("nav-active");
+
+  //Animate Links
+  navLinks.forEach((link, index) => {
+      if (link.style.animation) {
+          link.style.animation = ""
+      } else {
+          link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
+      }
+  });
+  //Burger Animation
+  burger.classList.toggle("toggle");
+}
+</script>
+
 <div class="intro">
-  <nav style="top:0;" class="navbar">
-    <ul class="nav-links">
+  <nav style="top:0;" class="navbar" bind:this={nav}>
+    <ul class="nav-links" bind:this={navLinks}>
       <li><a href="index.html" class='active-page'>Profile</a></li>
       <li><a href="aboutme.html">Privacy Settings</a></li>
       <li><a href="guide.html">Devices</a></li>
       <li><a href="feedback.html">Appearance</a></li>
     </ul>
-    <div class="burger">
+    <div class="burger" bind:this={burger} on:click={navSlide}>
       <div class="line1"></div>
       <div class="line2"></div>
       <div class="line3"></div>
@@ -26,11 +47,6 @@ nav {
    color:black;
 }
 
-.logo {
- height: 85px;
- width: auto;
-}
-
 .intro{
  height: auto;
  z-index:3;
@@ -47,6 +63,33 @@ nav {
    width: 30%;
 }
 
+.nav-links li {
+       opacity: 0;
+   }
+
+.burger {
+    display: block; /* shows the dropdown icon*/
+    cursor: pointer;
+    align-items: left;
+}
+
+body {
+       overflow-x: hidden;
+   }
+
+.nav-links {
+      position: fixed;
+      right: 0px;
+      height: 100%;
+      top: 0;
+      z-index:-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+      transform: translateX(100%);
+      transition: transform 0.25s ease-in;
+  }
 
 .nav-links li {
    list-style: none;
@@ -64,50 +107,12 @@ nav {
    opacity:1;
 }
 
-.burger {
-   display: none; /* hides the dropdown icon */
-}
-
 .burger div {
    width: 25px;
    height: 3px;
    background-color: black;
    margin: 5px;
    transition: all 0.3s ease;
-}
-
-@media screen and (max-width: 1500px) { /* settings that will overwrite when the screen is set to a specific size*/
-   body {
-       overflow-x: hidden;
-   }
-   .logo{
-     height: 60px;
-   }
-
-  .nav-links {
-       position: fixed;
-       right: 0px;
-       height: 100%;
-       top: 0;
-       background-color: white;
-       z-index:-1;
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-       width: 70%;
-       transform: translateX(100%);
-       transition: transform 0.25s ease-in;
-   }
-
-
-   .nav-links li {
-       opacity: 0;
-   }
-
-   .burger {
-       display: block; /* shows the dropdown icon*/
-       cursor: pointer;
-   }
 }
 
 .navbar ul li a.active-page{ /* to mark out the current page the user is in */
