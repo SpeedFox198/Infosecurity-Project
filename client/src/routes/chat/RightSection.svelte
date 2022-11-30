@@ -11,25 +11,26 @@ function attachFile() {
 
 <style>
 .top-right {
-    height: 70px;
-    border-top: 0.1px solid var(--primary-shadow);
-    border-right: 0.1px solid var(--primary-shadow);
+    height: 4rem;
+    border-top: 0.1rem solid var(--primary-shadow);
+    border-right: 0.1rem solid var(--primary-shadow);
     background-color: var(--primary);
 }
 
 .bottom-right {
     height: 100%;
-    border-right: 0.1px solid var(--grey);
+    border-right: 0.1rem solid var(--grey);
 }
 
 .input-area {
-    height: 60px;
+    height: 4rem;
     max-width: 100vw;
     background-color: var(--grey);
 }
 
 .icon {
-    height: 30px;
+    height: 1.5rem;
+    max-width: 100%;
 }
 </style>
 
