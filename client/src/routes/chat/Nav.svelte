@@ -1,22 +1,26 @@
 <script>
+import { onMount } from "svelte";
 let nav;
 let burger;
 let navLinks;
 function navSlide() {
-  //Toggle Nav
-  nav.classList.toggle("nav-active");
-
   //Animate Links
-  navLinks.forEach((link, index) => {
-      if (link.style.animation) {
-          link.style.animation = ""
-      } else {
-          link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
-      }
+  let links = Array.from(navLinks.children);
+  console.log(links);
+  links.forEach((link, index) => {
+    if (link.style.animation) {
+        link.style.animation = ""
+    } else {
+        link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
+    }
   });
   //Burger Animation
   burger.classList.toggle("toggle");
 }
+
+onMount(async () => {
+  burger.classList.toggle("toggle");
+})
 </script>
 
 <div class="intro">
@@ -27,7 +31,7 @@ function navSlide() {
       <li><a href="guide.html">Devices</a></li>
       <li><a href="feedback.html">Appearance</a></li>
     </ul>
-    <div class="burger" bind:this={burger} on:click={navSlide}>
+    <div class="burger toggle" bind:this={burger} on:click={navSlide}>
       <div class="line1"></div>
       <div class="line2"></div>
       <div class="line3"></div>
@@ -122,10 +126,6 @@ body {
   border-radius: 30px;
 }
 
-.nav-active {
-       transform: translateX(0%);
-}
-
 @keyframes navLinkFade {
    from {
        opacity: 0;
@@ -137,6 +137,17 @@ body {
    }
 }
 
+.toggle .line1 { /* the tranformation of the dropdown bar to become a cross (X) */
+   transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.toggle .line2 { /* the tranformation of the dropdown bar to become a cross (X) */
+   opacity: 0;
+}
+
+.toggle .line3 { /* the tranformation of the dropdown bar to become a cross (X) */
+   transform: rotate(45deg) translate(-5px, -6px);
+}
 </style>
 
 
