@@ -1,294 +1,178 @@
 <!--Navbar-->
 <style>
-  /* Icon 1 */
-
-.animated-icon1, .animated-icon2, .animated-icon3 {
-  width: 30px;
-  height: 20px;
-  position: relative;
-  margin: 0px;
-  -webkit-transform: rotate(0deg);
-  -moz-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  transform: rotate(0deg);
-  -webkit-transition: .5s ease-in-out;
-  -moz-transition: .5s ease-in-out;
-  -o-transition: .5s ease-in-out;
-  transition: .5s ease-in-out;
-  cursor: pointer;
+nav {
+   position: fixed !important; /* to make the navigation bar sticky */
+   top: 0%;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   min-height: 8vh;
+   background-color: white;
+   color:black;
 }
 
-.animated-icon1 span, .animated-icon2 span, .animated-icon3 span {
-  display: block;
-  position: absolute;
-  height: 3px;
-  width: 100%;
-  border-radius: 9px;
-  opacity: 1;
-  left: 0;
-  -webkit-transform: rotate(0deg);
-  -moz-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  transform: rotate(0deg);
-  -webkit-transition: .25s ease-in-out;
-  -moz-transition: .25s ease-in-out;
-  -o-transition: .25s ease-in-out;
-  transition: .25s ease-in-out;
+.logo {
+ height: 85px;
+ width: auto;
 }
 
-.animated-icon1 span {
-  background: #e65100;
+.intro{
+ height: auto;
+ z-index:3;
+ width: 100%;
+ height: 50px;
+ color: white;
+ position: relative;
+ z-index: 3;
 }
 
-.animated-icon2 span {
-  background: #e3f2fd;
+.nav-links {
+   display: flex;
+   justify-content: space-around;
+   width: 30%;
 }
 
-.animated-icon3 span {
-  background: #f3e5f5;
+
+.nav-links li {
+   list-style: none;
 }
 
-.animated-icon1 span:nth-child(1) {
- top: 0px;
+.nav-links a {
+   color: black;
+   text-decoration: none;
+   letter-spacing: 4px;
+   font-weight: bold;
+   font-size: 14px;
+   text-align: right;
+   word-spacing: 20px;
+   z-index: 3;
+   opacity:1;
 }
 
-.animated-icon1 span:nth-child(2) {
-  top: 10px;
+.burger {
+   display: none; /* hides the dropdown icon */
 }
 
-.animated-icon1 span:nth-child(3) {
-  top: 20px;
+.burger div {
+   width: 25px;
+   height: 3px;
+   background-color: black;
+   margin: 5px;
+   transition: all 0.3s ease;
 }
 
-.animated-icon1.open span:nth-child(1) {
-  top: 11px;
-  -webkit-transform: rotate(135deg);
-  -moz-transform: rotate(135deg);
-  -o-transform: rotate(135deg);
-  transform: rotate(135deg);
+@media screen and (max-width: 1500px) { /* settings that will overwrite when the screen is set to a specific size*/
+   body {
+       overflow-x: hidden;
+   }
+   .logo{
+     height: 60px;
+   }
+
+  .nav-links {
+       position: fixed;
+       right: 0px;
+       height: 100%;
+       top: 0;
+       background-color: white;
+       z-index:-1;
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       width: 70%;
+       transform: translateX(100%);
+       transition: transform 0.25s ease-in;
+   }
+
+
+   .nav-links li {
+       opacity: 0;
+   }
+
+   .burger {
+       display: block; /* shows the dropdown icon*/
+       cursor: pointer;
+   }
 }
 
-.animated-icon1.open span:nth-child(2) {
-  opacity: 0;
-  left: -60px;
+.navbar ul li a.active-page{ /* to mark out the current page the user is in */
+  color:white;
+  background-color:black;
+  padding:10px;
+  border-radius: 30px;
 }
 
-.animated-icon1.open span:nth-child(3) {
-  top: 11px;
-  -webkit-transform: rotate(-135deg);
-  -moz-transform: rotate(-135deg);
-  -o-transform: rotate(-135deg);
-  transform: rotate(-135deg);
+.nav-active {
+       transform: translateX(0%);
 }
 
-/* Icon 3*/
-
-.animated-icon2 span:nth-child(1) {
-  top: 0px;
+@keyframes navLinkFade {
+   from {
+       opacity: 0;
+       transform: translateX(50px);
+   }
+   to {
+       opacity: 1;
+       transform: translateX(0);
+   }
 }
 
-.animated-icon2 span:nth-child(2), .animated-icon2 span:nth-child(3) {
-  top: 10px;
+.toggle .line1 { /* the tranformation of the dropdown bar to become a cross (X) */
+   transform: rotate(-45deg) translate(-5px, 6px);
 }
 
-.animated-icon2 span:nth-child(4) {
-  top: 20px;
+.toggle .line2 { /* the tranformation of the dropdown bar to become a cross (X) */
+   opacity: 0;
 }
 
-.animated-icon2.open span:nth-child(1) {
-  top: 11px;
-  width: 0%;
-  left: 50%;
+.toggle .line3 { /* the tranformation of the dropdown bar to become a cross (X) */
+   transform: rotate(45deg) translate(-5px, -6px);
 }
 
-.animated-icon2.open span:nth-child(2) {
-  -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
-
-.animated-icon2.open span:nth-child(3) {
-  -webkit-transform: rotate(-45deg);
-  -moz-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-}
-
-.animated-icon2.open span:nth-child(4) {
-  top: 11px;
-  width: 0%;
-  left: 50%;
-}
-
-/* Icon 4 */
-
-.animated-icon3 span:nth-child(1) {
-  top: 0px;
-  -webkit-transform-origin: left center;
-  -moz-transform-origin: left center;
-  -o-transform-origin: left center;
-  transform-origin: left center;
-}
-
-.animated-icon3 span:nth-child(2) {
-  top: 10px;
-  -webkit-transform-origin: left center;
-  -moz-transform-origin: left center;
-  -o-transform-origin: left center;
-  transform-origin: left center;
-}
-
-.animated-icon3 span:nth-child(3) {
-  top: 20px;
-  -webkit-transform-origin: left center;
-  -moz-transform-origin: left center;
-  -o-transform-origin: left center;
-  transform-origin: left center;
-}
-
-.animated-icon3.open span:nth-child(1) {
-  -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  transform: rotate(45deg);
-  top: 0px;
-  left: 8px;
-}
-
-.animated-icon3.open span:nth-child(2) {
-  width: 0%;
-  opacity: 0;
-}
-
-.animated-icon3.open span:nth-child(3) {
-  -webkit-transform: rotate(-45deg);
-  -moz-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  top: 21px;
-  left: 8px;
-}
 </style>
 
-<nav class="navbar navbar-light amber lighten-4 mb-4">
-
-  <!-- Navbar brand -->
-  <a class="navbar-brand" href="#">Navbar</a>
-
-  <!-- Collapse button -->
-  <button class="navbar-toggler first-button" type="button" data-toggle="collapse" data-target="#navbarSupportedContent20"
-    aria-controls="navbarSupportedContent20" aria-expanded="false" aria-label="Toggle navigation">
-    <div class="animated-icon1"><span></span><span></span><span></span></div>
-  </button>
-
-  <!-- Collapsible content -->
-  <div class="collapse navbar-collapse" id="navbarSupportedContent20">
-
-    <!-- Links -->
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-    </ul>
-    <!-- Links -->
-
+<div class="intro">
+  <nav style="top:0;" class="navbar">
+    <div>
+      <a href="index.html"><img class="logo" src="images/Icon.jpg"></a>
+    </div>
+      <ul class="nav-links">
+        <li><a href="index.html" class='active-page'>Home</a></li>
+        <li><a href="aboutme.html">About-Me</a></li>
+        <li><a href="guide.html">Guide</a></li>
+        <li><a href="feedback.html">Feedback</a></li>
+      </ul>
+      <div class="burger">
+        <div class="line1"></div>
+        <div class="line2"></div>
+        <div class="line3"></div>
+      </div>
+    </nav>
   </div>
-  <!-- Collapsible content -->
-
-</nav>
-<!--/.Navbar-->
-
-<!--Navbar-->
-<nav class="navbar navbar-dark red lighten-1 mb-4">
-
-  <!-- Navbar brand -->
-  <a class="navbar-brand" href="#">Navbar</a>
-
-  <!-- Collapse button -->
-  <button class="navbar-toggler second-button" type="button" data-toggle="collapse" data-target="#navbarSupportedContent23"
-    aria-controls="navbarSupportedContent23" aria-expanded="false" aria-label="Toggle navigation">
-    <div class="animated-icon2"><span></span><span></span><span></span><span></span></div>
-  </button>
-
-  <!-- Collapsible content -->
-  <div class="collapse navbar-collapse" id="navbarSupportedContent23">
-
-    <!-- Links -->
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-    </ul>
-    <!-- Links -->
-
-  </div>
-  <!-- Collapsible content -->
-
-</nav>
-<!--/.Navbar-->
-
-<!--Navbar-->
-<nav class="navbar navbar-dark  indigo darken-2">
-
-  <!-- Navbar brand -->
-  <a class="navbar-brand" href="#">Navbar</a>
-
-  <!-- Collapse button -->
-  <button class="navbar-toggler third-button" type="button" data-toggle="collapse" data-target="#navbarSupportedContent22"
-    aria-controls="navbarSupportedContent22" aria-expanded="false" aria-label="Toggle navigation">
-    <div class="animated-icon3"><span></span><span></span><span></span></div>
-  </button>
-
-  <!-- Collapsible content -->
-  <div class="collapse navbar-collapse" id="navbarSupportedContent22">
-
-    <!-- Links -->
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-    </ul>
-    <!-- Links -->
-
-  </div>
-  <!-- Collapsible content -->
-
-</nav>
-<!--/.Navbar-->
 
 <script>
-  $(document).ready(function () {
-  
-    $('.first-button').on('click', function () {
-  
-      $('.animated-icon1').toggleClass('open');
+function navSlide() {
+    const burger = document.querySelector(".burger");
+    const nav = document.querySelector(".nav-links");
+    const navLinks = document.querySelectorAll(".nav-links li");
+
+    burger.addEventListener("click", () => {
+        //Toggle Nav
+        nav.classList.toggle("nav-active");
+
+        //Animate Links
+        navLinks.forEach((link, index) => {
+            if (link.style.animation) {
+                link.style.animation = ""
+            } else {
+                link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
+            }
+        });
+        //Burger Animation
+        burger.classList.toggle("toggle");
     });
-    $('.second-button').on('click', function () {
-  
-      $('.animated-icon2').toggleClass('open');
-    });
-    $('.third-button').on('click', function () {
-  
-      $('.animated-icon3').toggleClass('open');
-    });
-  });
+
+}
+
+navSlide();
 </script>
