@@ -1,0 +1,77 @@
+<script>
+let content = "";
+let attachmentInput;
+function sendMsg() {
+    alert("button clicked");
+}
+function attachFile() {
+    attachmentInput.click();
+}
+</script>
+
+<style>
+.top-right {
+    height: 70px;
+    border-top: 0.1px solid var(--primary-shadow);
+    border-right: 0.1px solid var(--primary-shadow);
+    background-color: var(--primary);
+}
+
+.bottom-right {
+    height: 100%;
+    border-right: 0.1px solid var(--grey);
+}
+
+.input-area {
+    height: 60px;
+    max-width: 100vw;
+    background-color: var(--grey);
+}
+
+.icon {
+    height: 30px;
+}
+</style>
+
+
+<!-- Right Section -->
+<div class="d-flex flex-column flex-grow-1 right-section">
+
+    <!-- Room Info Section -->
+    <div class="d-flex top-right">
+
+    </div>
+
+    <div class="d-flex flex-column bottom-right">
+
+        <!-- Messages Display Section -->
+        <div class="chat flex-grow-1">
+        </div>
+
+        <!-- Texting Input Section -->
+        <div class="container input-area">
+            <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={sendMsg}>
+
+                <!-- Attachments Input -->
+                <div class="col-1">
+                    <button class="btn" type="button" on:click={attachFile}>
+                        <img class="icon" src="/icons/paperclip.svg" alt="AttachFile">
+                    </button>
+                    <input type="file" class="d-none" bind:this={attachmentInput}>
+                </div>
+
+                <!-- Text Input -->
+                <div class="col-10">
+                    <input class="form-control" type="text" name="data" bind:value={content}>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-1">
+                    <button class="btn" type="submit">
+                        <img class="icon" src="/icons/plane.svg" alt="Send">
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

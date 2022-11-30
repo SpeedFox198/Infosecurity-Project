@@ -23,5 +23,5 @@ async def test(sid, data):
 
 
 # app.run(debug=DEBUG, port=PORT)  # Run app
-# config = Config.from_toml("hypercorn/config.toml")
-# asyncio.run(serve(sio_app, config))
+config = Config.from_toml("server/hypercorn/config.toml")
+asyncio.run(serve(sio_app, config))

@@ -7,7 +7,7 @@ let allMsgs = [];
 let content = "";
 
 onMount(async () => {
-    const namespace = "localhost:8000";
+    const namespace = "localhost:5000";
     const transports = {transports: ["websocket"]}
     socket = io(namespace, transports);
 
