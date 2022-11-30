@@ -11,3 +11,8 @@
     --grey: #e1e5f2;
     --white: #ffffff;
 }
+
+.navbar.navbar-2 .navbar-toggler-icon {
+    background-image: url('https://mdbootstrap.com/img/svg/hamburger2.svg?color=white');
+
+}
