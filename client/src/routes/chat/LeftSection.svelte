@@ -1,19 +1,19 @@
 <style>
 .left-section {
-    width: 410px;
+    width: 25rem;
     background-color: var(--primary-light);
 }
 
 .top-left {
-    height: 70px;
-    border-top: 0.1px solid var(--primary-shadow);
-    border-right: 0.1px solid var(--primary-shadow);
+    height: 4rem;
+    border-top: 0.1rem solid var(--primary-shadow);
+    border-right: 0.1rem solid var(--primary-shadow);
     background-color: var(--primary);
 }
 
 .bottom-left {
     height: 100%;
-    border-right: 0.1px solid var(--grey);
+    border-right: 0.1rem solid var(--grey);
 }
 </style>
 
