@@ -1,3 +1,6 @@
+<script>
+</script>
+
 <!--Navbar-->
 <style>
   /* Icon 1 */
@@ -177,7 +180,7 @@
   <a class="navbar-brand" href="#">Navbar</a>
 
   <!-- Collapse button -->
-  <button class="navbar-toggler first-button" type="button" data-toggle="collapse" data-target="#navbarSupportedContent20"
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent20"
     aria-controls="navbarSupportedContent20" aria-expanded="false" aria-label="Toggle navigation">
     <div class="animated-icon1"><span></span><span></span><span></span></div>
   </button>
@@ -274,21 +277,3 @@
 
 </nav>
 <!--/.Navbar-->
-
-<script>
-  $(document).ready(function () {
-  
-    $('.first-button').on('click', function () {
-  
-      $('.animated-icon1').toggleClass('open');
-    });
-    $('.second-button').on('click', function () {
-  
-      $('.animated-icon2').toggleClass('open');
-    });
-    $('.third-button').on('click', function () {
-  
-      $('.animated-icon3').toggleClass('open');
-    });
-  });
-</script>
