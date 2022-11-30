@@ -1,3 +1,7 @@
+<script>
+import Nav from "./Nav.svelte";
+</script>
+
 <style>
 .left-section {
     width: 25rem;
@@ -23,7 +27,7 @@
 
     <!-- Profile & Settings Section -->
     <div class="d-flex top-left">
-
+        <Nav/>
     </div>
 
     <!-- Chat List Section -->

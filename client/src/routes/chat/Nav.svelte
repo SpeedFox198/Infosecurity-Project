@@ -1,5 +1,5 @@
 <!--Navbar-->
-<nav class="navbar navbar-light navbar-2 1F7A8C">
+<nav class="navbar navbar-2 1F7A8C">
 
     <!-- Navbar brand -->
     <a class="navbar-brand" href="#">Navbar</a>
