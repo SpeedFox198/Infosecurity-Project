@@ -1,12 +1,15 @@
 <script>
 let content = "";
+let allMsgs = [];
 let attachmentInput;
-function sendMsg() {
-    alert("button clicked");
-}
-function attachFile() {
+
+async function attachFile(event) {
+    // Click the attachment input to prompt users to upload files
     attachmentInput.click();
 }
+
+// Export variables for page to use
+export { content, allMsgs };
 </script>
 
 <style>
@@ -47,11 +50,16 @@ function attachFile() {
 
         <!-- Messages Display Section -->
         <div class="chat flex-grow-1">
+            {#each allMsgs as msg}
+                <li>
+                    <span>{msg}</span>
+                </li>
+            {/each}
         </div>
 
         <!-- Texting Input Section -->
         <div class="container input-area">
-            <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={sendMsg}>
+            <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault>
 
                 <!-- Attachments Input -->
                 <div class="col-1">
