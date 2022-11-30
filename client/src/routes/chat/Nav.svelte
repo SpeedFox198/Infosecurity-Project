@@ -1,29 +1,18 @@
-<script>
-  function navSlide() {
-      const burger = document.querySelector(".burger");
-      const nav = document.querySelector(".nav-links");
-      const navLinks = document.querySelectorAll(".nav-links li");
-  
-      burger.addEventListener("click", () => {
-          //Toggle Nav
-          nav.classList.toggle("nav-active");
-  
-          //Animate Links
-          navLinks.forEach((link, index) => {
-              if (link.style.animation) {
-                  link.style.animation = ""
-              } else {
-                  link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.5}s`;
-              }
-          });
-          //Burger Animation
-          burger.classList.toggle("toggle");
-      });
-  
-  }
-  
-  navSlide();
-  </script>
+<div class="intro">
+  <nav style="top:0;" class="navbar">
+    <ul class="nav-links">
+      <li><a href="index.html" class='active-page'>Profile</a></li>
+      <li><a href="aboutme.html">Privacy Settings</a></li>
+      <li><a href="guide.html">Devices</a></li>
+      <li><a href="feedback.html">Appearance</a></li>
+    </ul>
+    <div class="burger">
+      <div class="line1"></div>
+      <div class="line2"></div>
+      <div class="line3"></div>
+    </div>
+  </nav>
+</div>
 
 <!--Navbar-->
 <style>
@@ -34,7 +23,6 @@ nav {
    display: flex;
    align-items: center;
    min-height: 8vh;
-   background-color: white;
    color:black;
 }
 
@@ -144,37 +132,6 @@ nav {
    }
 }
 
-.toggle .line1 { /* the tranformation of the dropdown bar to become a cross (X) */
-   transform: rotate(-45deg) translate(-5px, 6px);
-}
-
-.toggle .line2 { /* the tranformation of the dropdown bar to become a cross (X) */
-   opacity: 0;
-}
-
-.toggle .line3 { /* the tranformation of the dropdown bar to become a cross (X) */
-   transform: rotate(45deg) translate(-5px, -6px);
-}
-
 </style>
-
-<div class="intro">
-  <nav style="top:0;" class="navbar">
-    <div>
-      <a href="index.html"><img class="logo" src="images/Icon.jpg"></a>
-    </div>
-    <ul class="nav-links">
-      <li><a href="index.html" class='active-page'>Home</a></li>
-      <li><a href="aboutme.html">About-Me</a></li>
-      <li><a href="guide.html">Guide</a></li>
-      <li><a href="feedback.html">Feedback</a></li>
-    </ul>
-    <div class="burger">
-      <div class="line1"></div>
-      <div class="line2"></div>
-      <div class="line3"></div>
-    </div>
-  </nav>
-</div>
 
 
