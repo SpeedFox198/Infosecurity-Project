@@ -163,18 +163,18 @@ nav {
     <div>
       <a href="index.html"><img class="logo" src="images/Icon.jpg"></a>
     </div>
-      <ul class="nav-links">
-        <li><a href="index.html" class='active-page'>Home</a></li>
-        <li><a href="aboutme.html">About-Me</a></li>
-        <li><a href="guide.html">Guide</a></li>
-        <li><a href="feedback.html">Feedback</a></li>
-      </ul>
-      <div class="burger">
-        <div class="line1"></div>
-        <div class="line2"></div>
-        <div class="line3"></div>
-      </div>
-    </nav>
-  </div>
+    <ul class="nav-links">
+      <li><a href="index.html" class='active-page'>Home</a></li>
+      <li><a href="aboutme.html">About-Me</a></li>
+      <li><a href="guide.html">Guide</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+    <div class="burger">
+      <div class="line1"></div>
+      <div class="line2"></div>
+      <div class="line3"></div>
+    </div>
+  </nav>
+</div>
 
 
