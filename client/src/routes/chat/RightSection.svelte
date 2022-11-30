@@ -1,15 +1,41 @@
 <script>
+import { onMount } from "svelte";
+import { io } from "socket.io-client";
+
+const namespace = "localhost:5000";
+const transports = {transports: ["websocket"]}
+let attachmentInput;
 let content = "";
 let allMsgs = [];
-let attachmentInput;
+let socket;
+
+onMount(async () => {
+    // SocketIO instance
+    socket = io(namespace, transports);
+
+    socket.on("connect", () => {
+        socket.emit("test", {data: "connected to the SocketServer..."});
+    })
+
+    socket.on("response", (msg, cb) => {
+        allMsgs.push("from socketio server: " + msg.data);
+        allMsgs = allMsgs;
+        if (cb) cb();
+    });
+});
+
+async function sendMsg(event) {
+    socket.emit("test", {data: content});
+    allMsgs.push("Sent via socketio: " + content);
+    allMsgs = allMsgs;
+    content = "";
+}
 
 async function attachFile(event) {
     // Click the attachment input to prompt users to upload files
     attachmentInput.click();
 }
 
-// Export variables for page to use
-export { content, allMsgs };
 </script>
 
 <style>
@@ -59,7 +85,7 @@ export { content, allMsgs };
 
         <!-- Texting Input Section -->
         <div class="container input-area">
-            <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault>
+            <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={sendMsg}>
 
                 <!-- Attachments Input -->
                 <div class="col-1">
