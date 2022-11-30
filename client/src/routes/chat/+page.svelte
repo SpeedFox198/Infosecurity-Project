@@ -1,5 +1,5 @@
 <script>
-import LeftSection from "./LeftSection.svelte";
+import LeftSection from "./leftSection.svelte";
 import RightSection from "./RightSection.svelte";
 </script>
 
