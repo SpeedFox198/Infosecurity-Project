@@ -1,34 +1,17 @@
 <script>
-import { onMount } from "svelte";
-import { io } from "socket.io-client";
+import { createEventDispatcher } from "svelte";
+
+
+const dispatch = createEventDispatcher();
 let attachmentInput;
-
-const namespace = "localhost:5000";
-const transports = {transports: ["websocket"]}
 let content = "";
-let allMsgs = [];
-let socket;
 
-onMount(async () => {
-  // SocketIO instance
-  socket = io(namespace, transports);
 
-  socket.on("connect", () => {
-    socket.emit("test", {data: "connected to the SocketServer..."});
-  })
-
-  socket.on("response", (msg, cb) => {
-    allMsgs.push("from socketio server: " + msg.data);
-    allMsgs = allMsgs;
-    if (cb) cb();
-  });
-});
-
-async function sendMsg(event) {
-  socket.emit("test", {data: content});
-  allMsgs.push("Sent via socketio: " + content);
-  allMsgs = allMsgs;
-  content = "";
+async function onMessage(event) {
+  if (content) {
+    dispatch("message", content);
+    content = "";
+  }
 }
 
 async function attachFile(event) {
@@ -38,9 +21,10 @@ async function attachFile(event) {
 
 </script>
 
+
 <!-- Texting Input Section -->
 <div class="container input-area">
-  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={sendMsg}>
+  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onMessage}>
 
     <!-- Attachments Input -->
     <div class="col-1">
@@ -63,3 +47,17 @@ async function attachFile(event) {
     </div>
   </form>
 </div>
+
+
+<style>
+.input-area {
+  height: 4rem;
+  max-width: 100vw;
+  background-color: var(--grey);
+}
+
+.icon {
+  height: 1.5rem;
+  max-width: 100%;
+}
+</style>

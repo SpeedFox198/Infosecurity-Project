@@ -1,7 +1,38 @@
 <script>
 import MessageDisplay from "./MessageDisplay.svelte";
 import MessageInput from "./MessageInput.svelte";
-let allMsgs;
+import { onMount } from "svelte";
+import { io } from "socket.io-client";
+
+
+const namespace = "localhost:5000";
+const transports = {transports: ["websocket"]}
+let allMsgs = [];
+let socket;
+
+
+onMount(async () => {
+  // SocketIO instance
+  socket = io(namespace, transports);
+
+  socket.on("connect", () => {
+    socket.emit("test", {data: "connected to the SocketServer..."});
+  })
+
+  socket.on("response", (msg, cb) => {
+    allMsgs.push("from socketio server: " + msg.data);
+    allMsgs = allMsgs;
+    if (cb) cb();
+  });
+});
+
+async function sendMsg(event) {
+  let content = event.detail;
+  socket.emit("test", {data: content});
+  allMsgs.push("Sent via socketio: " + content);
+  allMsgs = allMsgs;
+}
+
 </script>
 
 
@@ -19,8 +50,7 @@ let allMsgs;
     <MessageDisplay allMsgs={allMsgs}/>
 
     <!-- Messages Display Section -->
-    <MessageInput/>
-
+    <MessageInput on:message={sendMsg}/>
 
   </div>
 </div>
@@ -37,17 +67,6 @@ let allMsgs;
 .bottom-right {
   height: 100%;
   border-right: 0.1rem solid var(--grey);
-}
-
-.input-area {
-  height: 4rem;
-  max-width: 100vw;
-  background-color: var(--grey);
-}
-
-.icon {
-  height: 1.5rem;
-  max-width: 100%;
 }
 </style>
     
