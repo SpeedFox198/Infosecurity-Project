@@ -27,7 +27,7 @@ async def login(data: LoginData):
         result = await session.execute(statement)
         user = result.scalars().first()
         if user:
-            login_user(AuthedUser(user.id))
+            login_user(AuthedUser(user.user_id))
             return {"message": "login success"}, 200
     return {"message": "invalid credentials"}, 401
 

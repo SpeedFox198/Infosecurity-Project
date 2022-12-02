@@ -1,7 +1,7 @@
 import asyncio
 
 from sqlalchemy import select
-from server.models import User, Room
+from server.models import *
 from server.db_access.globals import *
 
 
