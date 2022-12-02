@@ -1,8 +1,7 @@
-from hypercorn.config import Config
+import quart_auth
 from hypercorn.asyncio import serve
 from quart import Quart
 from quart_cors import cors
-from functools import wraps
 from constants import ASYNC_MODE, CORS_ALLOWED_ORIGINS
 from config import config
 import socketio
@@ -15,6 +14,7 @@ sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLO
 app = Quart(__name__)
 app = cors(app)
 sio_app = socketio.ASGIApp(sio, app)
+auth_manager = quart_auth.AuthManager()
 
 @sio.event
 async def test(sid, data):
