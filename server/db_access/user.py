@@ -14,6 +14,6 @@ async def get_user_details(user_id):
                 User.malware_scan,
                 User.friends_only,
                 User.censor
-        ).where(User.id == user_id)
+        ).where(User.user_id == user_id)
         result = await session.execute(statement)
         return result.first()
