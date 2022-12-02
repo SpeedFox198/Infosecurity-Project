@@ -1,5 +1,5 @@
 <script>
-import MessageDisplay from "./MessageDisplay.svelte";
+import Message from "./Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
@@ -58,7 +58,13 @@ async function addMsg(received, username, avatar, time, content) {
   <div class="d-flex flex-column bottom-right">
 
     <!-- Messages Display Section -->
-    <MessageDisplay allMsgs={allMsgs}/>
+    <div class="chat">
+      <div class="my-2"></div>
+      {#each allMsgs as msg}
+        <Message msg={msg}/>
+      {/each}
+      <div id="anchor"></div>
+    </div>
 
     <!-- Messages Display Section -->
     <MessageInput on:message={sendMsg}/>
@@ -84,4 +90,16 @@ async function addMsg(received, username, avatar, time, content) {
 
 /* .bottom-right {
 } */
+
+
+.chat {
+  height: calc(100vh - 8rem);
+  overflow-y: scroll;
+  border-left: 0.1rem solid var(--grey);
+}
+
+#anchor {
+  overflow-anchor: auto;
+  height: 1rem;
+}
 </style>
