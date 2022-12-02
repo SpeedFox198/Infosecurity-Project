@@ -5,37 +5,34 @@ export let allMsgs;
 
 <!-- Messages Display Section -->
 <div class="chat">
-  <ul class="h-100">
-    {#each allMsgs as msg}
-      <li>
-        <span>{msg}</span>
-      </li>
-      <div class="message">
-        <div class="message-avatar">
-          <img src={msg.avatar} alt={msg.username}>
-        </div>
+  {#each allMsgs as msg}
+    <div class="message">
+      <div class="avatar">
+        <img src={msg.avatar} alt={msg.username}>
+      </div>
+      <div class="container px-5">
         <div class="name">{msg.username}</div>
-        <div class="message-bubble">
-          <div class="message-content">
-            {msg.content}
-          </div>
-          <div class="message-time">{msg.username}</div>
+        <div class="bubble">
+            <div class="content">
+              <!-- {msg.content} --> {msg}
+            </div>
+            <div class="time">{msg.username}</div>
         </div>
       </div>
-    {/each}
-  </ul>
+    </div>
+  {/each}
 </div>
 
 
 <style>
 .chat {
-  height: 100vh;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+  height: calc(100vh - 8rem);
+  overflow-y: auto;
 }
 
-ul {
-  overflow-y: auto;
-  list-style: none;
+.bubble {
+  padding: 0.5rem 0.6rem 0.7rem 0.8rem;
+  background-color: var(--grey);
+  border-radius: 1rem;
 }
 </style>

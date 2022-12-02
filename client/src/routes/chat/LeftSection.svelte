@@ -20,19 +20,19 @@ import Nav from "./Nav.svelte";
 
 <style>
 .left-section {
-  width: 25rem;
+  width: var(--left-bar-length);
   background-color: var(--primary-light);
 }
 
 .top-left {
+  /* position: absolute;
+  top: 0; */
   height: 4rem;
-  border-top: 0.1rem solid var(--primary-shadow);
-  border-right: 0.1rem solid var(--primary-shadow);
+  width: var(--left-bar-length);
   background-color: var(--primary);
 }
 
 .bottom-left {
   height: 100%;
-  border-right: 0.1rem solid var(--grey);
 }
 </style>

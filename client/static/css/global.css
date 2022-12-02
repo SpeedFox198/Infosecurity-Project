@@ -1,15 +1,10 @@
 /*
     Global stylings
 */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 
-:root {
-    --black: #000000;
-    --primary-dark: #022b3a;
-    --primary-shadow: #1a6f80;
-    --primary: #1f7a8c;
-    --primary-light: #bfdbf7;
-    --grey: #e1e5f2;
-    --white: #ffffff;
+body {
+    font-family: "Open Sans", "Segoe UI", sans-serif;
 }
 
 .navbar.navbar-2 .navbar-toggler-icon {

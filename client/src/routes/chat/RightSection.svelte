@@ -41,7 +41,9 @@ async function sendMsg(event) {
 
   <!-- Room Info Section -->
   <div class="top-right">
+    <div class="temp">
 
+    </div>
   </div>
 
   <div class="d-flex flex-column bottom-right">
@@ -58,16 +60,20 @@ async function sendMsg(event) {
 
 <style>
 
-.top-right {
-  position: absolute;
-  top: 0;
+.temp {
   height: 4rem;
-  width: calc(100vw - 25rem);
+}
+
+.top-right {
+  /* position: absolute;
+  top: 0; */
+  height: 4rem;
+  width: calc(100vw - var(--left-bar-length));
   background-color: var(--primary);
+  border-left: 0.1rem solid var(--primary-shadow);
 }
 
 .bottom-right {
-  height: 100vh;
+  /* border-left: 0.1rem solid var(--grey); */
 }
 </style>
-    
