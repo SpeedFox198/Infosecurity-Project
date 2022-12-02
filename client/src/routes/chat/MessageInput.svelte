@@ -7,7 +7,7 @@ let attachmentInput;
 let content = "";
 
 
-async function onMessage(event) {
+async function onSend(event) {
   if (content) {
     dispatch("message", content);
     content = "";
@@ -24,7 +24,7 @@ async function attachFile(event) {
 
 <!-- Texting Input Section -->
 <div class="container input-area">
-  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onMessage}>
+  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onSend}>
 
     <!-- Attachments Input -->
     <div class="col-1">

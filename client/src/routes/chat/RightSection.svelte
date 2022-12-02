@@ -19,9 +19,8 @@ onMount(async () => {
     socket.emit("test", {data: "connected to the SocketServer..."});
   })
 
-  socket.on("response", (msg, cb) => {
-    allMsgs.push("from socketio server: " + msg.data);
-    allMsgs = allMsgs;
+  socket.on("response", async (msg, cb) => {
+    await addMsg(true, "Someone", "/default.png", "99:99PM", msg.data);
     if (cb) cb();
   });
 });
@@ -29,7 +28,17 @@ onMount(async () => {
 async function sendMsg(event) {
   let content = event.detail;
   socket.emit("test", {data: content});
-  allMsgs.push("Sent via socketio: " + content);
+  await addMsg(false, "Me", "/galaxy.jpg", "99:99PM", content);
+}
+
+async function addMsg(received, username, avatar, time, content) {
+  allMsgs.push({
+    received: received,
+    username: username,
+    avatar: avatar,
+    time: time,
+    content: content,
+  });
   allMsgs = allMsgs;
 }
 
@@ -73,7 +82,6 @@ async function sendMsg(event) {
   border-left: 0.1rem solid var(--primary-shadow);
 }
 
-.bottom-right {
-  /* border-left: 0.1rem solid var(--grey); */
-}
+/* .bottom-right {
+} */
 </style>

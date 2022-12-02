@@ -20,7 +20,7 @@ sio_app = socketio.ASGIApp(sio, app)
 async def test(sid, data):
     print(f"Received data: {data}")
     await sio.emit("response", {"data":f"We received: {data['data']}"}, to=sid)
-    await sio.emit("response", {"data":f"Broadcast: {data['data']}"})
+    # await sio.emit("response", {"data":f"Broadcast: {data['data']}"})
 
 
 
