@@ -4,7 +4,6 @@
 
 <script>
   import Login from "$lib/login.svelte"
-  const passwordRegex = `(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}`
   let email = ""
   let username = ""
   let password = ""
@@ -91,9 +90,6 @@
             <div class="form-floating mb-3">
               <input type="password"
                class="form-control rounded-3"
-               id="psw"
-               name="psw"
-               pattern={passwordRegex} 
                bind:value={password}
                on:click={showRequirements}
                on:keyup={checkPasswordRequirement}
@@ -114,16 +110,14 @@
               <label for="floatingPassword">Confirm password</label>
             </div>
 
-            <!-- password reuirements -->
+            <!-- password requirements -->
             {#if requirementsDisplay}
               <div id="message">
-                {#if !(lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill)}
-                  <h3>Password must contain the following:</h3>
-                {/if}
-                <p id="letter" class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
-                <p id="capital" class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
-                <p id="number" class="{numberFulfill === true ? "d-none" : ''}">A <b>number</b></p>
-                <p id="length" class="{lengthFulfill === true ? "d-none" : ''}">Minimum <b>8 characters</b></p>
+                <h3 class="{(lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill) ? "d-none" : ''}">Password must contain the following:</h3>
+                <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
+                <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
+                <p class="{numberFulfill === true ? "d-none" : ''}">A <b>number</b></p>
+                <p class="{lengthFulfill === true ? "d-none" : ''}">Minimum <b>8 characters</b></p>
               </div>
             {/if}
             
