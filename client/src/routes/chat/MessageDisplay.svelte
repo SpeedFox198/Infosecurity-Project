@@ -1,11 +1,11 @@
 <script>
-export let allMsgs = [];
+export let allMsgs;
 </script>
 
 
 <!-- Messages Display Section -->
 <div class="chat">
-  <ul>
+  <ul class="h-100">
     {#each allMsgs as msg}
       <li>
         <span>{msg}</span>
@@ -28,6 +28,12 @@ export let allMsgs = [];
 
 
 <style>
+.chat {
+  height: 100vh;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
 ul {
   overflow-y: auto;
   list-style: none;

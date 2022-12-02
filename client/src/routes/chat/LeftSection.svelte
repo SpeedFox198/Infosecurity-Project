@@ -2,6 +2,22 @@
 import Nav from "./Nav.svelte";
 </script>
 
+
+<!-- Left Section -->
+<div class="d-flex flex-column flex-shrink-0 left-section">
+  
+  <!-- Profile & Settings Section -->
+  <div class="d-flex top-left">
+    <Nav/>
+  </div>
+
+  <!-- Chat List Section -->
+  <div class="d-flex bottom-left">
+
+  </div>
+</div>
+
+
 <style>
 .left-section {
   width: 25rem;
@@ -20,18 +36,3 @@ import Nav from "./Nav.svelte";
   border-right: 0.1rem solid var(--grey);
 }
 </style>
-
-
-<!-- Left Section -->
-<div class="d-flex flex-column flex-shrink-0 left-section">
-
-  <!-- Profile & Settings Section -->
-  <div class="d-flex top-left">
-    <Nav/>
-  </div>
-
-  <!-- Chat List Section -->
-  <div class="d-flex bottom-left">
-
-  </div>
-</div>

@@ -51,8 +51,10 @@ async function attachFile(event) {
 
 <style>
 .input-area {
+  position: absolute;
+  bottom: 0;
   height: 4rem;
-  max-width: 100vw;
+  max-width: calc(100vw - 25rem);
   background-color: var(--grey);
 }
 

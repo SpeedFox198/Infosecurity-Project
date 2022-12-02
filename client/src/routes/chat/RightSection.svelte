@@ -40,7 +40,7 @@ async function sendMsg(event) {
 <div class="d-flex flex-column flex-grow-1 right-section">
 
   <!-- Room Info Section -->
-  <div class="d-flex top-right">
+  <div class="top-right">
 
   </div>
 
@@ -57,16 +57,17 @@ async function sendMsg(event) {
 
 
 <style>
+
 .top-right {
+  position: absolute;
+  top: 0;
   height: 4rem;
-  border-top: 0.1rem solid var(--primary-shadow);
-  border-right: 0.1rem solid var(--primary-shadow);
+  width: calc(100vw - 25rem);
   background-color: var(--primary);
 }
 
 .bottom-right {
-  height: 100%;
-  border-right: 0.1rem solid var(--grey);
+  height: 100vh;
 }
 </style>
     
