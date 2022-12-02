@@ -6,7 +6,7 @@ from sqlalchemy import (
     CHAR,
     Boolean
 )
-from server.db_access.globals import Base
+from db_access.globals import Base
 
 
 class User(Base):

@@ -8,7 +8,7 @@ import socketio
 import asyncio
 from blueprints.api import api_bp
 from blueprints.user import auth_bp
-from server.models import AuthedUser
+from models import AuthedUser
 
 DEBUG = True
 PORT = 5000

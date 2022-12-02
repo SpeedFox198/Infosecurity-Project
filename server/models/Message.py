@@ -7,8 +7,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.mysql import ENUM
 
-from server.db_access.globals import Base
-from server.models import User, Room
+from db_access.globals import Base
+from models import User, Room
 
 
 class Message(Base):

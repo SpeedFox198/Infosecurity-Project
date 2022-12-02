@@ -3,8 +3,8 @@ from sqlalchemy import (
     CHAR, ForeignKey
 )
 
-from server.db_access.globals import Base
-from server.models import User
+from db_access.globals import Base
+from models import User
 
 
 class Friend(Base):

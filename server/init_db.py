@@ -1,8 +1,8 @@
 import asyncio
 
 from sqlalchemy import select
-from server.models import *
-from server.db_access.globals import *
+from models import *
+from db_access.globals import *
 
 
 # Windows specific issue https://stackoverflow.com/questions/61543406/asyncio-run-runtimeerror-event-loop-is-closed

@@ -9,8 +9,8 @@ from quart_schema import validate_request
 
 import sqlalchemy as sa
 
-from server.db_access.globals import async_session
-from server.models import (
+from db_access.globals import async_session
+from models import (
     User,
     AuthedUser,
     LoginData

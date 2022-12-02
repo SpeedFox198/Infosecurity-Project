@@ -52,7 +52,7 @@ nav {
 }
 
 .intro{
- height: auto;
+ height: 4rem;
  z-index:3;
  width: 100%;
  height: 50px;

@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
-from server.db_access.globals import async_session
-from server.models.User import User
+from db_access.globals import async_session
+from models.User import User
 
 
 async def get_user_details(user_id):

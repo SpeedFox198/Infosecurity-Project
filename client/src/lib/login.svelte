@@ -46,7 +46,7 @@
 
 	.login{
 	  background-color: var(--white);
-	  margin: 8rem
+	  margin: auto
 	}
 	
 	.login-btn{

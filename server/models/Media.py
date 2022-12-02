@@ -1,4 +1,4 @@
-from server.db_access.globals import Base
+from db_access.globals import Base
 from sqlalchemy import (
     Column,
     CHAR,

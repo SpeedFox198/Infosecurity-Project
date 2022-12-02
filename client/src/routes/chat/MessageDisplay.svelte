@@ -13,9 +13,9 @@ export let allMsgs;
         <span class="time">{msg.time}</span>
       </div>
       <div class="bubble">
-        {#if msg.received}
+        <!-- {#if msg.received} -->
           <div class="username">{msg.username}</div>
-        {/if}
+        <!-- {/if} -->
         <div class="content text-wrap text-break">
           {msg.content}
         </div>
@@ -67,5 +67,6 @@ export let allMsgs;
 
 .sent {
   flex-direction: row-reverse;
+  text-align: right;
 }
 </style>
