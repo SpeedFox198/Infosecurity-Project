@@ -1,15 +1,15 @@
 from quart import Blueprint
 from quart_auth import login_required
 
-API_BP = Blueprint("api", __name__, url_prefix="/api")
+api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
-@API_BP.get("/")
+@api_bp.get("/")
 async def index():
     return {"message": "Welcome to Test Quart App API"}
 
 
-@API_BP.get("/users")
+@api_bp.get("/users")
 @login_required
 async def users():
     data = [

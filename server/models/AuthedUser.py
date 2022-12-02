@@ -1,6 +1,6 @@
 from quart_auth import AuthUser
 
-from server.db_access import get_user_details
+from server.db_access.user import get_user_details
 
 
 class AuthedUser(AuthUser):
