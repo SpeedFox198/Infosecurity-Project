@@ -1,22 +1,24 @@
-# IT2566 Infosecurity Project
+![Bubbles](https://user-images.githubusercontent.com/65378401/205416409-78229e23-ddf0-4391-b891-eeb42dca0d4d.svg)
 
-![Japanese French Toast](https://user-images.githubusercontent.com/65378401/169692179-96d98787-600f-40b6-9917-d773e11ccb44.jpg)
+# Bubbles chat app
 
-> Providing quality services since 2022, better than Coffee & Waffles Co.
+> Your privacy is our priority
 
-## Group Details
+Bubbles places data security as our highest priority. Our goal is for people to have a safe and secure online platform to chat with each other.
 
-### Japanese French Toast
 
-**PEM Group:** SF2102  
-**Group Name:** Japanese French Toast
+## Project Details
 
-**Team members:**
-- [211973E]  Jabriel Seah **(Leader)**
-- [210162M]  Clarence Koh
-- [214242Q]  Royston Loo
-- [214299H]  Fong Chung Wai
+**IT2566 Infosecurity Project**
 
-## Project Description
+The objective of this project is for students to apply the knowledge and skills acquired, to develop a software project utilising information security principles and techniques and demonstrate the understanding how data security could be achieved.
 
-...
+
+## Our Team
+
+_Team Japanese French Toast_
+
+- Jabriel Seah **(Leader)**
+- Clarence Koh
+- Royston Loo
+- Fong Chung Wai
