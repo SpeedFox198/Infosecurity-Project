@@ -1,4 +1,4 @@
-![Bubbles](https://user-images.githubusercontent.com/65378401/205416409-78229e23-ddf0-4391-b891-eeb42dca0d4d.svg)
+![Bubbles](https://user-images.githubusercontent.com/65378401/205420607-25a5ef71-8c3a-45d4-a14a-ee2262bb033e.svg)
 
 # Bubbles chat app
 
