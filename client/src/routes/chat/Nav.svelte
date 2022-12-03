@@ -77,10 +77,6 @@ nav {
     align-items: left;
 }
 
-body {
-       overflow-x: hidden;
-   }
-
 .nav-links {
       position: fixed;
       right: 0px;
