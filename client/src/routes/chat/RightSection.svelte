@@ -8,6 +8,9 @@ import Message from "./Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
 $: roomMsgs = $allMsgs[$room_id];
+console.log(roomMsgs);
+console.log($allMsgs);
+console.log($room_id);
 
 const namespace = "localhost:5000";
 const transports = {transports: ["websocket"]}
