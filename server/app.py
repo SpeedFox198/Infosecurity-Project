@@ -25,6 +25,11 @@ app.register_blueprint(api_bp)
 app.secret_key = "secret123"
 
 
+@app.errorhandler(quart_auth.Unauthorized)
+async def unauthorized(*_):
+    return {"message": "Not authorized"}, 401
+
+
 # Serve the SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
 sio_app = socketio.ASGIApp(sio, app)
