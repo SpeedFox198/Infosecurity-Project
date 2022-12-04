@@ -37,7 +37,7 @@
 </script>
 
 
-<div class="signup col-md-4 card rounded-4 shadow">
+<div class="signup card rounded-4 shadow">
         <div class=" p-5 pb-4 border-bottom-0">
           <h1 class="card-title fw-bold mb-0 fs-2">Sign up and start chatting!</h1>
         </div>
@@ -121,5 +121,10 @@
   background-color: var(--primary-dark)
 }
 
+@media (max-width: 576px) {
+  .signup {
+    margin: 0rem
+  }
+}
 
 </style>
