@@ -9,8 +9,7 @@
   let password = ""
   let confirmPassword = ""
   let requirementsDisplay
-  let signupDisplay
-  let loginDisplay
+  let signupDisplay = false;
   let lowerCaseFulfill
   let upperCaseFulfill
   let numberFulfill
@@ -19,15 +18,8 @@
   let strength = 0
   $: requirementsFulfill = lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill
 
-
-  const toggleLoginOn = () => {
-    loginDisplay = true
-    signupDisplay = false
-  }
-
   const toggleSignupOn = () => {
-    signupDisplay = true
-    loginDisplay = false
+    signupDisplay = !signupDisplay
   }
 
   const showRequirements = () => {
@@ -82,10 +74,10 @@
       </div>
 
       <!-- Login -->
-      <Login toggleSignupOn={toggleSignupOn}/>
+      <Login toggleSignupOn={toggleSignupOn} signupDisplay={signupDisplay}/>
       
       <!-- Sign up -->
-      <div class="signup col-md-4 card rounded-4 shadow {loginDisplay ? "d-none" : ""}">
+      <div class="signup col-md-4 card rounded-4 shadow {signupDisplay ? "" : "d-none"}">
         <div class=" p-5 pb-4 border-bottom-0">
           <h1 class="card-title fw-bold mb-0 fs-2">Sign up and start chatting!</h1>
         </div>
@@ -150,7 +142,7 @@
             <h2 class="fs-5 fw-bold mb-3">Already have an account?</h2>
             <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" 
             type="button"
-            on:click={toggleLoginOn}>
+            on:click={toggleSignupOn}>
               Log in here
             </button>
         </div>
