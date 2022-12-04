@@ -1,6 +1,7 @@
 <script>
   import Login from "$lib/login.svelte"
-  import Signup from "$lib/login.svelte"
+  import Signup from "$lib/signup.svelte"
+  
   let signupDisplay = false
 
   const toggleSignupOn = () => {
