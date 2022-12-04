@@ -27,7 +27,8 @@ export const allMsgs = (() => {
 
 
 export const room_id = (() => {
-  const { subscribe, set } = writable("<room_id>");
+  // TODO(SpeedFox198): remove this temp value
+  const { subscribe, set } = writable("");
   return { subscribe, set }
 })();
 
@@ -48,6 +49,7 @@ export const roomMsgs = derived(
 
 
 export const user_id = (() => {
+  // TODO(SpeedFox198): remove this temp value
   const { subscribe, set } = writable("<user_id>");
   return { subscribe, set }
 })();

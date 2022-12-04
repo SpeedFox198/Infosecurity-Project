@@ -18,7 +18,6 @@ async function attachFile(event) {
   // Click the attachment input to prompt users to upload files
   attachmentInput.click();
 }
-
 </script>
 
 
@@ -56,6 +55,7 @@ async function attachFile(event) {
   height: 4rem;
   max-width: calc(100vw - 25rem);
   background-color: var(--grey);
+  border-left: 0.1rem solid var(--grey-shadow);
 }
 
 .icon {

@@ -4,13 +4,13 @@ import { io } from "socket.io-client";
 
 import { allMsgs, room_id, roomMsgs, user_id } from "$lib/stores";
 
-import Message from "./Message.svelte";
+import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
 const namespace = "https://localhost:8443";
 const transports = {transports: ["websocket"]}
 let socket;  // Forward declare socket :)
-
+let rooms;
 
 onMount(async () => {
   // SocketIO instance
@@ -18,7 +18,11 @@ onMount(async () => {
 
   socket.on("connect", async () => {
     console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
-    await joinRoom(); // TODO(SpeedFox198): remove this later lmao
+  })
+
+  socket.on("rooms_joined", async data => {
+    rooms = data;
+    console.log(rooms);
   })
 
   socket.on("receive_message", async (data, cb) => {
@@ -45,11 +49,6 @@ async function addMsg(received, room_id, username, avatar, time, content) {
   let msg = {received, username, avatar, time, content};
   await allMsgs.addMsg(msg, room_id);
 }
-
-async function joinRoom() {
-  await socket.emit("begin_chat", $room_id); // TODO(SpeedFox198): room_id? really?
-  console.log(`Joined room ${$room_id}`); // TODO(SpeedFox198): remove this later lol
-}
 </script>
 
 
@@ -63,21 +62,23 @@ async function joinRoom() {
     </div>
   </div>
 
-  <div class="d-flex flex-column bottom-right">
-
     <!-- Messages Display Section -->
-    <div class="chat">
-      <div class="my-2"></div>
-      {#each $roomMsgs as msg}
-        <Message msg={msg}/>
-      {/each}
-      <div id="anchor"></div>
-    </div>
+    {#if $room_id}
+      <div class="chat">
+        <div class="my-2"></div>
+        {#each $roomMsgs as msg}
+          <Message msg={msg}/>
+        {/each}
+        <div id="anchor"></div>
+      </div>
 
-    <!-- Messages Display Section -->
-    <MessageInput on:message={sendMsg}/>
-
-  </div>
+      <!-- Messages Display Section -->
+      <MessageInput on:message={sendMsg}/>
+    {:else}
+      <div class="">
+        <!-- TODO(SpeedFox198): add welcome page? lol -->
+      </div>
+    {/if}
 </div>
 
 
@@ -93,13 +94,11 @@ async function joinRoom() {
   border-left: 0.1rem solid var(--primary-shadow);
 }
 
-/* .bottom-right {
-} */
-
 .chat {
   height: calc(100vh - 8rem);
   overflow-y: scroll;
-  border-left: 0.1rem solid var(--grey);
+  border-top: 0.1rem solid var(--grey-shadow);
+  border-left: 0.1rem solid var(--grey-shadow);
 }
 
 #anchor {
