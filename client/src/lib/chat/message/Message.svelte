@@ -9,7 +9,7 @@ export let msg;
     <span class="time">{msg.time}</span>
   </div>
   <div class="bubble">
-    <!-- {#if msg.received} -->
+    <!-- {#if msg.received} --> <!-- TODO(SpeedFox198): rmb to change this! -->
       <div class="username">{msg.username}</div>
     <!-- {/if} -->
     <div class="content text-wrap text-break">

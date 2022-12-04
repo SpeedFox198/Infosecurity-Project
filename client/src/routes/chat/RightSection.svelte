@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 
 import { allMsgs, room_id, roomMsgs, user_id } from "$lib/stores";
 
-import Message from "./Message.svelte";
+import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
 const namespace = "https://localhost:8443";
@@ -63,8 +63,6 @@ async function joinRoom() {
     </div>
   </div>
 
-  <div class="d-flex flex-column bottom-right">
-
     <!-- Messages Display Section -->
     <div class="chat">
       <div class="my-2"></div>
@@ -76,8 +74,6 @@ async function joinRoom() {
 
     <!-- Messages Display Section -->
     <MessageInput on:message={sendMsg}/>
-
-  </div>
 </div>
 
 
@@ -93,13 +89,11 @@ async function joinRoom() {
   border-left: 0.1rem solid var(--primary-shadow);
 }
 
-/* .bottom-right {
-} */
-
 .chat {
   height: calc(100vh - 8rem);
   overflow-y: scroll;
-  border-left: 0.1rem solid var(--grey);
+  border-top: 0.1rem solid var(--grey-shadow);
+  border-left: 0.1rem solid var(--grey-shadow);
 }
 
 #anchor {
