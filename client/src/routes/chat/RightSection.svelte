@@ -7,7 +7,7 @@ import { allMsgs, room_id, roomMsgs, user_id } from "$lib/stores";
 import Message from "./Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
-const namespace = "localhost:5000";
+const namespace = "https://localhost:8443";
 const transports = {transports: ["websocket"]}
 let socket;  // Forward declare socket :)
 
@@ -22,7 +22,7 @@ onMount(async () => {
   })
 
   socket.on("receive_message", async (data, cb) => {
-    await addMsg(data.room_id, true, data.username, data.avatar, data.time, data.content);
+    await addMsg(true, data.room_id, data.username, data.avatar, data.time, data.content);
     if (cb) await cb();
   });
 });
@@ -31,8 +31,8 @@ onMount(async () => {
 async function sendMsg(event) {
   let content = event.detail;
   await socket.emit("send_message", {
-    $room_id,
-    $user_id,
+    room_id: $room_id,
+    user_id: $user_id,
     time: "99:99PM", // prob use unix time here
     content,
     reply_to: null, // reply_to
