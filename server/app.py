@@ -4,7 +4,7 @@ import quart_auth
 import socketio
 from blueprints.api import api_bp
 from blueprints.chat import sio
-from blueprints.user import auth_bp
+from blueprints.auth import auth_bp
 from config import config
 from hypercorn.asyncio import serve
 from models import AuthedUser

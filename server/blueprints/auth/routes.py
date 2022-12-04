@@ -41,26 +41,15 @@ async def logout():
 
 @auth_bp.get("/is-logged-in")
 async def is_logged_in():
-    if await current_user.is_authenticated:
-        return {
-            "message": "user authenticated",
-            "user": {
-                "user_id": current_user.auth_id,
-                "is_authenticated": True
-            }
-        }
-    return {"message": "not authenticated"}
+    if not await current_user.is_authenticated:
+        return {"message": "not authenticated"}, 401
 
-
-@auth_bp.get("/info")
-@login_required
-async def user_info():
     return {
-        "username": await current_user.username,
-        "email": await current_user.email,
-        "profile_pic": await current_user.profile_pic,
-        "dark_mode": await current_user.dark_mode,
-        "malware_scan": await current_user.malware_scan,
-        "friends_only": await current_user.friends_only,
-        "censor": await current_user.censor
+            "username": await current_user.username,
+            "email": await current_user.email,
+            "profile_pic": await current_user.profile_pic,
+            "dark_mode": await current_user.dark_mode,
+            "malware_scan": await current_user.malware_scan,
+            "friends_only": await current_user.friends_only,
+            "censor": await current_user.censor
     }

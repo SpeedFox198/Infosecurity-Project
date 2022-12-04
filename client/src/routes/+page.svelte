@@ -13,6 +13,7 @@
   let upperCaseFulfill
   let numberFulfill
   let lengthFulfill
+  $: requirementsFulfill = lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill
 
   const showRequirements = () => {
     requirementsDisplay = true
@@ -22,7 +23,7 @@
     requirementsDisplay = false
   }
   
-  const checkPasswordRequirement = () => {
+  const checkPasswordRequirements = () => {
     const lowerCaseRegex = /[a-z]/g
     const upperCaseRegex = /[A-Z]/g
     const numberRegex = /[0-9]/g
@@ -92,7 +93,7 @@
                class="form-control rounded-3"
                bind:value={password}
                on:click={showRequirements}
-               on:keyup={checkPasswordRequirement}
+               on:keyup={checkPasswordRequirements}
                on:blur={hideRequirements}
                title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" 
                placeholder="Password" 
@@ -113,7 +114,7 @@
             <!-- password requirements -->
             {#if requirementsDisplay}
               <div id="message">
-                <h3 class="{(lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill) ? "d-none" : ''}">Password must contain the following:</h3>
+                <h3 class="{(requirementsFulfill) ? "d-none" : ''}">Password must contain the following:</h3>
                 <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
                 <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
                 <p class="{numberFulfill === true ? "d-none" : ''}">A <b>number</b></p>
