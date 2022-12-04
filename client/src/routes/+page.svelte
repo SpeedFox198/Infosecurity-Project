@@ -21,13 +21,13 @@
       <div class="bubbles-name col-md-6">
         <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
       </div>
-
-      <!-- Login -->
-      <Login toggleSignupOn={toggleSignupOn} signupDisplay={signupDisplay}/>
-      
+      {#if (signupDisplay)}
       <!-- Sign up -->
-      <Signup toggleSignupOn={toggleSignupOn} signupDisplay={signupDisplay}/>
-      
+      <Signup toggleSignupOn={toggleSignupOn}/>
+      {:else}
+      <!-- Login -->
+      <Login toggleSignupOn={toggleSignupOn} />
+      {/if}
     </div>
   </div>
 </main>
