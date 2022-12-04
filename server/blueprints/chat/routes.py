@@ -23,6 +23,7 @@ async def send_message(sid, data):
     # Get time using pythong maybe?
     # Change format to getting those using another api
     await sio.emit("receive_message", {
+        "room_id": room,
         "username": "<username>",
         "avatar": "/default.png",
         "time": "99:99PM",

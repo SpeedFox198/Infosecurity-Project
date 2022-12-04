@@ -1,23 +1,17 @@
 <script>
-import Message from "./Message.svelte";
-import MessageInput from "./MessageInput.svelte";
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { messages } from "$lib/messages";
+import { allMsgs, room_id, user_id } from "$lib/stores";
 
-export let room_id;
-export let user_id;
+import Message from "./Message.svelte";
+import MessageInput from "./MessageInput.svelte";
 
-// temp values TODO(SpeedFox198): remove these when not needed
-room_id = "<room_id>";
-user_id = "<user_id>";
-
+$: roomMsgs = $allMsgs[$room_id];
 
 const namespace = "localhost:5000";
 const transports = {transports: ["websocket"]}
-let allMsgs = messages();
-let socket;
+let socket;  // Forward declare socket :)
 
 
 onMount(async () => {
@@ -30,7 +24,7 @@ onMount(async () => {
   })
 
   socket.on("receive_message", async (data, cb) => {
-    await addMsg(true, data.username, data.avatar, data.time, data.content);
+    await addMsg(data.room_id, true, data.username, data.avatar, data.time, data.content);
     if (cb) await cb();
   });
 });
@@ -39,23 +33,23 @@ onMount(async () => {
 async function sendMsg(event) {
   let content = event.detail;
   await socket.emit("send_message", {
-    room_id,
+    $room_id,
     user_id,
     time: "99:99PM", // prob use unix time here
     content,
     reply_to: null, // reply_to
     type: "text" // <type> ENUM(image, document, video, text)
   });
-  await addMsg(false, "Me", "/galaxy.jpg", "99:99PM", content);
+  await addMsg(false, $room_id, "Me", "/galaxy.jpg", "99:99PM", content);
 }
 
-async function addMsg(received, username, avatar, time, content) {
+async function addMsg(received, room_id, username, avatar, time, content) {
   let msg = {received, username, avatar, time, content};
-  allMsgs.addMsg(msg);
+  await allMsgs.addMsg(msg, room_id);
 }
 
 async function joinRoom() {
-  await socket.emit("begin_chat", room_id);
+  await socket.emit("begin_chat", $room_id); // TODO(SpeedFox198): room_id? really?
   console.log(`Joined room ${room_id}`); // TODO(SpeedFox198): remove this later lol
 }
 </script>
@@ -76,7 +70,7 @@ async function joinRoom() {
     <!-- Messages Display Section -->
     <div class="chat">
       <div class="my-2"></div>
-      {#each $allMsgs as msg}
+      {#each roomMsgs as msg}
         <Message msg={msg}/>
       {/each}
       <div id="anchor"></div>
