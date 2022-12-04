@@ -5,7 +5,7 @@ export let msg;
 <!-- Messages Bubble -->
 <div class="message d-flex {!msg.received ? "sent": ""}">
   <div class="info-section m{msg.received ? "e": "s"}-2">
-    <img class="rounded-circle" src={msg.avatar} alt={msg.username}>
+    <img class="rounded-circle" src={msg.avatar} alt="User Avatar">
     <span class="time">{msg.time}</span>
   </div>
   <div class="bubble">

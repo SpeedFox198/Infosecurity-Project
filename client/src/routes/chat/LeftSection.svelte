@@ -1,16 +1,19 @@
 <script>
-import Nav from "./Nav.svelte";
-import Group from "$lib/chat/group/Group.svelte"
+import { room_id } from "$lib/stores";
 
+import Group from "$lib/chat/group/Group.svelte"
+import Nav from "./Nav.svelte";
+
+// TODO(SpeedFox198): remove temp values
 let grpList = [
-  {icon:"/default.png", name:"Grp Chat"},
-  {icon:"/default.png", name:"Grp Chat"},
-  {icon:"/galaxy.jpg", name:"Grp Chat"},
-  {icon:"/favicon.svg", name:"Grp Chat"}
+  {icon:"/default.png", name:"Grp Chat", room_id:"<room_id>"},
+  {icon:"/default.png", name:"Grp Chat", room_id:"room_2"},
+  {icon:"/galaxy.jpg", name:"Grp Chat", room_id:"room_3"},
+  {icon:"/favicon.svg", name:"Grp Chat", room_id:"room_4"}
 ];
 
-async function selectGrp() {
-
+async function selectGrp(new_room) {
+  room_id.set(new_room);
 }
 </script>
 

@@ -10,7 +10,7 @@ import MessageInput from "./MessageInput.svelte";
 const namespace = "https://localhost:8443";
 const transports = {transports: ["websocket"]}
 let socket;  // Forward declare socket :)
-
+let rooms;
 
 onMount(async () => {
   // SocketIO instance
@@ -19,6 +19,11 @@ onMount(async () => {
   socket.on("connect", async () => {
     console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
     await joinRoom(); // TODO(SpeedFox198): remove this later lmao
+  })
+
+  socket.on("rooms_joined", async data => {
+    rooms = data;
+    console.log(rooms);
   })
 
   socket.on("receive_message", async (data, cb) => {
@@ -46,8 +51,18 @@ async function addMsg(received, room_id, username, avatar, time, content) {
   await allMsgs.addMsg(msg, room_id);
 }
 
+/* TODO(SpeedFox198):
+ * LOGIC HAS CHANGED!
+ * When user connects to server, on the server side
+ * server will go into database and join user into every room
+ * that user belongs to!!!
+ * This solves a few issues:
+ * 1. Users will get real time updates of receiving msgs from any room
+ * 2. Client side won't be able to emit even to request for join room
+ * 3. Client side does not need to sort of maintain a list of room_id :)
+ */
 async function joinRoom() {
-  await socket.emit("begin_chat", $room_id); // TODO(SpeedFox198): room_id? really?
+  await socket.emit("join_room", $room_id);
   console.log(`Joined room ${$room_id}`); // TODO(SpeedFox198): remove this later lol
 }
 </script>
