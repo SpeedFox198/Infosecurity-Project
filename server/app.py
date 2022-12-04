@@ -5,7 +5,6 @@ import socketio
 from blueprints.api import api_bp
 from blueprints.chat import sio
 from blueprints.auth import auth_bp
-from config import config
 from hypercorn.asyncio import serve
 from models import AuthedUser
 from quart import Quart
@@ -30,7 +29,6 @@ async def unauthorized(*_):
     return {"message": "Not authorized"}, 401
 
 
-# Serve the SocketIO app
+# The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
 sio_app = socketio.ASGIApp(sio, app)
-# asyncio.run(serve(sio_app, config))  # TODO(SpeedFox198): if unused remove

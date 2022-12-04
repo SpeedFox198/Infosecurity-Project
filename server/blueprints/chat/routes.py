@@ -1,8 +1,10 @@
 import socketio
 import sqlalchemy as sa
-from config import ASYNC_MODE, CORS_ALLOWED_ORIGINS
 from db_access.globals import async_session
 from models import AuthedUser, LoginData, User
+
+ASYNC_MODE = "asgi"
+CORS_ALLOWED_ORIGINS = "http://localhost"
 
 sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
 
