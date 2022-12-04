@@ -5,7 +5,6 @@ import socketio
 from blueprints.api import api_bp
 from blueprints.chat import sio
 from blueprints.auth import auth_bp
-from hypercorn.asyncio import serve
 from models import AuthedUser
 from quart import Quart
 from quart_cors import cors
