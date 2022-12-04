@@ -2,17 +2,12 @@
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { allMsgs, room_id, user_id } from "$lib/stores";
+import { allMsgs, room_id, roomMsgs, user_id } from "$lib/stores";
 
 import Message from "./Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
-$: roomMsgs = $allMsgs[$room_id];
-console.log(roomMsgs);
-console.log($allMsgs);
-console.log($room_id);
-
-const namespace = "localhost:5000";
+const namespace = "https://localhost:8443";
 const transports = {transports: ["websocket"]}
 let socket;  // Forward declare socket :)
 
@@ -27,7 +22,7 @@ onMount(async () => {
   })
 
   socket.on("receive_message", async (data, cb) => {
-    await addMsg(data.room_id, true, data.username, data.avatar, data.time, data.content);
+    await addMsg(true, data.room_id, data.username, data.avatar, data.time, data.content);
     if (cb) await cb();
   });
 });
@@ -36,8 +31,8 @@ onMount(async () => {
 async function sendMsg(event) {
   let content = event.detail;
   await socket.emit("send_message", {
-    $room_id,
-    user_id,
+    room_id: $room_id,
+    user_id: $user_id,
     time: "99:99PM", // prob use unix time here
     content,
     reply_to: null, // reply_to
@@ -53,7 +48,7 @@ async function addMsg(received, room_id, username, avatar, time, content) {
 
 async function joinRoom() {
   await socket.emit("begin_chat", $room_id); // TODO(SpeedFox198): room_id? really?
-  console.log(`Joined room ${room_id}`); // TODO(SpeedFox198): remove this later lol
+  console.log(`Joined room ${$room_id}`); // TODO(SpeedFox198): remove this later lol
 }
 </script>
 
@@ -73,7 +68,7 @@ async function joinRoom() {
     <!-- Messages Display Section -->
     <div class="chat">
       <div class="my-2"></div>
-      {#each roomMsgs as msg}
+      {#each $roomMsgs as msg}
         <Message msg={msg}/>
       {/each}
       <div id="anchor"></div>
