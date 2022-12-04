@@ -1,6 +1,6 @@
 try {
     cd ./client
-    npm run dev
+    npm run dev -- --port 80
 }
 finally {
     cd ..
