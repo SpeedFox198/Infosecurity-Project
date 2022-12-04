@@ -1,4 +1,4 @@
-from quart import Blueprint
+from quart import Blueprint, request
 from quart_auth import (
     login_user,
     logout_user,
@@ -16,6 +16,7 @@ from models import (
     LoginData
 )
 
+
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
 
@@ -28,6 +29,7 @@ async def login(data: LoginData):
         user = result.scalars().first()
         if user:
             login_user(AuthedUser(user.user_id))
+            # print(request.user_agent)
             return {"message": "login success"}, 200
     return {"message": "invalid credentials"}, 401
 

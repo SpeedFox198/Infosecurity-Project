@@ -4,7 +4,7 @@ from db_access.globals import async_session
 from models import AuthedUser, LoginData, User
 
 ASYNC_MODE = "asgi"
-CORS_ALLOWED_ORIGINS = "http://localhost"
+CORS_ALLOWED_ORIGINS = "https://localhost"
 
 sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
 
