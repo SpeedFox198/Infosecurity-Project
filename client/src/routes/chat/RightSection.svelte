@@ -4,10 +4,19 @@ import MessageInput from "./MessageInput.svelte";
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
+import { messages } from "$lib/messages";
+
+export let room_id;
+export let user_id;
+
+// temp values TODO(SpeedFox198): remove these when not needed
+room_id = "<room_id>";
+user_id = "<user_id>";
+
 
 const namespace = "localhost:5000";
 const transports = {transports: ["websocket"]}
-let allMsgs = [];
+let allMsgs = messages();
 let socket;
 
 
@@ -15,33 +24,40 @@ onMount(async () => {
   // SocketIO instance
   socket = io(namespace, transports);
 
-  socket.on("connect", () => {
-    socket.emit("test", {data: "connected to the SocketServer..."});
+  socket.on("connect", async () => {
+    console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
+    await joinRoom(); // TODO(SpeedFox198): remove this later lmao
   })
 
-  socket.on("response", async (msg, cb) => {
-    await addMsg(true, "Someone", "/default.png", "99:99PM", msg.data);
-    if (cb) cb();
+  socket.on("receive_message", async (data, cb) => {
+    await addMsg(true, data.username, data.avatar, data.time, data.content);
+    if (cb) await cb();
   });
 });
 
+
 async function sendMsg(event) {
   let content = event.detail;
-  socket.emit("test", {data: content});
+  await socket.emit("send_message", {
+    room_id,
+    user_id,
+    time: "99:99PM", // prob use unix time here
+    content,
+    reply_to: null, // reply_to
+    type: "text" // <type> ENUM(image, document, video, text)
+  });
   await addMsg(false, "Me", "/galaxy.jpg", "99:99PM", content);
 }
 
 async function addMsg(received, username, avatar, time, content) {
-  allMsgs.push({
-    received: received,
-    username: username,
-    avatar: avatar,
-    time: time,
-    content: content,
-  });
-  allMsgs = allMsgs;
+  let msg = {received, username, avatar, time, content};
+  allMsgs.addMsg(msg);
 }
 
+async function joinRoom() {
+  await socket.emit("begin_chat", room_id);
+  console.log(`Joined room ${room_id}`); // TODO(SpeedFox198): remove this later lol
+}
 </script>
 
 
@@ -60,7 +76,7 @@ async function addMsg(received, username, avatar, time, content) {
     <!-- Messages Display Section -->
     <div class="chat">
       <div class="my-2"></div>
-      {#each allMsgs as msg}
+      {#each $allMsgs as msg}
         <Message msg={msg}/>
       {/each}
       <div id="anchor"></div>
@@ -74,14 +90,11 @@ async function addMsg(received, username, avatar, time, content) {
 
 
 <style>
-
-.temp {
+.temp { /*TODO(SpeedFox198): remove this extra temp style when not needed */
   height: 4rem;
 }
 
 .top-right {
-  /* position: absolute;
-  top: 0; */
   height: 4rem;
   width: calc(100vw - var(--left-bar-length));
   background-color: var(--primary);
@@ -90,7 +103,6 @@ async function addMsg(received, username, avatar, time, content) {
 
 /* .bottom-right {
 } */
-
 
 .chat {
   height: calc(100vh - 8rem);

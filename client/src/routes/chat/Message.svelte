@@ -46,6 +46,9 @@ export let msg;
 
 .sent {
   flex-direction: row-reverse;
+}
+
+.sent .username {
   text-align: right;
 }
 </style>
