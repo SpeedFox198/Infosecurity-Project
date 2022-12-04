@@ -9,11 +9,26 @@
   let password = ""
   let confirmPassword = ""
   let requirementsDisplay
+  let signupDisplay
+  let loginDisplay
   let lowerCaseFulfill
   let upperCaseFulfill
   let numberFulfill
+  let specialCharFulfill
   let lengthFulfill
+  let strength = 0
   $: requirementsFulfill = lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill
+
+
+  const toggleLoginOn = () => {
+    loginDisplay = true
+    signupDisplay = false
+  }
+
+  const toggleSignupOn = () => {
+    signupDisplay = true
+    loginDisplay = false
+  }
 
   const showRequirements = () => {
     requirementsDisplay = true
@@ -27,10 +42,12 @@
     const lowerCaseRegex = /[a-z]/g
     const upperCaseRegex = /[A-Z]/g
     const numberRegex = /[0-9]/g
+    const specialCharRegex = /[!@#$%^&*`~<>,./?'";:-_=+|\\()]/g
     
     lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
     upperCaseFulfill = Boolean(password.match(upperCaseRegex))
     numberFulfill = Boolean(password.match(numberRegex))
+    specialCharFulfill = Boolean(password.match(specialCharRegex))
     lengthFulfill = password.length >= 8
   }
 </script>
@@ -44,7 +61,7 @@
   padding: 8rem
 }
 
-.login{
+.signup{
   background-color: var(--white);
   margin: 8rem
 }
@@ -65,10 +82,10 @@
       </div>
 
       <!-- Login -->
-      <Login />
+      <Login toggleSignupOn={toggleSignupOn}/>
       
       <!-- Sign up -->
-      <div class="login col-md-4 card rounded-4 shadow">
+      <div class="signup col-md-4 card rounded-4 shadow {loginDisplay ? "d-none" : ""}">
         <div class=" p-5 pb-4 border-bottom-0">
           <h1 class="card-title fw-bold mb-0 fs-2">Sign up and start chatting!</h1>
         </div>
@@ -95,11 +112,24 @@
                on:click={showRequirements}
                on:keyup={checkPasswordRequirements}
                on:blur={hideRequirements}
-               title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" 
+               title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 or more characters" 
                placeholder="Password" 
                required>
               <label for="floatingPassword">Password</label>
             </div>
+            
+            <!-- password requirements -->
+            {#if requirementsDisplay}
+              <div id="message">
+                <h4 class="{(requirementsFulfill) ? "d-none" : ''}">Password must contain the following:</h4>
+                <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
+                <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
+                <p class="{numberFulfill === true ? "d-none" : ''}">1 <b>number (0-9)</b></p>
+                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (!@#$%^&*`~&lt;&gt;,./?'";:-_=+|\())</b></p>
+                <p class="{lengthFulfill === true ? "d-none" : ''}">At least <b>8 characters</b></p>
+              </div>
+            {/if}
+
             <!-- confirm password -->
             <div class="form-floating mb-3">
               <input type="password"
@@ -111,27 +141,18 @@
               <label for="floatingPassword">Confirm password</label>
             </div>
 
-            <!-- password requirements -->
-            {#if requirementsDisplay}
-              <div id="message">
-                <h3 class="{(requirementsFulfill) ? "d-none" : ''}">Password must contain the following:</h3>
-                <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
-                <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
-                <p class="{numberFulfill === true ? "d-none" : ''}">A <b>number</b></p>
-                <p class="{lengthFulfill === true ? "d-none" : ''}">Minimum <b>8 characters</b></p>
-              </div>
-            {/if}
-            
-
             <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Sign up</button>
-            <small class="text-muted">By clicking Sign up, you agree to the terms of use.</small>
-            
+            <small class="text-muted">By clicking Sign up, you agree to our <a href="https://discord.com/terms">terms of service</a>.</small>
+              
             <hr class="my-4">
+          </form>
+          
             <h2 class="fs-5 fw-bold mb-3">Already have an account?</h2>
-            <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" type="submit">
+            <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" 
+            type="button"
+            on:click={toggleLoginOn}>
               Log in here
             </button>
-          </form>
         </div>
       </div>
     </div>

@@ -1,4 +1,11 @@
-<div class="login col-md-4 card rounded-4 shadow">
+<script>
+  export let signupDisplay
+  export let toggleSignupOn
+</script>
+
+
+
+<div class="login col-md-4 card rounded-4 shadow {signupDisplay ? "d-none" : ""}">
   <div class=" p-5 pb-4 border-bottom-0">
     <h1 class="card-title fw-bold mb-0 fs-2">Log in and start chatting!</h1>
   </div>
@@ -31,11 +38,13 @@
       <a class="forgot-pw card-link text-center" href="/">Forgotten password?</a>
 
       <hr class="my-4" />
-      <h2 class="fs-5 fw-bold mb-3">Don't have an account yet?</h2>
-      <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" type="submit">
+    </form>
+    <h2 class="fs-5 fw-bold mb-3">Don't have an account yet?</h2>
+      <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3"
+      type="button"
+      on:click={toggleSignupOn}>
         Create new account
       </button>
-    </form>
   </div>
 </div>
 
@@ -46,7 +55,7 @@
 
   .login{
     background-color: var(--white);
-    margin: auto
+    margin: 8rem
   }
   
   .login-btn{
