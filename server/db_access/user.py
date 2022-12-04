@@ -4,7 +4,7 @@ from db_access.globals import async_session
 from models.User import User
 
 
-async def get_user_details(user_id):
+async def get_user_details(user_id: str) -> tuple:
     async with async_session() as session:
         statement = sa.select(
                 User.username,

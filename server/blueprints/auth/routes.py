@@ -9,6 +9,7 @@ from quart_schema import validate_request
 
 import sqlalchemy as sa
 
+from .functions import add_logged_in_device, get_location_from_ip
 from db_access.globals import async_session
 from models import (
     User,
@@ -29,7 +30,8 @@ async def login(data: LoginData):
         user = result.scalars().first()
         if user:
             login_user(AuthedUser(user.user_id))
-            # print(request.user_agent)
+            location = await get_location_from_ip(request.remote_addr)
+            await add_logged_in_device(session, request.user_agent.string)
             return {"message": "login success"}, 200
     return {"message": "invalid credentials"}, 401
 
