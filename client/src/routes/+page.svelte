@@ -1,70 +1,18 @@
-<svelte:head>
-  <title>Bubbles | Login</title>
-</svelte:head>
-
 <script>
   import Login from "$lib/login.svelte"
-  let email = ""
-  let username = ""
-  let password = ""
-  let confirmPassword = ""
-  let requirementsDisplay
-  let signupDisplay = false;
-  let lowerCaseFulfill
-  let upperCaseFulfill
-  let numberFulfill
-  let specialCharFulfill
-  let lengthFulfill
-  let strength = 0
-  $: requirementsFulfill = lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill
+  import Signup from "$lib/login.svelte"
+  let signupDisplay = false
 
   const toggleSignupOn = () => {
     signupDisplay = !signupDisplay
   }
 
-  const showRequirements = () => {
-    requirementsDisplay = true
-  }
-  
-  const hideRequirements = () => {
-    requirementsDisplay = false
-  }
-  
-  const checkPasswordRequirements = () => {
-    const lowerCaseRegex = /[a-z]/g
-    const upperCaseRegex = /[A-Z]/g
-    const numberRegex = /[0-9]/g
-    const specialCharRegex = /[!@#$%^&*`~<>,./?'";:-_=+|\\()]/g
-    
-    lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
-    upperCaseFulfill = Boolean(password.match(upperCaseRegex))
-    numberFulfill = Boolean(password.match(numberRegex))
-    specialCharFulfill = Boolean(password.match(specialCharRegex))
-    lengthFulfill = password.length >= 8
-  }
 </script>
 
-<style>
-.background{
-  background-color: var(--grey);
-}
 
-.logo-with-text{
-  padding: 8rem
-}
-
-.signup{
-  background-color: var(--white);
-  margin: 8rem
-}
-
-.login-btn{
-  background-color: var(--primary-dark)
-}
-
-
-</style>
-
+<svelte:head>
+  <title>Bubbles | Login</title>
+</svelte:head>
 <main class="background h-100">
   <div class="container-fluid">
     <div class="row">
@@ -77,76 +25,21 @@
       <Login toggleSignupOn={toggleSignupOn} signupDisplay={signupDisplay}/>
       
       <!-- Sign up -->
-      <div class="signup col-md-4 card rounded-4 shadow {signupDisplay ? "" : "d-none"}">
-        <div class=" p-5 pb-4 border-bottom-0">
-          <h1 class="card-title fw-bold mb-0 fs-2">Sign up and start chatting!</h1>
-        </div>
-
-        <div class="card-body p-5 pt-0">
-          <form class="">
-            <!-- email address -->
-            <div class="form-floating mb-3">
-              <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" bind:value={email} required>
-              <label for="floatingInput">Email address</label>
-            </div>
-
-            <!-- username -->
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" bind:value={username} required>
-              <label for="floatingInput">Username</label>
-            </div>
-
-            <!-- password -->
-            <div class="form-floating mb-3">
-              <input type="password"
-               class="form-control rounded-3"
-               bind:value={password}
-               on:click={showRequirements}
-               on:keyup={checkPasswordRequirements}
-               on:blur={hideRequirements}
-               title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 or more characters" 
-               placeholder="Password" 
-               required>
-              <label for="floatingPassword">Password</label>
-            </div>
-            
-            <!-- password requirements -->
-            {#if requirementsDisplay}
-              <div id="message">
-                <h4 class="{(requirementsFulfill) ? "d-none" : ''}">Password must contain the following:</h4>
-                <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
-                <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
-                <p class="{numberFulfill === true ? "d-none" : ''}">1 <b>number (0-9)</b></p>
-                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (!@#$%^&*`~&lt;&gt;,./?'";:-_=+|\())</b></p>
-                <p class="{lengthFulfill === true ? "d-none" : ''}">At least <b>8 characters</b></p>
-              </div>
-            {/if}
-
-            <!-- confirm password -->
-            <div class="form-floating mb-3">
-              <input type="password"
-              class="form-control rounded-3" 
-              bind:value={confirmPassword}
-              id="floatingPassword" 
-              placeholder="Password" 
-              required>
-              <label for="floatingPassword">Confirm password</label>
-            </div>
-
-            <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Sign up</button>
-            <small class="text-muted">By clicking Sign up, you agree to our <a href="https://discord.com/terms">terms of service</a>.</small>
-              
-            <hr class="my-4">
-          </form>
-          
-            <h2 class="fs-5 fw-bold mb-3">Already have an account?</h2>
-            <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" 
-            type="button"
-            on:click={toggleSignupOn}>
-              Log in here
-            </button>
-        </div>
-      </div>
+      <Signup toggleSignupOn={toggleSignupOn} signupDisplay={signupDisplay}/>
+      
     </div>
   </div>
 </main>
+
+
+
+<style>
+.background{
+  background-color: var(--grey);
+}
+
+.logo-with-text{
+  padding: 8rem
+}
+
+</style>
