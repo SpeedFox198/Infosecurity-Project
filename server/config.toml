@@ -1,0 +1,4 @@
+access_log_format = "%(h)s %(r)s %(s)s %(b)s %(D)s"
+accesslog = "-"
+bind = "127.0.0.1:5000"
+errorlog = "-"

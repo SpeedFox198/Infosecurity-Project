@@ -33,4 +33,4 @@ async def unauthorized(*_):
 # Serve the SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
 sio_app = socketio.ASGIApp(sio, app)
-asyncio.run(serve(sio_app, config))
+# asyncio.run(serve(sio_app, config))  # TODO(SpeedFox198): if unused remove
