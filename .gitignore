@@ -4,4 +4,7 @@ __pycache__/
 .venv/
 .vscode/
 .idea/
-.pem
+
+mkcert.exe
+cert.pem
+key.pem
