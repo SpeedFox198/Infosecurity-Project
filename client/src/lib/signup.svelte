@@ -26,7 +26,7 @@
         const lowerCaseRegex = /[a-z]/g
         const upperCaseRegex = /[A-Z]/g
         const numberRegex = /[0-9]/g
-        const specialCharRegex = /[!@#$%^&*`~<>,./?'";:-_=+|\\()]/g
+        const specialCharRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?~]/g
         
         lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
         upperCaseFulfill = Boolean(password.match(upperCaseRegex))
@@ -77,7 +77,7 @@
                 <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
                 <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
                 <p class="{numberFulfill === true ? "d-none" : ''}">1 <b>number (0-9)</b></p>
-                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (!@#$%^&*`~&lt;&gt;,./?'";:-_=+|\())</b></p>
+                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (`!@#$%^&*()_+-=[]|&#123;&#125;;':"\|,.&lt;&gt;\/?~)</b></p>
                 <p class="{lengthFulfill === true ? "d-none" : ''}">At least <b>8 characters</b></p>
               </div>
             {/if}
