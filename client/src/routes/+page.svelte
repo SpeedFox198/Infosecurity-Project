@@ -12,7 +12,7 @@
 
 
 <svelte:head>
-  <title>Bubbles | Login</title>
+  <title>Bubbles | Login/Signup</title>
 </svelte:head>
 <main class="background h-100">
   <div class="container-fluid">
