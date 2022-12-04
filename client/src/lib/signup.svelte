@@ -1,5 +1,4 @@
 <script>
-    export let signupDisplay
     export let toggleSignupOn
 
     let email
@@ -27,7 +26,7 @@
         const lowerCaseRegex = /[a-z]/g
         const upperCaseRegex = /[A-Z]/g
         const numberRegex = /[0-9]/g
-        const specialCharRegex = /[!@#$%^&*`~<>,./?'";:-_=+|\\()]/g
+        const specialCharRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?~]/g
         
         lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
         upperCaseFulfill = Boolean(password.match(upperCaseRegex))
@@ -38,7 +37,7 @@
 </script>
 
 
-<div class="signup col-md-4 card rounded-4 shadow {signupDisplay ? "" : "d-none"}">
+<div class="signup card rounded-4 shadow">
         <div class=" p-5 pb-4 border-bottom-0">
           <h1 class="card-title fw-bold mb-0 fs-2">Sign up and start chatting!</h1>
         </div>
@@ -78,7 +77,7 @@
                 <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
                 <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
                 <p class="{numberFulfill === true ? "d-none" : ''}">1 <b>number (0-9)</b></p>
-                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (!@#$%^&*`~&lt;&gt;,./?'";:-_=+|\())</b></p>
+                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (`!@#$%^&*()_+-=[]|&#123;&#125;;':"\|,.&lt;&gt;\/?~)</b></p>
                 <p class="{lengthFulfill === true ? "d-none" : ''}">At least <b>8 characters</b></p>
               </div>
             {/if}
@@ -122,5 +121,10 @@
   background-color: var(--primary-dark)
 }
 
+@media (max-width: 576px) {
+  .signup {
+    margin: 0rem
+  }
+}
 
 </style>

@@ -1,11 +1,10 @@
 <script>
-  export let signupDisplay
   export let toggleSignupOn
 </script>
 
 
 
-<div class="login col-md-4 card rounded-4 shadow {signupDisplay ? "d-none" : ""}">
+<div class="login card rounded-4 shadow">
   <div class=" p-5 pb-4 border-bottom-0">
     <h1 class="card-title fw-bold mb-0 fs-2">Log in and start chatting!</h1>
   </div>
@@ -60,5 +59,11 @@
   
   .login-btn{
     background-color: var(--primary-dark)
+  }
+  
+  @media(max-width: 576px) {
+    .login {
+      margin: 0rem
+    }
   }
 </style>
