@@ -6,7 +6,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="image-size">
-      <a href="#Profile Settings"><img class="rounded-circle s-xaYsMfKz8n8O img-fluid" src="/galaxy.jpg" alt="Me"></a>
+      <a href="#Profile Settings"><img class="rounded-circle img-fluid" src="/galaxy.jpg" alt="Me"></a>
     </div>
     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">

@@ -8,3 +8,4 @@ from .Media import Media
 from .Membership import Membership
 from .Message import Message
 from .Request import Request
+from .Group import Group

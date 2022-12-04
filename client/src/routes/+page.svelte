@@ -34,8 +34,6 @@
   </div>
 </main>
 
-
-
 <style>
 .background{
   background-color: var(--grey);

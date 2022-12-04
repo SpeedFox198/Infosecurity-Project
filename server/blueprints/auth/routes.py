@@ -1,4 +1,4 @@
-from quart import Blueprint
+from quart import Blueprint, request
 from quart_auth import (
     login_user,
     logout_user,
@@ -9,12 +9,14 @@ from quart_schema import validate_request
 
 import sqlalchemy as sa
 
+from .functions import add_logged_in_device, get_location_from_ip
 from db_access.globals import async_session
 from models import (
     User,
     AuthedUser,
     LoginData
 )
+
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -28,6 +30,8 @@ async def login(data: LoginData):
         user = result.scalars().first()
         if user:
             login_user(AuthedUser(user.user_id))
+            location = await get_location_from_ip(request.remote_addr)
+            await add_logged_in_device(session, request.user_agent.string)
             return {"message": "login success"}, 200
     return {"message": "invalid credentials"}, 401
 
