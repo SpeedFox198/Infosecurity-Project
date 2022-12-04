@@ -37,7 +37,7 @@ async def send_message(sid, data):
     print(f"Received {data}")  # TODO(SpeedFox198): change to log later
     room = data["room_id"]
     # TODO(SpeedFox198): get username, avatar using user_id
-    # Get time using pythong maybe?
+    # Get time using python maybe?
     # Change format to getting those using another api
     await sio.emit("receive_message", {
         "room_id": room,
@@ -49,19 +49,8 @@ async def send_message(sid, data):
     # await sio.emit("sent_success", data, to=sid)
 
 
-# TODO(SpeedFox198): add authentication and authorisation here
-# LOGIC HAS CHANGED!
-# When user connects to server, on the server side
-# server will go into database and join user into every room
-# that user belongs to!!!
-# This solves a few issues:
-# 1. Users will get real time updates of receiving msgs from any room
-# 2. Client side won't be able to emit even to request for join room
-# 3. Client side does not need to sort of maintain a list of room_id :)
-@sio.event
-async def join_room(sid, room_id):
-    sio.enter_room(sid, room_id)
-
+# TODO(SpeedFox198): need user to leave room!!!
+# perhaps on disconnect, leave all the rooms?
 # @sio.event
 # def exit_chat(sid):
 #     sio.leave_room(sid, "chat_users")

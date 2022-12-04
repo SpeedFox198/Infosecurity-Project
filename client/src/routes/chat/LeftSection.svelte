@@ -6,7 +6,7 @@ import Nav from "./Nav.svelte";
 
 // TODO(SpeedFox198): remove temp values
 let grpList = [
-  {icon:"/default.png", name:"Grp Chat", room_id:"<room_id>"},
+  {icon:"/default.png", name:"Grp Chat", room_id:"room_1"},
   {icon:"/default.png", name:"Grp Chat", room_id:"room_2"},
   {icon:"/galaxy.jpg", name:"Grp Chat", room_id:"room_3"},
   {icon:"/favicon.svg", name:"Grp Chat", room_id:"room_4"}

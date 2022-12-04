@@ -28,7 +28,7 @@ export const allMsgs = (() => {
 
 export const room_id = (() => {
   // TODO(SpeedFox198): remove this temp value
-  const { subscribe, set } = writable("<room_id>");
+  const { subscribe, set } = writable("");
   return { subscribe, set }
 })();
 

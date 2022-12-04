@@ -18,7 +18,6 @@ onMount(async () => {
 
   socket.on("connect", async () => {
     console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
-    await joinRoom(); // TODO(SpeedFox198): remove this later lmao
   })
 
   socket.on("rooms_joined", async data => {
@@ -50,21 +49,6 @@ async function addMsg(received, room_id, username, avatar, time, content) {
   let msg = {received, username, avatar, time, content};
   await allMsgs.addMsg(msg, room_id);
 }
-
-/* TODO(SpeedFox198):
- * LOGIC HAS CHANGED!
- * When user connects to server, on the server side
- * server will go into database and join user into every room
- * that user belongs to!!!
- * This solves a few issues:
- * 1. Users will get real time updates of receiving msgs from any room
- * 2. Client side won't be able to emit even to request for join room
- * 3. Client side does not need to sort of maintain a list of room_id :)
- */
-async function joinRoom() {
-  await socket.emit("join_room", $room_id);
-  console.log(`Joined room ${$room_id}`); // TODO(SpeedFox198): remove this later lol
-}
 </script>
 
 
@@ -79,16 +63,22 @@ async function joinRoom() {
   </div>
 
     <!-- Messages Display Section -->
-    <div class="chat">
-      <div class="my-2"></div>
-      {#each $roomMsgs as msg}
-        <Message msg={msg}/>
-      {/each}
-      <div id="anchor"></div>
-    </div>
+    {#if $room_id}
+      <div class="chat">
+        <div class="my-2"></div>
+        {#each $roomMsgs as msg}
+          <Message msg={msg}/>
+        {/each}
+        <div id="anchor"></div>
+      </div>
 
-    <!-- Messages Display Section -->
-    <MessageInput on:message={sendMsg}/>
+      <!-- Messages Display Section -->
+      <MessageInput on:message={sendMsg}/>
+    {:else}
+      <div class="">
+        <!-- TODO(SpeedFox198): add welcome page? lol -->
+      </div>
+    {/if}
 </div>
 
 
