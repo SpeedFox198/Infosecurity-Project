@@ -46,10 +46,3 @@ export const roomMsgs = derived(
     return roomMsgs;
   }
 );
-
-
-export const user_id = (() => {
-  // TODO(SpeedFox198): remove this temp value
-  const { subscribe, set } = writable("<user_id>");
-  return { subscribe, set }
-})();

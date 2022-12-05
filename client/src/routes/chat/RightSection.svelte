@@ -2,7 +2,8 @@
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { allMsgs, room_id, roomMsgs, user_id } from "$lib/stores";
+import { allMsgs, room_id, roomMsgs } from "$lib/stores/messages.js";
+import { user_id, allUsers } from "$lib/stores/users.js";
 
 import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "./MessageInput.svelte";
@@ -20,13 +21,14 @@ onMount(async () => {
     console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
   })
 
+  // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
     rooms = data;
     console.log(rooms);
   })
 
   socket.on("receive_message", async (data, cb) => {
-    await addMsg(true, data.room_id, data.username, data.avatar, data.time, data.content);
+    await addMsg(data.room_id, "<user_id>", data.username, data.avatar, data.time, data.content);
     if (cb) await cb();
   });
 });
@@ -42,11 +44,11 @@ async function sendMsg(event) {
     reply_to: null, // reply_to
     type: "text" // <type> ENUM(image, document, video, text)
   });
-  await addMsg(false, $room_id, "Me", "/galaxy.jpg", "99:99PM", content);
+  await addMsg($room_id, "<user_id>", "Me", "/galaxy.jpg", "99:99PM", content);
 }
 
-async function addMsg(received, room_id, username, avatar, time, content) {
-  let msg = {received, username, avatar, time, content};
+async function addMsg(room_id, user_id, username, avatar, time, content) {
+  let msg = {user_id, username, avatar, time, content};
   await allMsgs.addMsg(msg, room_id);
 }
 </script>
@@ -67,7 +69,7 @@ async function addMsg(received, room_id, username, avatar, time, content) {
       <div class="chat">
         <div class="my-2"></div>
         {#each $roomMsgs as msg}
-          <Message msg={msg}/>
+          <Message msg={msg} sent={msg.user_id === $user_id}/>
         {/each}
         <div id="anchor"></div>
       </div>

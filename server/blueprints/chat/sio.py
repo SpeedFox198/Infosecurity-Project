@@ -31,6 +31,12 @@ async def connect(sid, environ, auth):
     # Send room_ids that client belongs to
     await sio.emit("rooms_joined", temp_rooms, to=sid)
 
+@sio.event()
+async def disconnect(sid):
+    print("disconnected:", sid)
+    for room_id in temp_rooms:
+        sio.leave_room(sid, room_id)
+    print(f"{sid} joined: {sio.rooms(sid)}")
 
 @sio.event
 async def send_message(sid, data):

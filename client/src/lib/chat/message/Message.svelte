@@ -1,15 +1,16 @@
 <script>
 export let msg;
+export let sent;
 </script>
 
 <!-- Messages Bubble -->
-<div class="message d-flex {!msg.received ? "sent": ""}">
-  <div class="info-section m{msg.received ? "e": "s"}-2">
+<div class="message d-flex {sent ? "sent": ""}">
+  <div class="info-section m{sent ? "s": "e"}-2">
     <img class="rounded-circle" src={msg.avatar} alt="User Avatar">
     <span class="time">{msg.time}</span>
   </div>
   <div class="bubble">
-    <!-- {#if msg.received} --> <!-- TODO(SpeedFox198): rmb to change this! -->
+    <!-- {#if !sent} --> <!-- TODO(SpeedFox198): rmb to change this! -->
       <div class="username">{msg.username}</div>
     <!-- {/if} -->
     <div class="content text-wrap text-break">
