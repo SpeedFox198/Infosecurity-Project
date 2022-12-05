@@ -15,7 +15,7 @@
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link active" aria-current="page" href="##">Home</a>
         </li>
       </ul>
     </div>
