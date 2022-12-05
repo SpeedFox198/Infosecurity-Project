@@ -9,7 +9,11 @@ from quart_schema import validate_request
 
 import sqlalchemy as sa
 
-from .functions import add_logged_in_device, get_location_from_ip
+from .functions import (
+    add_logged_in_device,
+    get_location_from_ip,
+    get_user_agent_data
+)
 from db_access.globals import async_session
 from models import (
     User,
@@ -33,8 +37,9 @@ async def login(data: LoginData):
             return {"message": "invalid credentials"}, 401
 
         login_user(AuthedUser(user.user_id))
-        # location = await get_location_from_ip(request.remote_addr)
-        # await add_logged_in_device(session, request.user_agent.string)
+        location = await get_location_from_ip(request.remote_addr)
+        browser, os = await get_user_agent_data(request.user_agent.string)
+
         return {"message": "login success"}, 200
 
 
@@ -51,12 +56,12 @@ async def is_logged_in():
         return {"message": "not authenticated"}, 401
 
     return {
-            "user_id": current_user.auth_id,
-            "username": await current_user.username,
-            "email": await current_user.email,
-            "avatar": await current_user.avatar,
-            "dark_mode": await current_user.dark_mode,
-            "malware_scan": await current_user.malware_scan,
-            "friends_only": await current_user.friends_only,
-            "censor": await current_user.censor
+        "user_id": current_user.auth_id,
+        "username": await current_user.username,
+        "email": await current_user.email,
+        "avatar": await current_user.avatar,
+        "dark_mode": await current_user.dark_mode,
+        "malware_scan": await current_user.malware_scan,
+        "friends_only": await current_user.friends_only,
+        "censor": await current_user.censor
     }
