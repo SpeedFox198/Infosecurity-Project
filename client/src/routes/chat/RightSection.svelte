@@ -11,7 +11,7 @@ import MessageInput from "./MessageInput.svelte";
 const namespace = "https://localhost:8443";
 const transports = { transports: ["websocket"] }
 let socket;  // Forward declare socket :)
-let rooms;
+let rooms; // TODO(SpeedFox198): use this
 
 onMount(async () => {
   // SocketIO instance
