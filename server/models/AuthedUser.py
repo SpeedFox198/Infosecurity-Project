@@ -9,7 +9,7 @@ class AuthedUser(AuthUser):
         self._resolved = False
         self._username = None
         self._email = None
-        self._profile_pic = None
+        self._avatar = None
         self._dark_mode = None
         self._malware_scan = None
         self._friends_only = None
@@ -20,7 +20,7 @@ class AuthedUser(AuthUser):
             (
                 self._username,
                 self._email,
-                self._profile_pic,
+                self._avatar,
                 self._dark_mode,
                 self._malware_scan,
                 self._friends_only,
@@ -39,9 +39,9 @@ class AuthedUser(AuthUser):
         return self._email
 
     @property
-    async def profile_pic(self):
+    async def avatar(self):
         await self._resolve()
-        return self._profile_pic
+        return self._avatar
 
     @property
     async def dark_mode(self):

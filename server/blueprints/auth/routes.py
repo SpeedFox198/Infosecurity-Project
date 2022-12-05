@@ -51,7 +51,7 @@ async def is_logged_in():
     return {
             "username": await current_user.username,
             "email": await current_user.email,
-            "profile_pic": await current_user.profile_pic,
+            "avatar": await current_user.avatar,
             "dark_mode": await current_user.dark_mode,
             "malware_scan": await current_user.malware_scan,
             "friends_only": await current_user.friends_only,

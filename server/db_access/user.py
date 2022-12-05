@@ -9,7 +9,7 @@ async def get_user_details(user_id: str) -> tuple:
         statement = sa.select(
                 User.username,
                 User.email,
-                User.profile_pic,
+                User.avatar,
                 User.dark_mode,
                 User.malware_scan,
                 User.friends_only,

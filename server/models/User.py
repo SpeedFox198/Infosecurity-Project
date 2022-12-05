@@ -22,7 +22,7 @@ class User(Base):
     username = Column(VARCHAR(32), unique=True, nullable=False)
     email = Column(VARCHAR(255), unique=True, nullable=False)
     password = Column(VARCHAR(255), nullable=False)
-    profile_pic = Column(VARCHAR(255))
+    avatar = Column(VARCHAR(255))
     dark_mode = Column(Boolean, default=False)
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
