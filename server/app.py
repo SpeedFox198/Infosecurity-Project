@@ -3,8 +3,9 @@ import asyncio
 import quart_auth
 import socketio
 from blueprints.api import api_bp
-from blueprints.chat import sio
 from blueprints.auth import auth_bp
+from blueprints.chat import sio
+from blueprints.user import user_bp
 from models import AuthedUser
 from quart import Quart
 from quart_cors import cors
@@ -19,6 +20,7 @@ auth_manager.user_class = AuthedUser
 auth_manager.init_app(app)
 
 api_bp.register_blueprint(auth_bp)
+api_bp.register_blueprint(user_bp)
 app.register_blueprint(api_bp)
 app.secret_key = "secret123"
 
