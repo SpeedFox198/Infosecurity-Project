@@ -79,7 +79,6 @@ async function addMsg(room_id, user_id_, time, content) {
   const msg = {sent, username, avatar, time, content};
   allMsgs.addMsg(msg, room_id);
 }
-
 </script>
 
 
@@ -114,7 +113,7 @@ async function addMsg(room_id, user_id_, time, content) {
 
 
 <style>
-.temp { /*TODO(SpeedFox198): remove this extra temp style when not needed */
+.temp {  /*TODO(SpeedFox198): remove this extra temp style when not needed */
   height: 4rem;
 }
 
