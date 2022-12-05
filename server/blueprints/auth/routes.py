@@ -33,9 +33,8 @@ async def login(data: LoginData):
             return {"message": "invalid credentials"}, 401
 
         login_user(AuthedUser(user.user_id))
-        location = await get_location_from_ip(request.remote_addr)
-        print(location)
-        await add_logged_in_device(session, request.user_agent.string)
+        # location = await get_location_from_ip(request.remote_addr)
+        # await add_logged_in_device(session, request.user_agent.string)
         return {"message": "login success"}, 200
 
 

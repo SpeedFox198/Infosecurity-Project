@@ -11,7 +11,7 @@ from quart_cors import cors
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 app = Quart(__name__)
-app = cors(app)
+app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
 
 
 auth_manager = quart_auth.AuthManager()
