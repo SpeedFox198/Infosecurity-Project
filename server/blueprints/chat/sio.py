@@ -154,15 +154,18 @@ async def disconnect(sid):
 @sio.event
 async def send_message(sid, data):
     print(f"Received {data}")  # TODO(SpeedFox198): change to log later
-    # TODO(SpeedFox198): get username, avatar using user_id
+    # TODO(SpeedFox198):
+    # Change temp things to actual
     # Get time using python maybe?
-    # Change format to getting those using another api
+    # Change format to getting those using another api (<- ??? what was i refering to b4?)
     await sio.emit("receive_message", {
         "room_id": data["room_id"],
         "user_id": data["user_id"],
         "time": "99:99PM",
         "content": data["content"],
     }, room=data["room_id"], skip_sid=sid)
+
+    # TODO(SpeedFox198): consider if you want sent receipt
     # await sio.emit("sent_success", data, to=sid)
 
 
