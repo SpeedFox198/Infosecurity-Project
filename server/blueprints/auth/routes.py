@@ -51,6 +51,7 @@ async def is_logged_in():
         return {"message": "not authenticated"}, 401
 
     return {
+            "user_id": current_user.auth_id,
             "username": await current_user.username,
             "email": await current_user.email,
             "avatar": await current_user.avatar,

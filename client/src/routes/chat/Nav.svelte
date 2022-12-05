@@ -1,4 +1,7 @@
-
+<script>
+  import {page} from "$app/stores"
+  let currentUser = $page.data.user
+</script>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
@@ -8,6 +11,7 @@
     <div class="image-size">
       <a href="#Profile Settings"><img class="rounded-circle img-fluid" src="/galaxy.jpg" alt="Me"></a>
     </div>
+    <span class="px-2 py-2">{currentUser.username}</span>
     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <form class="d-flex">
