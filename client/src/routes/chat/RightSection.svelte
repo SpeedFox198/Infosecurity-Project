@@ -16,7 +16,7 @@ let rooms; // TODO(SpeedFox198): use this
 onMount(async () => {
   // TODO(SpeedFox198): remove this temp function lmao (and the alert is annoying lol)
   (async () => {
-    let x = prompt("Enter username:", "bob");
+    const x = prompt("Enter username:", "bob");
     if (x == "bob") {
       user_id.set("2a3f14df-ef17-4410-baf9-ed6693ac8c5a");
     }
