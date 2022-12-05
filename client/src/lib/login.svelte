@@ -62,7 +62,7 @@
       Log in
       </button>
       {#if loginError}
-        <p class="text-error">Invalid credentials!</p>
+        <p class="text-danger">Invalid credentials!</p>
       {/if}
       <a class="forgot-pw card-link text-center" href="/">Forgotten password?</a>
 

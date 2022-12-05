@@ -11,7 +11,7 @@ export const handle = async ({event, resolve}) => {
     // Check if cookie is valid
     const response = await fetch("https://127.0.0.1:8443/api/auth/is-logged-in", {
         headers: {
-            Cookie: `QUART_AUTH=${session}`
+            cookies: `QUART_AUTH=${session}`,
         }
     })
     const userResponse = await response.json()
