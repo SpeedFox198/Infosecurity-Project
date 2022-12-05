@@ -28,12 +28,14 @@ async def login(data: LoginData):
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
         user = result.scalars().first()
-        if user:
-            login_user(AuthedUser(user.user_id))
-            location = await get_location_from_ip(request.remote_addr)
-            await add_logged_in_device(session, request.user_agent.string)
-            return {"message": "login success"}, 200
-    return {"message": "invalid credentials"}, 401
+
+        if not user:
+            return {"message": "invalid credentials"}, 401
+
+        login_user(AuthedUser(user.user_id))
+        # location = await get_location_from_ip(request.remote_addr)
+        # await add_logged_in_device(session, request.user_agent.string)
+        return {"message": "login success"}, 200
 
 
 @auth_bp.post("/logout")
