@@ -18,10 +18,123 @@ temp_rooms = [
     "room_4",
     "room_5"
 ]
+tmp_msgs = {
+    "room_1": [
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 1"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 2"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 3"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 4"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 5"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 6"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 7"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 8"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 9"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 10"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 11"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 12"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 13"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 14"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 15"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 16"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 17"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 18"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 19"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"room 111 content"},
+    ],
+    "room_2": [
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 1"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 2"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 3"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 4"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 5"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 6"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 7"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 8"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 9"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 10"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 11"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 12"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 13"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 14"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 15"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 16"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 17"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 18"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 19"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"room 222 content"},
+    ],
+    "room_3": [
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 1"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 2"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 3"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 4"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 5"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 6"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 7"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 8"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 9"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 10"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 11"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 12"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 13"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 14"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 15"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 16"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 17"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 18"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 19"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"room 333 content"},
+    ],
+    "room_4": [
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 1"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 2"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 3"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 4"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 5"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 6"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 7"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 8"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 9"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 10"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 11"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 12"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 13"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 14"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 15"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 16"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 17"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 18"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 19"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"room 4 content"},
+    ],
+    "room_5": [
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 1"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 2"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 3"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 4"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 5"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 6"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 7"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 8"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 9"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 10"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem 11"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum 12"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what 13"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did 14"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you 15"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect 16"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 17"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 18"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"Lorem Ipsum what did you expect lmao 19"},
+        {"user_id":"<user_id>", "time":"99:99PM", "content":"room 5 content"},
+    ],
+}
 
 # TODO(SpeedFox198): do authentication
-@sio.event()
+@sio.event
 async def connect(sid, environ, auth):
+    """ Event when client connects to server """
     print("connected:", sid)
     # Do authentication
     for room_id in temp_rooms:
@@ -31,32 +144,34 @@ async def connect(sid, environ, auth):
     # Send room_ids that client belongs to
     await sio.emit("rooms_joined", temp_rooms, to=sid)
 
-@sio.event()
+
+@sio.event
 async def disconnect(sid):
+    """ Event when client disconnects from server """
     print("disconnected:", sid)
-    for room_id in temp_rooms:
-        sio.leave_room(sid, room_id)
-    print(f"{sid} joined: {sio.rooms(sid)}")
+
 
 @sio.event
 async def send_message(sid, data):
     print(f"Received {data}")  # TODO(SpeedFox198): change to log later
-    room = data["room_id"]
     # TODO(SpeedFox198): get username, avatar using user_id
     # Get time using python maybe?
     # Change format to getting those using another api
     await sio.emit("receive_message", {
-        "room_id": room,
-        "username": "<username>",
-        "avatar": "/default.png",
+        "room_id": data["room_id"],
+        "user_id": data["user_id"],
         "time": "99:99PM",
         "content": data["content"],
-    }, room=room, skip_sid=sid)
+    }, room=data["room_id"], skip_sid=sid)
     # await sio.emit("sent_success", data, to=sid)
 
 
-# TODO(SpeedFox198): need user to leave room!!!
-# perhaps on disconnect, leave all the rooms?
-# @sio.event
-# def exit_chat(sid):
-#     sio.leave_room(sid, "chat_users")
+@sio.event
+async def get_room_messages(sid, data):
+    print(f"Received {data}")  # TODO(SpeedFox198): change to log later
+    room_id = data["room_id"]
+    room_messages = tmp_msgs[room_id]
+    await sio.emit("receive_room_messages", {
+        "room_id": room_id,
+        "room_messages": room_messages
+    }, to=sid)

@@ -1,28 +1,32 @@
 import { derived, writable } from "svelte/store";
 
-
 export const allMsgs = (() => {
   const { subscribe, update } = writable({});
 
-  async function addMsg (msg, room_id) {
+  async function addMsg (msg, room_id, add_prev) {
     update(storage => {
 
       // Get room messages array
       let roomMsgs = storage[room_id];
-  
+
       // If room messages does not exist, create array for it
       if (!roomMsgs) {
-        storage[room_id] = [];
-        roomMsgs = storage[room_id];
+        roomMsgs = [];
+        storage[room_id] = roomMsgs;
       }
-  
-      // Add new message to array
-      roomMsgs.push(msg);
+
+      if (!add_prev) {  // Add new message to array
+        roomMsgs.push(msg);
+      }
+      else {  // Add older(previous) messages to front of array
+        roomMsgs.unshift.apply(msg, roomMsgs);
+      }
+
       return storage;
     });
   }
 
-  return {subscribe, addMsg};
+  return { subscribe, addMsg };
 })();
 
 
@@ -33,6 +37,7 @@ export const room_id = (() => {
 })();
 
 
+// TODO(SpeedFox198): consider removing this later
 export const roomMsgs = derived(
   [allMsgs, room_id],
   ([$allMsgs, $room_id]) => {

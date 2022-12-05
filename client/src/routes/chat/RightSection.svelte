@@ -2,14 +2,14 @@
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { allMsgs, room_id, roomMsgs } from "$lib/stores/messages.js";
-import { user_id, allUsers } from "$lib/stores/users.js";
+import { allMsgs, room_id, roomMsgs } from "$lib/stores/messages";
+import { user_id, allUsers } from "$lib/stores/users";
 
 import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "./MessageInput.svelte";
 
 const namespace = "https://localhost:8443";
-const transports = {transports: ["websocket"]}
+const transports = { transports: ["websocket"] }
 let socket;  // Forward declare socket :)
 let rooms;
 
@@ -19,38 +19,67 @@ onMount(async () => {
 
   socket.on("connect", async () => {
     console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
-  })
+  });
 
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
     rooms = data;
-    console.log(rooms);
-  })
+    // TODO(SpeedFox198): maybe use stores to update LeftSection
+  });
 
-  socket.on("receive_message", async (data, cb) => {
-    await addMsg(data.room_id, "<user_id>", data.username, data.avatar, data.time, data.content);
-    if (cb) await cb();
+  socket.on("receive_message", async data => {
+    addMsg(data.room_id, data.user_id, data.time, data.content);
+  });
+
+  socket.on("receive_room_messages", async data => {
+    allMsgs.addMsg(data.room_messages, data.room_id, true);
   });
 });
 
 
+// Send message to room via SocketIO
 async function sendMsg(event) {
   let content = event.detail;
-  await socket.emit("send_message", {
+  socket.emit("send_message", {
     room_id: $room_id,
     user_id: $user_id,
-    time: "99:99PM", // prob use unix time here
+    time: "99:99PM", // TODO(SpeedFox198): prob use unix time here
     content,
     reply_to: null, // reply_to
     type: "text" // <type> ENUM(image, document, video, text)
   });
-  await addMsg($room_id, "<user_id>", "Me", "/galaxy.jpg", "99:99PM", content);
+  addMsg($room_id, $user_id, "99:99PM", content);
 }
 
-async function addMsg(room_id, user_id, username, avatar, time, content) {
-  let msg = {user_id, username, avatar, time, content};
-  await allMsgs.addMsg(msg, room_id);
+// Get latest 20n+1 to 20n+20 messages from room
+async function getRoomMsgs(n) {
+  socket.emit("get_room_messages", {
+    room_id: $room_id,
+    start: 20*n + 1,
+    end: 20*n + 20
+  });
 }
+
+async function getUser(user_id) {
+  // TODO(SpeedFox198): fetch user data
+  let user = {
+    avatar: "/default.png",
+    username: "<username>"
+  };
+  allUsers.addUser(user, user_id);
+  return user;
+}
+
+async function addMsg(room_id, user_id_, time, content) {
+  const sent = user_id_ === $user_id;
+  let user = $allUsers[user_id_];
+  if (!user) user = await getUser(user_id_);
+  const avatar = user.avatar;
+  const username = user.username;
+  const msg = {sent, username, avatar, time, content};
+  allMsgs.addMsg(msg, room_id);
+}
+
 </script>
 
 
@@ -64,23 +93,23 @@ async function addMsg(room_id, user_id, username, avatar, time, content) {
     </div>
   </div>
 
+  {#if $room_id}
     <!-- Messages Display Section -->
-    {#if $room_id}
-      <div class="chat">
-        <div class="my-2"></div>
-        {#each $roomMsgs as msg}
-          <Message msg={msg} sent={msg.user_id === $user_id}/>
-        {/each}
-        <div id="anchor"></div>
-      </div>
+    <div class="chat" on:scroll={()=>null}>
+      <div class="my-2"></div>
+      {#each $roomMsgs as msg}
+        <Message msg={msg}/>
+      {/each}
+      <div id="anchor"></div>
+    </div>
 
-      <!-- Messages Display Section -->
-      <MessageInput on:message={sendMsg}/>
-    {:else}
-      <div class="">
-        <!-- TODO(SpeedFox198): add welcome page? lol -->
-      </div>
-    {/if}
+    <!-- Messages Display Section -->
+    <MessageInput on:message={sendMsg}/>
+  {:else}
+    <div class="">
+      <!-- TODO(SpeedFox198): add welcome page? lol -->
+    </div>
+  {/if}
 </div>
 
 

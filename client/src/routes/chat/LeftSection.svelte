@@ -1,5 +1,5 @@
 <script>
-import { room_id } from "$lib/stores";
+import { room_id } from "$lib/stores/messages";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
