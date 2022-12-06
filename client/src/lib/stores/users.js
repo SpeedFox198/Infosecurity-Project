@@ -2,8 +2,7 @@ import { writable } from "svelte/store";
 
 // user_id of currently logged in user
 export const user_id = (() => {
-  // TODO(SpeedFox198): remove this temp value
-  const { subscribe, set } = writable("2a3f14df-ef17-4410-baf9-ed6693ac8c5a");
+  const { subscribe, set } = writable("");
   return { subscribe, set };
 })();
 

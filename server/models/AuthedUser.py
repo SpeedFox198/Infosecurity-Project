@@ -19,7 +19,12 @@ class AuthedUser(AuthUser):
 
     async def _resolve(self):
         if not self._resolved:
-            self._user_id, self._device_id = self.auth_id.split(".")
+            try:
+                self._user_id, self._device_id = self.auth_id.split(".")
+            except:
+                self._user_id, self._device_id = ("",)*2
+
+            user_details = await get_user_details(self._user_id) or ("",)*7
 
             (
                 self._username,
@@ -29,7 +34,8 @@ class AuthedUser(AuthUser):
                 self._malware_scan,
                 self._friends_only,
                 self._censor
-            ) = await get_user_details(self._user_id)
+            ) = user_details
+
             self._resolved = True
 
     @property

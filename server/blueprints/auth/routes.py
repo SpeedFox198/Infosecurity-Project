@@ -52,7 +52,7 @@ async def logout():
 
 @auth_bp.get("/is-logged-in")
 async def is_logged_in():
-    if not await current_user.is_authenticated:
+    if not await current_user.is_authenticated or not await current_user.user_id:
         return {"message": "not authenticated"}, 401
 
     return {
