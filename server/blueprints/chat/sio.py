@@ -12,12 +12,12 @@ sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLO
 
 # TODO(SpeedFox198): remove temp values
 temp_rooms = [
-    "room_1",
-    "room_2",
-    "room_3",
-    "room_4",
-    "room_5"
+    {"icon":"/default.png", "name":"Grp Chat", "room_id":"room_1"},
+    {"icon":"/default.png", "name":"Grp Chat", "room_id":"room_2"},
+    {"icon":"/galaxy.jpg", "name":"Grp Chat", "room_id":"room_3"},
+    {"icon":"/favicon.svg", "name":"Grp Chat", "room_id":"room_4"}
 ]
+
 tmp_msgs = {
     "room_1": [
         {"user_id":"2a3f14df-ef17-4410-baf9-ed6693ac8c5a", "time":"99:99PM", "content":"Lorem 1"},
@@ -137,8 +137,8 @@ async def connect(sid, environ, auth):
     """ Event when client connects to server """
     # print("connected:", sid)
     # Do authentication
-    for room_id in temp_rooms:
-        sio.enter_room(sid, room_id)
+    for room in temp_rooms:
+        sio.enter_room(sid, room["room_id"])
     # print(f"{sid} joined: {sio.rooms(sid)}")
 
     # Send room_ids that client belongs to

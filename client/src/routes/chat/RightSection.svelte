@@ -2,16 +2,16 @@
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { allMsgs, room_id, roomMsgs } from "$lib/stores/messages";
+import { allMsgs, roomMsgs } from "$lib/stores/messages";
+import { room_id, allRooms } from "$lib/stores/rooms";
 import { user_id, allUsers } from "$lib/stores/users";
 
 import Message from "$lib/chat/message/Message.svelte";
-import MessageInput from "./MessageInput.svelte";
+import MessageInput from "$lib/chat/message/MessageInput.svelte";
 
 const namespace = "https://localhost:8443";
 const transports = { transports: ["websocket"] }
 let socket;  // Forward declare socket :)
-let rooms; // TODO(SpeedFox198): use this
 
 onMount(async () => {
   // TODO(SpeedFox198): remove this temp function lmao (and the alert is annoying lol)
@@ -34,8 +34,7 @@ onMount(async () => {
 
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
-    rooms = data;
-    // TODO(SpeedFox198): maybe use stores to update LeftSection
+    allRooms.set(data);  // Set list of rooms
   });
 
   socket.on("receive_message", async data => {
