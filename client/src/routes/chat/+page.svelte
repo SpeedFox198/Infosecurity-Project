@@ -1,13 +1,18 @@
 <svelte:head>
-  <title>Bubbles | {page}</title>
+  <title>Bubbles | {activity}</title>
 </svelte:head>
 
 
 <script>
 import LeftSection from "./LeftSection.svelte";
 import RightSection from "./RightSection.svelte";
+import { page } from "$app/stores";
+import { user_id } from "$lib/stores/users";
 
-let page = "Chat"; // TODO(SpeedFox198): change this later lmao
+let activity = "Chat"; // TODO(SpeedFox198): make this change according to chat u are at :)
+
+// Set user_id according to cookie data
+user_id.set($page.data.user.user_id);
 
 </script>
 

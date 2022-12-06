@@ -14,17 +14,6 @@ const transports = { transports: ["websocket"] }
 let socket;  // Forward declare socket :)
 
 onMount(async () => {
-  // TODO(SpeedFox198): remove this temp function lmao (and the alert is annoying lol)
-  (async () => {
-    const x = prompt("Enter username:", "bob");
-    if (x == "bob") {
-      user_id.set("2a3f14df-ef17-4410-baf9-ed6693ac8c5a");
-    }
-    else {
-      user_id.set("ac4528d0-98f3-41a3-9516-03381f76c374");
-    }
-  })();
-
   // SocketIO instance
   socket = io(namespace, transports);
 
