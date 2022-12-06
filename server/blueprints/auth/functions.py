@@ -32,7 +32,7 @@ async def get_location_from_ip(ip_address: str) -> str:
             if data["status"] == "fail":
                 return unknown_country
 
-            return f"{data['country']}, {data['regionName']}"
+            return f"{data['regionName']}, {data['country']}"
 
 
 async def add_logged_in_device(sql_session, device_id: str, user_id: str, request: quart.Request) -> None:
@@ -49,7 +49,7 @@ async def add_logged_in_device(sql_session, device_id: str, user_id: str, reques
         await sql_session.commit()
     except SQLAlchemyError as err:
         await sql_session.rollback()
-        raise err
+        print(err)
 
 
 async def remove_logged_in_device(device_id: str, user_id: str) -> None:
@@ -60,4 +60,4 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> None:
             await session.commit()
         except SQLAlchemyError as err:
             await session.rollback()
-            raise err
+            print(err)
