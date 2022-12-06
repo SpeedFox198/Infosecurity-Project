@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from quart import Blueprint, request
 from quart_auth import (
     login_user,
@@ -34,16 +36,17 @@ async def login(data: LoginData):
         if not user:
             return {"message": "invalid credentials"}, 401
 
-        authed_user = AuthedUser(user.user_id)
-        await add_logged_in_device(session, authed_user.device_id, user.user_id, request)
-        login_user(authed_user)
+        device_id = str(uuid4())
+        await add_logged_in_device(session, device_id, user.user_id, request)
+        login_user(AuthedUser(f"{user.user_id}.{device_id}"))
         return {"message": "login success"}, 200
 
 
 @auth_bp.post("/logout")
 @login_required
 async def logout():
-    await remove_logged_in_device(current_user.device_id, current_user.auth_id)
+    user_id = current_user.auth_id.split(".")[0]
+    await remove_logged_in_device(current_user.device_id, user_id)
     logout_user()
     return {"message": "successful logout"}, 200
 
@@ -53,9 +56,10 @@ async def is_logged_in():
     if not await current_user.is_authenticated:
         return {"message": "not authenticated"}, 401
 
+    user_id = current_user.auth_id.split(".")[0]
     return {
-        "user_id": current_user.auth_id,
-        "device_id": current_user.device_id,
+        "user_id": user_id,
+        "device_id": await current_user.device_id,
         "username": await current_user.username,
         "email": await current_user.email,
         "avatar": await current_user.avatar,

@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from quart_auth import AuthUser
 
 from db_access.user import get_user_details
@@ -16,7 +14,7 @@ class AuthedUser(AuthUser):
         self._malware_scan = None
         self._friends_only = None
         self._censor = None
-        self.device_id = str(uuid4())
+        self._device_id = None
 
     async def _resolve(self):
         if not self._resolved:
@@ -28,13 +26,19 @@ class AuthedUser(AuthUser):
                 self._malware_scan,
                 self._friends_only,
                 self._censor
-            ) = await get_user_details(self.auth_id)
+            ) = await get_user_details(self.auth_id.split(".")[0])
+            self._device_id = self.auth_id.split(".")[1]
             self._resolved = True
 
     @property
     async def username(self):
         await self._resolve()
         return self._username
+
+    @property
+    async def device_id(self):
+        await self._resolve()
+        return self._device_id
 
     @property
     async def email(self):
