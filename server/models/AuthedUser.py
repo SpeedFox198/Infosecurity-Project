@@ -7,6 +7,8 @@ class AuthedUser(AuthUser):
     def __init__(self, auth_id):
         super().__init__(auth_id)
         self._resolved = False
+        self._user_id = None
+        self._device_id = None
         self._username = None
         self._email = None
         self._avatar = None
@@ -14,10 +16,11 @@ class AuthedUser(AuthUser):
         self._malware_scan = None
         self._friends_only = None
         self._censor = None
-        self._device_id = None
 
     async def _resolve(self):
         if not self._resolved:
+            self._user_id, self._device_id = self.auth_id.split(".")
+
             (
                 self._username,
                 self._email,
@@ -26,19 +29,23 @@ class AuthedUser(AuthUser):
                 self._malware_scan,
                 self._friends_only,
                 self._censor
-            ) = await get_user_details(self.auth_id.split(".")[0])
-            self._device_id = self.auth_id.split(".")[1]
+            ) = await get_user_details(self._user_id)
             self._resolved = True
 
     @property
-    async def username(self):
+    async def user_id(self):
         await self._resolve()
-        return self._username
+        return self._user_id
 
     @property
     async def device_id(self):
         await self._resolve()
         return self._device_id
+
+    @property
+    async def username(self):
+        await self._resolve()
+        return self._username
 
     @property
     async def email(self):

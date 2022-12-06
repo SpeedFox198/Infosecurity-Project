@@ -45,8 +45,7 @@ async def login(data: LoginData):
 @auth_bp.post("/logout")
 @login_required
 async def logout():
-    user_id = current_user.auth_id.split(".")[0]
-    await remove_logged_in_device(current_user.device_id, user_id)
+    await remove_logged_in_device(current_user.device_id, current_user.user_id)
     logout_user()
     return {"message": "successful logout"}, 200
 
@@ -56,9 +55,8 @@ async def is_logged_in():
     if not await current_user.is_authenticated:
         return {"message": "not authenticated"}, 401
 
-    user_id = current_user.auth_id.split(".")[0]
     return {
-        "user_id": user_id,
+        "user_id": await current_user.user_id,
         "device_id": await current_user.device_id,
         "username": await current_user.username,
         "email": await current_user.email,
