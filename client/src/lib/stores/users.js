@@ -4,7 +4,7 @@ import { writable } from "svelte/store";
 export const user_id = (() => {
   // TODO(SpeedFox198): remove this temp value
   const { subscribe, set } = writable("2a3f14df-ef17-4410-baf9-ed6693ac8c5a");
-  return { subscribe, set }
+  return { subscribe, set };
 })();
 
 
@@ -31,5 +31,5 @@ export const allUsers = (() => {
     });
   }
 
-  return { subscribe, addUser }
+  return { subscribe, addUser };
 })();

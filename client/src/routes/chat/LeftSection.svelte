@@ -1,16 +1,9 @@
 <script>
-import { room_id } from "$lib/stores/messages";
+import { room_id, allRooms } from "$lib/stores/rooms";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
 
-// TODO(SpeedFox198): remove temp values
-let grpList = [
-  {icon:"/default.png", name:"Grp Chat", room_id:"room_1"},
-  {icon:"/default.png", name:"Grp Chat", room_id:"room_2"},
-  {icon:"/galaxy.jpg", name:"Grp Chat", room_id:"room_3"},
-  {icon:"/favicon.svg", name:"Grp Chat", room_id:"room_4"}
-];
 
 async function selectGrp(new_room) {
   room_id.set(new_room);
@@ -28,7 +21,7 @@ async function selectGrp(new_room) {
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
-    {#each grpList as grp}
+    {#each $allRooms as grp}
       <Group grp={grp} selectGrp={selectGrp}/>
     {/each}
   </div>

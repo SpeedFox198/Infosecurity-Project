@@ -39,4 +39,3 @@ async def user_details():
         "username": user[0],
         "avatar": user[1]
     }
-

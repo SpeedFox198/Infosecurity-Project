@@ -16,6 +16,12 @@ async def main():
 
     async with async_session() as session:
         async with session.begin():
+            # bob = User("bob", "bob@gmail.com", "bob123")
+            # alice = User("alice", "alice@yahoo.com", "alice456")
+            # bob.user_id = "2a3f14df-ef17-4410-baf9-ed6693ac8c5a"
+            # alice.user_id = "ac4528d0-98f3-41a3-9516-03381f76c374"
+            # session.add(bob)
+            # session.add(alice)
             session.add(User("bob", "bob@gmail.com", "bob123"))
             session.add(User("alice", "alice@yahoo.com", "alice456"))
 

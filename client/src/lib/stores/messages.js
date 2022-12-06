@@ -1,4 +1,5 @@
 import { derived, writable } from "svelte/store";
+import { room_id } from "./rooms";
 
 export const allMsgs = (() => {
   const { subscribe, update } = writable({});
@@ -29,20 +30,14 @@ export const allMsgs = (() => {
   return { subscribe, addMsg };
 })();
 
-
-export const room_id = (() => {
-  // TODO(SpeedFox198): remove this temp value
-  const { subscribe, set } = writable("");
-  return { subscribe, set }
-})();
-
-
 // TODO(SpeedFox198): consider removing this later
+// especially since it seems like it's only used once
+// and if it's removed, rmb to remove the import
 export const roomMsgs = derived(
   [allMsgs, room_id],
   ([$allMsgs, $room_id]) => {
     // Get room messages array
-    let roomMsgs = $allMsgs[$room_id]
+    let roomMsgs = $allMsgs[$room_id];
 
     // If room messages array does not exist
     if (!roomMsgs) roomMsgs = [];
