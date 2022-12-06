@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from quart import Blueprint, request
 from quart_auth import (
     login_user,
@@ -10,9 +12,7 @@ from quart_schema import validate_request
 import sqlalchemy as sa
 
 from .functions import (
-    add_logged_in_device,
-    get_location_from_ip,
-    get_user_agent_data
+    add_logged_in_device, remove_logged_in_device,
 )
 from db_access.globals import async_session
 from models import (
@@ -36,16 +36,16 @@ async def login(data: LoginData):
         if not user:
             return {"message": "invalid credentials"}, 401
 
-        login_user(AuthedUser(user.user_id))
-        location = await get_location_from_ip(request.remote_addr)
-        browser, os = await get_user_agent_data(request.user_agent.string)
-
+        device_id = str(uuid4())
+        await add_logged_in_device(session, device_id, user.user_id, request)
+        login_user(AuthedUser(f"{user.user_id}.{device_id}"))
         return {"message": "login success"}, 200
 
 
 @auth_bp.post("/logout")
 @login_required
 async def logout():
+    await remove_logged_in_device(current_user.device_id, current_user.user_id)
     logout_user()
     return {"message": "successful logout"}, 200
 
@@ -56,7 +56,8 @@ async def is_logged_in():
         return {"message": "not authenticated"}, 401
 
     return {
-        "user_id": current_user.auth_id,
+        "user_id": await current_user.user_id,
+        "device_id": await current_user.device_id,
         "username": await current_user.username,
         "email": await current_user.email,
         "avatar": await current_user.avatar,

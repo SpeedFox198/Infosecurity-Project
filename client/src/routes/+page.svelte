@@ -1,6 +1,6 @@
 <script>
-  import Login from "$lib/login.svelte"
-  import Signup from "$lib/signup.svelte"
+  import Login from "$lib/auth/login.svelte"
+  import Signup from "$lib/auth/signup.svelte"
 
   let signupDisplay = false
 
