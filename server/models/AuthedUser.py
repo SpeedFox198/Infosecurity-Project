@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from quart_auth import AuthUser
 
 from db_access.user import get_user_details
@@ -14,6 +16,7 @@ class AuthedUser(AuthUser):
         self._malware_scan = None
         self._friends_only = None
         self._censor = None
+        self.device_id = str(uuid4())
 
     async def _resolve(self):
         if not self._resolved:

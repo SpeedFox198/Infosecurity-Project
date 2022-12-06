@@ -10,9 +10,7 @@ from quart_schema import validate_request
 import sqlalchemy as sa
 
 from .functions import (
-    add_logged_in_device,
-    get_location_from_ip,
-    get_user_agent_data
+    add_logged_in_device, remove_logged_in_device,
 )
 from db_access.globals import async_session
 from models import (
@@ -36,16 +34,16 @@ async def login(data: LoginData):
         if not user:
             return {"message": "invalid credentials"}, 401
 
-        login_user(AuthedUser(user.user_id))
-        location = await get_location_from_ip(request.remote_addr)
-        browser, os = await get_user_agent_data(request.user_agent.string)
-
+        authed_user = AuthedUser(user.user_id)
+        await add_logged_in_device(session, authed_user.device_id, user.user_id, request)
+        login_user(authed_user)
         return {"message": "login success"}, 200
 
 
 @auth_bp.post("/logout")
 @login_required
 async def logout():
+    await remove_logged_in_device(current_user.device_id, current_user.auth_id)
     logout_user()
     return {"message": "successful logout"}, 200
 
@@ -57,6 +55,7 @@ async def is_logged_in():
 
     return {
         "user_id": current_user.auth_id,
+        "device_id": current_user.device_id,
         "username": await current_user.username,
         "email": await current_user.email,
         "avatar": await current_user.avatar,
