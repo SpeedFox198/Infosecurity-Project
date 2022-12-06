@@ -20,5 +20,13 @@ export const handle = async ({event, resolve}) => {
     }
  
     event.locals.user = userResponse    
-    return await resolve(event)
+    return await resolve(event)    
+}
+
+export async function handleFetch({ event, request, fetch }) {
+    if (request.url.startsWith("https://localhost:8443/") || request.url.startsWith("https://127.0.0.1:8443/")) {
+        request.headers.set('Cookie', `QUART_AUTH=${event.cookies.get("QUART_AUTH")}`)
+    }
+    
+    return fetch(request)
 }
