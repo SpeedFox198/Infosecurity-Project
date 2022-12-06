@@ -21,13 +21,18 @@ async def get_devices():
     async with async_session() as session:
         statement = sa.select(Device).where(Device.user_id == await current_user.user_id)
         results = await session.execute(statement)
-        devices = results.scalars()
+        device_list = results.scalars()
 
-    return [
+    # the results are unsorted because of async (maybe)
+    unsorted_device_list = [
         {
-            "time": int(time.mktime(device.time.timetuple())),
+            "id": device.device_id,
+            "time": int(time.mktime(device.time.timetuple())),  # unix time
             "location": device.location,
             "os": device.os,
             "browser": device.browser
-        } for device in devices
+        }
+        for device in device_list
     ]
+    # sort by time
+    return sorted(unsorted_device_list, key=lambda i: i["time"], reverse=True)
