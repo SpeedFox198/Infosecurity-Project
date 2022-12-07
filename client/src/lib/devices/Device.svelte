@@ -6,6 +6,7 @@
   let removeError
   
   const removeDevice = async () => {
+    //TODO(br1ght) figure out a way to refresh/update after click
     const response = await fetch(`https://localhost:8443/api/devices/${device.id}`, {
       method: "DELETE",
       credentials: "include"
