@@ -3,20 +3,20 @@
 	export let currentDeviceId;
 
 	let time = new Date(device.time * 1000).toLocaleString('en-SG'); // JS uses milliseconds instead of seconds
-  let removeError
-  
-  const removeDevice = async () => {
-    //TODO(br1ght) figure out a way to refresh/update after click
-    const response = await fetch(`https://localhost:8443/api/devices/${device.id}`, {
-      method: "DELETE",
-      credentials: "include"
-    })
-    const result = await response.json()
-    
-    if (!response.ok) {
-      removeError = result.message
-    }
-  }
+	let removeError;
+
+	const removeDevice = async () => {
+		//TODO(br1ght) figure out a way to refresh/update after click
+		const response = await fetch(`https://localhost:8443/api/devices/${device.id}`, {
+			method: 'DELETE',
+			credentials: 'include'
+		});
+		const result = await response.json();
+
+		if (!response.ok) {
+			removeError = result.message;
+		}
+	};
 </script>
 
 <div class="border-bottom border-dark device-box box-width p-3 ">
