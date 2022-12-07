@@ -38,6 +38,3 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> str:
             await session.rollback()
             print(err)
             return "fail"
-
-
-
