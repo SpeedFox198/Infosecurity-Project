@@ -1,7 +1,7 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, LoginData, User
+from models import AuthedUser, User
 
 
 ASYNC_MODE = "asgi"

@@ -1,13 +1,5 @@
-from datetime import datetime
-
-import quart
-from sqlalchemy.exc import SQLAlchemyError
-import sqlalchemy as sa
 from ua_parser import user_agent_parser
 import aiohttp
-
-from db_access.globals import async_session
-from models import Device
 
 
 async def get_user_agent_data(user_agent: str) -> tuple[str, str]:
@@ -35,29 +27,3 @@ async def get_location_from_ip(ip_address: str) -> str:
             return f"{data['regionName']}, {data['country']}"
 
 
-async def add_logged_in_device(sql_session, device_id: str, user_id: str, request: quart.Request) -> None:
-    browser, os = await get_user_agent_data(request.user_agent.string)
-    location = await get_location_from_ip(request.remote_addr)
-    statement = sa.insert(Device).values(device_id=device_id,
-                                         user_id=user_id,
-                                         time=datetime.now(),
-                                         location=location,
-                                         os=os,
-                                         browser=browser)
-    try:
-        await sql_session.execute(statement)
-        await sql_session.commit()
-    except SQLAlchemyError as err:
-        await sql_session.rollback()
-        print(err)
-
-
-async def remove_logged_in_device(device_id: str, user_id: str) -> None:
-    with async_session() as session:
-        statement = sa.delete(Device).where((Device.device_id == device_id) & (Device.user_id == user_id))
-        try:
-            await session.execute(statement)
-            await session.commit()
-        except SQLAlchemyError as err:
-            await session.rollback()
-            print(err)

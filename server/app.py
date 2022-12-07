@@ -2,6 +2,8 @@ import asyncio
 
 import quart_auth
 import socketio
+from quart_schema import QuartSchema
+
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
 from blueprints.chat import sio
@@ -14,6 +16,7 @@ from quart_cors import cors
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
+QuartSchema(app)
 
 
 auth_manager = quart_auth.AuthManager()

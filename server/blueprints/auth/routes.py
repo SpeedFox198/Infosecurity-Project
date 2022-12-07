@@ -7,27 +7,25 @@ from quart_auth import (
     login_required,
     current_user
 )
-from quart_schema import validate_request
+from quart_schema import validate_request, validate_response
 
 import sqlalchemy as sa
 
-from .functions import (
-    add_logged_in_device, remove_logged_in_device,
-)
+from db_access.device import remove_logged_in_device, add_logged_in_device
 from db_access.globals import async_session
 from models import (
     User,
     AuthedUser,
-    LoginData
 )
-
+from models.request_data import LoginBody
+from models.response_data import UserData
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
 
 @auth_bp.post("/login")
-@validate_request(LoginData)
-async def login(data: LoginData):
+@validate_request(LoginBody)
+async def login(data: LoginBody):
     async with async_session() as session:
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
@@ -51,18 +49,17 @@ async def logout():
 
 
 @auth_bp.get("/is-logged-in")
+@validate_response(UserData)
 async def is_logged_in():
     if not await current_user.is_authenticated or not await current_user.user_id:
         return {"message": "not authenticated"}, 401
 
-    return {
-        "user_id": await current_user.user_id,
-        "device_id": await current_user.device_id,
-        "username": await current_user.username,
-        "email": await current_user.email,
-        "avatar": await current_user.avatar,
-        "dark_mode": await current_user.dark_mode,
-        "malware_scan": await current_user.malware_scan,
-        "friends_only": await current_user.friends_only,
-        "censor": await current_user.censor
-    }
+    return UserData(await current_user.user_id,
+                    await current_user.device_id,
+                    await current_user.username,
+                    await current_user.email,
+                    await current_user.avatar,
+                    await current_user.dark_mode,
+                    await current_user.malware_scan,
+                    await current_user.friends_only,
+                    await current_user.censor)

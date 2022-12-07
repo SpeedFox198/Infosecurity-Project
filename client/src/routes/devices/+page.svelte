@@ -24,8 +24,9 @@
     {#if errors}
       <p class="text-danger">{errors}</p>
     {/if}
+    
     {#each devices as device}
-      <Device {device} current_device_id={currentUser.device_id} />
+      <Device {device} currentDeviceId={currentUser.device_id}/>
     {/each}
   </div> 
 </main>
