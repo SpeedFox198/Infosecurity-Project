@@ -1,6 +1,5 @@
 <script>
   export let toggleSignupOn
-
   let loginError
   let username = ""
   let password = ""
@@ -27,7 +26,9 @@
   
 </script>
 
-
+<svelte:head>
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf"></script>
+</svelte:head>
 
 <div class="login card rounded-4 shadow">
   <div class=" p-5 pb-4 border-bottom-0">
