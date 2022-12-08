@@ -13,7 +13,6 @@ from db_access.globals import async_session
 from models import (
     User,
     AuthedUser,
-    LoginData
 )
 
 

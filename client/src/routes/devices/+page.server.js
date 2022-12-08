@@ -7,7 +7,7 @@ export async function load({ locals, fetch }) {
     }
    
     try {
-        const deviceRes = await fetch("https://127.0.0.1:8443/api/device/", {
+        const deviceRes = await fetch("https://127.0.0.1:8443/api/devices/", {
             credentials: "include"
         })
         const devicesData = await deviceRes.json()
@@ -20,7 +20,7 @@ export async function load({ locals, fetch }) {
     
         return {
             errors: null,
-            devices: devicesData
+            devices: devicesData.devices
         }
     } catch (error) {
         console.error(error)
