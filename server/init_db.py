@@ -1,6 +1,5 @@
 import asyncio
 
-from sqlalchemy import select
 from models import *
 from db_access.globals import *
 
@@ -24,14 +23,6 @@ async def main():
             # session.add(alice)
             session.add(User("bob", "bob@gmail.com", "bob123"))
             session.add(User("alice", "alice@yahoo.com", "alice456"))
-
-
-async def query():
-    async with async_session() as session:
-        stmt = select(User)
-        result = await session.execute(stmt)
-        for item in result.scalars():
-            print(item.username)
 
 
 asyncio.run(main())

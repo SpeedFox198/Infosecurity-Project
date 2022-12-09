@@ -46,6 +46,11 @@
 			</button>
 		</div>
 	</div>
+	<div class="flex-row d-flex">
+		{#if (removeError)}
+			<span class="text-danger">{removeError}</span>	
+		{/if}
+	</div>
 </div>
 
 <style>
