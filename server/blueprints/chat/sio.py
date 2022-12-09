@@ -1,11 +1,7 @@
 import socketio
-import sqlalchemy as sa
 from db_access.globals import async_session
-# TODO(SpeedFox198): remove if uneeded
-# from models import AuthedUser, LoginData, User
-from datetime import datetime
+from models import Message
 from utils import to_unix
-
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -151,27 +147,45 @@ async def connect(sid, environ, auth):
 @sio.event
 async def disconnect(sid):
     """ Event when client disconnects from server """
+    # TODO(SpeedFox198): remove if unused
     # print("disconnected:", sid)
 
 
+# TODO(SpeedFox198): authenticate and verify msg (user, and format)
 @sio.event
 async def send_message(sid, data):
     print(f"Received {data}")  # TODO(SpeedFox198): change to log later
-    # TODO(SpeedFox198):
-    # Change temp things to actual
-    # Get time using python maybe?
-    # Change format to getting those using another api (<- ??? what was i refering to b4?)
-    time = datetime.now()
 
+    # Create message object
+    message = Message(
+        data["user_id"],
+        data["room_id"],
+        data["content"],
+        data["reply_to"],
+        data["type"]
+    )
+
+    # Insert object into database
+    async with async_session() as session:
+        async with session.begin():
+            session.add(message)
+
+    # Forward messages to other clients in same room
     await sio.emit("receive_message", {
-        "room_id": data["room_id"],
-        "user_id": data["user_id"],
-        "time": to_unix(time),
-        "content": data["content"],
+        "message_id": message.message_id,
+        "room_id": message.room_id,
+        "user_id": message.user_id,
+        "time": to_unix(message.time),
+        "content": message.content,
     }, room=data["room_id"], skip_sid=sid)
 
-    # TODO(SpeedFox198): consider if you want sent receipt
-    # await sio.emit("sent_success", data, to=sid)
+    # Return timestamp and message_id to client
+    await sio.emit("sent_success", {
+        "message_id": message.message_id,
+        "room_id": message.room_id,
+        "temp_id": data["message_id"],
+        "time": to_unix(message.time)
+    }, to=sid)
 
 
 @sio.event

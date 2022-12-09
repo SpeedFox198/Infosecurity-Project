@@ -27,7 +27,20 @@ export const msgStorage = (() => {
     });
   }
 
-  return { subscribe, updateMsg };
+  async function changeId(temp_id, message_id, time) {
+    update(storage => {
+      // Change temp_id to message_id
+      storage[message_id] = storage[temp_id];
+      delete storage[temp_id];
+
+      // Add time attribute
+      storage[message_id].time = time;
+
+      return storage;
+    });
+  }
+
+  return { subscribe, updateMsg, changeId };
 })();
 
 
@@ -57,5 +70,27 @@ export const allMsgs = (() => {
     });
   }
 
-  return { subscribe, addMsg };
+  async function initRooms(rooms) {
+    update(storage => {
+      for (let i; i < rooms.length; i++) {
+        storage[rooms[i].room_id] = [];
+      }
+      return storage;
+    });
+  }
+
+  async function changeId(temp_id, message_id, room_id) {
+    update(storage => {
+
+      // Get index of temp_id in storage
+      const index = storage[room_id].indexOf(temp_id);
+
+      // Replace temp_id with message_id
+      if (index > -1) storage[room_id][index] = message_id;
+
+      return storage;
+    });
+  }
+
+  return { subscribe, addMsg, initRooms, changeId };
 })();

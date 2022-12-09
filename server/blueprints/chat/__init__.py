@@ -1,1 +1,1 @@
-from .sio import *
+from .sio import sio

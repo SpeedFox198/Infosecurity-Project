@@ -9,11 +9,13 @@ import { user_id, allUsers } from "$lib/stores/users";
 import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 
-$: roomMsgs = $allMsgs[$room_id] || [];
+
+$: roomMsgs = ($allMsgs || {})[$room_id] || [];
 
 const namespace = "https://localhost:8443";
 const transports = { transports: ["websocket"] };
 let socket;  // Forward declare socket :)
+
 
 onMount(async () => {
   // SocketIO instance
@@ -26,10 +28,17 @@ onMount(async () => {
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
     allRooms.set(data);  // Set list of rooms
+    allMsgs.initRooms(data)  // Initialise empty arrays for rooms
   });
 
-  socket.on("receive_message", async data => {
-    addMsg(data);
+  socket.on("receive_message", addMsg);
+
+  socket.on("sent_success", async data => {
+    const { message_id, temp_id, time, room_id } = data;  // Unpack data
+
+    // Update time and temp_id to message_id for both msgStorage and allMsgs
+    msgStorage.changeId(temp_id, message_id, time);
+    allMsgs.changeId(temp_id, message_id, room_id);
   });
 
   socket.on("receive_room_messages", async data => {
@@ -55,8 +64,8 @@ async function sendMsg(event) {
   };
 
   // Emit message to server and add message to client stores
+  await addMsg(msg);
   socket.emit("send_message", msg);
-  addMsg(msg);
 }
 
 // Get latest 20n+1 to 20n+20 messages from room
@@ -93,8 +102,8 @@ async function addMsg(data) {
   const avatar = user.avatar;
   const username = user.username;
   const msg = { sent, username, avatar, time, content, reply_to, type };
-  msgStorage.updateMsg(message_id, msg);
-  allMsgs.addMsg(message_id, room_id);
+  await msgStorage.updateMsg(message_id, msg);
+  await allMsgs.addMsg(message_id, room_id);
 }
 </script>
 
