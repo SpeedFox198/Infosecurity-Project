@@ -38,7 +38,7 @@ app.secret_key = "secret123"
 
 @app.before_request
 async def before_request():
-    if not current_user.is_authenticated:
+    if not await current_user.is_authenticated:
         return
 
     valid_device = await get_device(await current_user.user_id, await current_user.device_id)

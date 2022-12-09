@@ -1,19 +1,17 @@
-from app import app
-
-logger = app.logger
+import logging
 
 
 async def log_warning(message: str) -> None:
-    logger.warning(message)
+    logging.warning(message)
 
 
 async def log_error(message: str) -> None:
-    logger.error(message)
+    logging.error(message)
 
 
 async def log_info(message: str) -> None:
-    logger.info(message)
+    logging.info(message)
 
 
 async def log_exception() -> None:
-    logger.exception()
+    logging.exception("Exception happened")
