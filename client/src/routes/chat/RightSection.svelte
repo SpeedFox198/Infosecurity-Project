@@ -2,12 +2,14 @@
 import { onMount } from "svelte";
 import { io } from "socket.io-client";
 
-import { allMsgs, roomMsgs } from "$lib/stores/messages";
+import { msgStorage, allMsgs, getTempId } from "$lib/stores/messages";
 import { room_id, allRooms } from "$lib/stores/rooms";
 import { user_id, allUsers } from "$lib/stores/users";
 
 import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
+
+$: roomMsgs = $allMsgs[$room_id] || [];
 
 const namespace = "https://localhost:8443";
 const transports = { transports: ["websocket"] };
@@ -27,27 +29,34 @@ onMount(async () => {
   });
 
   socket.on("receive_message", async data => {
-    addMsg(data.room_id, data.user_id, data.time, data.content);
+    addMsg(data);
   });
 
   socket.on("receive_room_messages", async data => {
-    allMsgs.addMsg(data.room_messages, data.room_id, true);
+    msgStorage.updateMsg(data.message_id, data.room_messages);
+    allMsgs.addMsg(data.message_id, data.room_id, true);
   });
 });
 
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
-  let content = event.detail;
-  socket.emit("send_message", {
+  const content = event.detail;
+  const message_id = getTempId();  // Temporary id for referencing message
+  const msg = {
+    message_id,
     room_id: $room_id,
     user_id: $user_id,
-    // time: "99:99PM", // TODO(SpeedFox198): prob use unix time here
+    time: Math.floor(Date.now()/1000),
     content,
-    reply_to: null, // reply_to
+    // TODO(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
+    reply_to: null,
     type: "text" // <type> ENUM(image, document, video, text)
-  });
-  addMsg($room_id, $user_id, Math.floor(Date.now()/1000), content);
+  };
+
+  // Emit message to server and add message to client stores
+  socket.emit("send_message", msg);
+  addMsg(msg);
 }
 
 // Get latest 20n+1 to 20n+20 messages from room
@@ -62,11 +71,11 @@ async function getRoomMsgs(n) {
 async function getUser(user_id) {
   const url = `https://localhost:8443/api/user/${user_id}`;
   const response = await fetch(url);
+  const { username, avatar, message } = await response.json();
+  
   if (!response.ok) {
     throw new Error(message);
   }
-
-  const { username, avatar, message } = await response.json();
 
   let user = { username, avatar };
   allUsers.addUser(user, user_id);
@@ -74,14 +83,18 @@ async function getUser(user_id) {
   return user;
 }
 
-async function addMsg(room_id, user_id_, time, content) {
+async function addMsg(data) {
+  // Unpacking values
+  const { message_id, room_id, time, content, reply_to, type } = data;
+  const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   let user = $allUsers[user_id_];
   if (!user) user = await getUser(user_id_);
   const avatar = user.avatar;
   const username = user.username;
-  const msg = {sent, username, avatar, time, content};
-  allMsgs.addMsg(msg, room_id);
+  const msg = { sent, username, avatar, time, content, reply_to, type };
+  msgStorage.updateMsg(message_id, msg);
+  allMsgs.addMsg(message_id, room_id);
 }
 </script>
 
@@ -100,8 +113,8 @@ async function addMsg(room_id, user_id_, time, content) {
     <!-- Messages Display Section -->
     <div class="chat" on:scroll={()=>null}>
       <div class="my-2"></div>
-      {#each $roomMsgs as msg}
-        <Message msg={msg}/>
+      {#each roomMsgs as message_id}
+        <Message msg={$msgStorage[message_id]}/>
       {/each}
       <div id="anchor"></div>
     </div>

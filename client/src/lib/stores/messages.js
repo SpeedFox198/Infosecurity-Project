@@ -1,10 +1,40 @@
-import { derived, writable } from "svelte/store";
-import { room_id } from "./rooms";
+import { writable } from "svelte/store";
+
+
+// Generates and returns an increasing temp_id
+export const getTempId = (() => {
+  const { update } = writable(0);
+
+  return () => {
+    let n;
+    update(update => {
+      n = update;
+      return n + 1;
+    });
+    return n;
+  }
+})();
+
+
+export const msgStorage = (() => {
+  const { subscribe, update } = writable({});
+
+  // Adds a new message or updates an existing message
+  async function updateMsg(message_id, msg) {
+    update(storage => {
+      storage[message_id] = msg;  // Add new message to storage
+      return storage;
+    });
+  }
+
+  return { subscribe, updateMsg };
+})();
+
 
 export const allMsgs = (() => {
   const { subscribe, update } = writable({});
 
-  async function addMsg (msg, room_id, add_prev) {
+  async function addMsg(message_id, room_id, add_prev) {
     update(storage => {
 
       // Get room messages array
@@ -17,10 +47,10 @@ export const allMsgs = (() => {
       }
 
       if (!add_prev) {  // Add new message to array
-        roomMsgs.push(msg);
+        roomMsgs.push(message_id);
       }
       else {  // Add older(previous) messages to front of array
-        roomMsgs.unshift.apply(msg, roomMsgs);
+        roomMsgs.unshift.apply(message_id, roomMsgs);
       }
 
       return storage;
@@ -29,20 +59,3 @@ export const allMsgs = (() => {
 
   return { subscribe, addMsg };
 })();
-
-// TODO(SpeedFox198): consider removing this later
-// especially since it seems like it's only used once
-// and if it's removed, rmb to remove the import
-export const roomMsgs = derived(
-  [allMsgs, room_id],
-  ([$allMsgs, $room_id]) => {
-    // Get room messages array
-    let roomMsgs = $allMsgs[$room_id];
-
-    // If room messages array does not exist
-    if (!roomMsgs) roomMsgs = [];
-
-    // Return room messages array
-    return roomMsgs;
-  }
-);
