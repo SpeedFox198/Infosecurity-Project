@@ -8,6 +8,7 @@ from db_access.globals import async_session
 import sqlalchemy as sa
 
 from models import Device
+from utils.logging import log_exception
 
 
 async def add_logged_in_device(sql_session, device_id: str, user_id: str, request: quart.Request) -> None:
@@ -22,9 +23,9 @@ async def add_logged_in_device(sql_session, device_id: str, user_id: str, reques
     try:
         await sql_session.execute(statement)
         await sql_session.commit()
-    except SQLAlchemyError as err:
+    except SQLAlchemyError:
         await sql_session.rollback()
-        print(err)
+        await log_exception()
 
 
 async def remove_logged_in_device(device_id: str, user_id: str) -> str:
@@ -34,9 +35,9 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> str:
             await session.execute(statement)
             await session.commit()
             return "success"
-        except SQLAlchemyError as err:
+        except SQLAlchemyError:
             await session.rollback()
-            print(err)
+            await log_exception()
             return "fail"
 
 
@@ -51,6 +52,6 @@ async def get_device(user_id: str, device_id: str):
         try:
             result = await session.execute(statement)
             return result.scalars().first()
-        except SQLAlchemyError as err:
+        except SQLAlchemyError:
             await session.rollback()
-            print(err)
+            await log_exception()
