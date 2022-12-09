@@ -40,11 +40,13 @@
 				<span>Location: {device.location}</span>
 			</div>
 		</div>
-		<div class="d-flex justify-content-center">
-			<button class="btn" title="Log out device" on:click={removeDevice}>
-				<i class="fa-solid fa-xmark fs-1" />
-			</button>
-		</div>
+		{#if !(currentDeviceId === device.id)}
+			<div class="d-flex justify-content-center">
+				<button class="btn" title="Log out device" on:click={removeDevice}>
+					<i class="fa-solid fa-xmark fs-1" />
+				</button>
+			</div>
+		{/if}
 	</div>
 	<div class="flex-row d-flex">
 		{#if (removeError)}
