@@ -1,6 +1,6 @@
 <script>
+  import {onMount} from 'svelte'
   export let toggleSignupOn
-
   let loginError
   let username = ""
   let password = ""
@@ -25,9 +25,20 @@
     location.replace("/chat")
   }
   
+  onMount(() => {
+    grecaptcha.enterprise.ready(async () => {
+      const token = await grecaptcha.enterprise.execute('6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf', {action: 'homepage'});
+      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
+      // reCAPTCHA Enterprise to the end user's browser.
+      // This token must be validated by creating an assessment.
+      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
+    });
+  });
 </script>
 
-
+<svelte:head>
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf"></script>
+</svelte:head>
 
 <div class="login card rounded-4 shadow">
   <div class=" p-5 pb-4 border-bottom-0">

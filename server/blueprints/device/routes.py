@@ -1,5 +1,3 @@
-import time
-
 from quart import Blueprint
 import sqlalchemy as sa
 from quart_auth import (
@@ -12,6 +10,7 @@ from db_access.device import remove_logged_in_device
 from db_access.globals import async_session
 from models import Device
 from models.response_data import DeviceListData, DeviceData
+from utils import to_unix
 
 device_bp = Blueprint("devices", __name__, url_prefix="/devices")
 
@@ -28,7 +27,7 @@ async def get_devices():
     device_list = DeviceListData([
         DeviceData(
             device.device_id,
-            int(time.mktime(device.time.timetuple())),
+            to_unix(device.time),
             device.location,
             device.os,
             device.browser

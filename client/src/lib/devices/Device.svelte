@@ -41,7 +41,7 @@
 			</div>
 		</div>
 		<div class="d-flex justify-content-center">
-			<button class="btn" title="Remove device" on:click={removeDevice}>
+			<button class="btn" title="Log out device" on:click={removeDevice}>
 				<i class="fa-solid fa-xmark fs-1" />
 			</button>
 		</div>
