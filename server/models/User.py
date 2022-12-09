@@ -6,6 +6,8 @@ from sqlalchemy import (
     CHAR,
     Boolean
 )
+from sqlalchemy.orm import relationship
+
 from db_access.globals import Base
 
 
@@ -27,3 +29,5 @@ class User(Base):
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
     censor = Column(Boolean, default=True)
+
+    devices = relationship("Device", back_populates="user")

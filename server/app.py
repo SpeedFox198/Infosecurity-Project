@@ -14,7 +14,7 @@ from blueprints.auth import auth_bp
 from blueprints.chat import sio
 from blueprints.device import device_bp
 from blueprints.user import user_bp
-from db_access.sessions import get_device
+from db_access.device import get_device
 from models import AuthedUser
 from quart import Quart
 from quart_cors import cors
@@ -38,7 +38,7 @@ app.secret_key = "secret123"
 
 @app.before_request
 async def before_request():
-    if not current_user.is_authenticated:
+    if not await current_user.is_authenticated:
         return
 
     valid_device = await get_device(await current_user.user_id, await current_user.device_id)
