@@ -14,7 +14,7 @@ from blueprints.auth import auth_bp
 from blueprints.chat import sio
 from blueprints.device import device_bp
 from blueprints.user import user_bp
-from db_access.sessions import get_device
+from db_access.device import get_device
 from models import AuthedUser
 from quart import Quart
 from quart_cors import cors

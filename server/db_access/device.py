@@ -38,3 +38,19 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> str:
             await session.rollback()
             print(err)
             return "fail"
+
+
+async def get_device(user_id: str, device_id: str):
+    async with async_session() as session:
+        statement = sa.select(Device).where(
+            (Device.user_id == user_id)
+            &
+            (Device.device_id == device_id)
+        )
+
+        try:
+            result = await session.execute(statement)
+            return result.scalars().first()
+        except SQLAlchemyError as err:
+            await session.rollback()
+            print(err)

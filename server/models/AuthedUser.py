@@ -21,7 +21,7 @@ class AuthedUser(AuthUser):
         if not self._resolved:
             try:
                 self._user_id, self._device_id = self.auth_id.split(".")
-            except:
+            except (ValueError, AttributeError):
                 self._user_id, self._device_id = ("",)*2
 
             user_details = await get_user_details(self._user_id) or ("",)*7
