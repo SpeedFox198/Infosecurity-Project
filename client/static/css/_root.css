@@ -1,14 +1,15 @@
 :root {
     /* Colours */
-    --black: #000000;
+    --black: #202223;
+    --grey-dark: #54585b;
+    --grey-shadow: #d2d7e8;
+    --grey: #e1e5f2;
+    --white: #ffffff;
     --primary-dark: #022b3a;
     --primary-shadow: #1a6f80;
     --primary: #1f7a8c;
-    --primary-light: #bfdbf7;
     --primary-light-shadow: #b1cfed;
-    --grey: #e1e5f2;
-    --grey-shadow: #d2d7e8;
-    --white: #ffffff;
+    --primary-light: #bfdbf7;
 
     /* Misc */
     --left-bar-length: 25rem;

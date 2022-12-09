@@ -1,21 +1,33 @@
 <script>
 export let msg;
+
+const padZero = t => t < 10 ? "0" + t : t;
+
+const t = new Date(msg.time * 1000);
+let hours = t.getHours();
+let ampm = hours >= 12 ? "PM" : "AM";
+hours = hours % 12;
+hours = hours ? hours : 12;
+
+// const time = `${padZero(t.getDate())}/${padZero(t.getMonth())}/${t.getFullYear()} ${hours}:${padZero(t.getMinutes())} ${ampm}`;
+const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
 </script>
 
 <!-- Messages Bubble -->
-<div class="message d-flex {msg.sent ? "sent": ""}">
-  <div class="info-section m{msg.sent ? "s": "e"}-2">
+<div class="message d-flex {msg.sent ? "sent" : ""}">
+  <div class="info-section m{msg.sent ? "s" : "e"}-2">
     <img class="rounded-circle" src={msg.avatar} alt="User Avatar">
-    <span class="time">{msg.time}</span>
   </div>
-  <div class="bubble">
-    <!-- {#if !msg.sent} --> <!-- TODO(SpeedFox198): rmb to change this! -->
-      <div class="username">{msg.username}</div>
-    <!-- {/if} -->
-    <div class="content text-wrap text-break">
-      {msg.content}
+    <div class="bubble mt-auto">
+      {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
+        <div class="username">{msg.username}</div>
+      {/if}
+      <span class="text-wrap text-break">
+        {msg.content}
+      </span>
+      <span class="hidden" aria-hidden="true">{time}</span>
+      <span class="time d-block">{time}</span>
     </div>
-  </div>
 </div>
 
 
@@ -26,11 +38,23 @@ export let msg;
   overflow-anchor: none;
 }
 
+.username {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
 .bubble {
   max-width: 75%;
-  padding: 0.5rem 0.6rem 0.5rem 0.8rem;
+  padding: 0.5rem 0.6rem 0.65rem 0.8rem;
   background-color: var(--grey);
-  border-radius: 1rem;
+  border-radius: 1.1rem;
+  text-align: left;
+}
+
+.sent .bubble {
+  background-color: var(--primary);
+  padding: 0.5rem 0.7rem 0.65rem 0.6rem;
+  color: var(--white);
 }
 
 .info-section {
@@ -38,17 +62,28 @@ export let msg;
 }
 
 .time {
-  font-size: 0.8rem;
-  text-align: center;
-  float: left;
-  margin: 0rem 0.25rem -0.5rem;
+  font-size: 0.65rem;
+  position: relative;
+  float: right;
+  margin: 0.8rem 0 -3rem -3rem;
+  z-index: 10;
+  color: var(--grey-dark);
+}
+
+.sent .time {
+  color: var(--grey);
+}
+
+.hidden {
+  font-size: 0.68rem;
+  visibility: hidden;
 }
 
 .sent {
   flex-direction: row-reverse;
 }
 
-.sent .username {
-  text-align: right;
+span {
+  vertical-align: top;
 }
 </style>

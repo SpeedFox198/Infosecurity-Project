@@ -1,7 +1,10 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, User
+# TODO(SpeedFox198): remove if uneeded
+# from models import AuthedUser, LoginData, User
+from datetime import datetime
+from utils import to_unix
 
 
 ASYNC_MODE = "asgi"
@@ -158,10 +161,12 @@ async def send_message(sid, data):
     # Change temp things to actual
     # Get time using python maybe?
     # Change format to getting those using another api (<- ??? what was i refering to b4?)
+    time = datetime.now()
+
     await sio.emit("receive_message", {
         "room_id": data["room_id"],
         "user_id": data["user_id"],
-        "time": "99:99PM",
+        "time": to_unix(time),
         "content": data["content"],
     }, room=data["room_id"], skip_sid=sid)
 

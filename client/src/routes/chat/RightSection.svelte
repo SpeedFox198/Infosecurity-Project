@@ -10,7 +10,7 @@ import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 
 const namespace = "https://localhost:8443";
-const transports = { transports: ["websocket"] }
+const transports = { transports: ["websocket"] };
 let socket;  // Forward declare socket :)
 
 onMount(async () => {
@@ -42,12 +42,12 @@ async function sendMsg(event) {
   socket.emit("send_message", {
     room_id: $room_id,
     user_id: $user_id,
-    time: "99:99PM", // TODO(SpeedFox198): prob use unix time here
+    // time: "99:99PM", // TODO(SpeedFox198): prob use unix time here
     content,
     reply_to: null, // reply_to
     type: "text" // <type> ENUM(image, document, video, text)
   });
-  addMsg($room_id, $user_id, "99:99PM", content);
+  addMsg($room_id, $user_id, Math.floor(Date.now()/1000), content);
 }
 
 // Get latest 20n+1 to 20n+20 messages from room
@@ -60,18 +60,16 @@ async function getRoomMsgs(n) {
 }
 
 async function getUser(user_id) {
-  const url = `https://localhost:8443/api/user?user_id=${user_id}`;
+  const url = `https://localhost:8443/api/user/${user_id}`;
   const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(message);
+  }
+
   const { username, avatar, message } = await response.json();
 
   let user = { username, avatar };
-
-  if (response.ok) {
-    allUsers.addUser(user, user_id);
-  }
-  else {
-    throw new Error(message);
-  }
+  allUsers.addUser(user, user_id);
 
   return user;
 }

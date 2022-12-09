@@ -18,9 +18,8 @@ from models import (
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
-@user_bp.get("/")
-async def user_details():
-    user_id = request.args.get("user_id", default="", type=str)
+@user_bp.get("/<string:user_id>")
+async def user_details(user_id):
 
     if not user_id:
         return {"message": "User does not exist."}, 404

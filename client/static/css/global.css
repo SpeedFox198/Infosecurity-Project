@@ -5,6 +5,7 @@
 
 body {
     font-family: "Open Sans", "Segoe UI", sans-serif;
+    color: var(--black);
 }
 
 .navbar.navbar-2 .navbar-toggler-icon {

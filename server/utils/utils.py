@@ -11,4 +11,4 @@ def to_unix(timestamp:datetime) -> int:
     Returns:
         int: Unix time format of timestamp
     """
-    return int(time.mktime(timestamp))
+    return int(time.mktime(timestamp.timetuple()))
