@@ -5,9 +5,13 @@ __pycache__/
 .vscode/
 .idea/
 
+# Logs
+server/logs/
+
+# Development
 mkcert.exe
 cert.pem
 key.pem
 
+# Stuff
 key.key
-logs/*.log
