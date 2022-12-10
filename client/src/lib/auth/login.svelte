@@ -14,8 +14,9 @@
             "Content-Type": "application/json"
         },
         body: JSON.stringify({"username": username, "password": password})
-    })
-    const result = await response.json()
+    });
+    const result = await response.json();
+    console.log(result);
 
     if (!response.ok) {
       loginError = result.message
@@ -24,16 +25,7 @@
 
     location.replace("/chat")
   }
-  
-  onMount(() => {
-    grecaptcha.enterprise.ready(async () => {
-      const token = await grecaptcha.enterprise.execute('6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf', {action: 'homepage'});
-      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
-      // reCAPTCHA Enterprise to the end user's browser.
-      // This token must be validated by creating an assessment.
-      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
-    });
-  });
+
 </script>
 
 <svelte:head>

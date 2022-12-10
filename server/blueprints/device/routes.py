@@ -20,7 +20,9 @@ device_bp = Blueprint("devices", __name__, url_prefix="/devices")
 @validate_response(DeviceListData)
 async def get_devices():
     async with async_session() as session:
-        statement = sa.select(Device).where(Device.user_id == await current_user.user_id)
+        statement = sa.select(Device)\
+            .where(Device.user_id == await current_user.user_id)\
+            .order_by(sa.desc(Device.time))
         results = await session.execute(statement)
         device_results = results.scalars()
 
@@ -35,7 +37,6 @@ async def get_devices():
         for device in device_results
     ])
 
-    device_list.devices.sort(key=lambda i: i.time, reverse=True)
     return device_list
 
 
@@ -45,4 +46,5 @@ async def remove_device(device_id):
     status = await remove_logged_in_device(device_id, await current_user.user_id)
     if status == "fail":
         return {"message": "failed to remove device"}, 404
+
     return {"message": "device removed successfully"}

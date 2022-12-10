@@ -19,6 +19,7 @@ from models import (
 )
 from models.request_data import LoginBody
 from models.response_data import UserData
+from google_authenticator import create_assessment
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -30,10 +31,8 @@ async def login(data: LoginBody):
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
         user = result.scalars().first()
-
         if not user:
             return {"message": "invalid credentials"}, 401
-
         device_id = str(uuid4())
         await add_logged_in_device(session, device_id, user.user_id, request)
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))

@@ -4,7 +4,7 @@ import { count } from "$lib/stores/count";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
-
+import ProfileArea from "./ProfileArea.svelte";
 
 // SocketIO instance
 export let getRoomMsgs;
@@ -39,6 +39,8 @@ async function selectGrp(new_room) {
   </div>
 </div>
 
+<footer>
+</footer>
 
 <style>
 .left-section {
