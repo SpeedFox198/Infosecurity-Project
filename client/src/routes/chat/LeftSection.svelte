@@ -16,7 +16,7 @@ async function selectGrp(new_room) {
 
   // Get room messages via socket if n is 0
   if (!$count[$room_id]) {
-    const { n, extra } = count.next($room_id);
+    const { n, extra } = count.nextN($room_id);
     getRoomMsgs($room_id, n, extra);
   }
 }

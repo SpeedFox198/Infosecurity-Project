@@ -7,9 +7,9 @@ export const getTempId = (() => {
 
   return () => {
     let n;
-    update(update => {
-      n = update;
-      return n + 1;
+    update(storage => {
+      n = ++storage;
+      return storage;
     });
     return n;
   }

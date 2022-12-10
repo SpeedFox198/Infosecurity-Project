@@ -1,29 +1,62 @@
 <script>
-import { beforeUpdate, afterUpdate } from "svelte";
+import { beforeUpdate, afterUpdate, onMount } from "svelte";
 
 import { msgStorage, allMsgs } from "$lib/stores/message";
 import { room_id } from "$lib/stores/room";
+import { count } from "$lib/stores/count";
 
 import Message from "$lib/chat/message/Message.svelte";
 
 
+export let getRoomMsgs;
+
 $: roomMsgs = ($allMsgs || {})[$room_id] || [];
 
-let chatDisplay;
+let display;
+let autoScroll = true;
+let loadingMsgs = false;
+let currentScroll;
 
 
-// beforeUpdate(() => {
-//   autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
-// });
+onMount(() => {
+  autoScroll = true;  // Scroll the first time it is loaded
+})
 
-// afterUpdate(() => {
-//   if (autoscroll) div.scrollTo(0, div.scrollHeight);
-// });
+
+beforeUpdate(() => {
+  if (loadingMsgs) {  // If loading old messages
+    currentScroll = display.scrollHeight - display.scrollTop;
+  } else {            // Check if need to autoscroll to latest message
+    autoScroll = display && display.scrollTop + display.clientHeight === display.scrollHeight;
+  }
+});
+
+
+afterUpdate(() => {
+  if (loadingMsgs) {        // If loading old messages
+  console.log('then height', display.scrollHeight)
+    console.log('currentscroll ',currentScroll);
+    display.scrollTo(0, display.scrollHeight - currentScroll);
+    loadingMsgs = false;
+  } else if (autoScroll) {  // Scroll if at bottom of screen
+    display.scrollTo(0, display.scrollHeight);
+  }
+});
+
+
+async function loadOldMsgs() {
+  console.log('scroll height', display.scrollHeight)
+  if (!loadingMsgs && display && display.scrollTop < 500) {
+    loadingMsgs = true;
+    const { n, extra } = count.nextN($room_id);
+    getRoomMsgs($room_id, n, extra);
+  }
+}
 </script>
 
 
 <!-- Messages Display Section -->
-<div class="chat" bind:this={chatDisplay}>
+<div class="chat" bind:this={display} on:scroll={loadOldMsgs}>
   <div class="my-2"></div>
   {#each roomMsgs as message_id}
     <Message msg={$msgStorage[message_id]}/>

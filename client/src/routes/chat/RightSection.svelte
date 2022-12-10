@@ -145,7 +145,7 @@ async function formatMsg(data) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay/>
+    <MessageDisplay getRoomMsgs={getRoomMsgs}/>
 
     <!-- Messages Display Section -->
     <MessageInput on:message={sendMsg}/>

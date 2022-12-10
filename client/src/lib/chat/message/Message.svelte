@@ -1,5 +1,9 @@
 <script>
+import { beforeUpdate } from "svelte";
+
 export let msg;
+
+beforeUpdate(() => msg = msg || {})
 
 const padZero = t => t < 10 ? "0" + t : t;
 

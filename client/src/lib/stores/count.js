@@ -14,19 +14,6 @@ export const count = (() => {
     return result;
   }
 
-  function next(room_id) {
-    let n, extra;
-  
-    update(storage => {
-      const room_count = _get(storage, room_id);
-      n = room_count.n++;
-      extra = room_count.extra++;
-      return storage;
-    });
-
-    return { n, extra };
-  }
-
   function nextN(room_id) {
     let n, extra;
   
@@ -53,5 +40,5 @@ export const count = (() => {
     return { n, extra };
   }
 
-  return { subscribe, next, nextN, nextExtra };
+  return { subscribe, nextN, nextExtra };
 })();
