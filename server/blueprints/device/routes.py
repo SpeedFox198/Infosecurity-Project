@@ -46,4 +46,5 @@ async def remove_device(device_id):
     status = await remove_logged_in_device(device_id, await current_user.user_id)
     if status == "fail":
         return {"message": "failed to remove device"}, 404
+
     return {"message": "device removed successfully"}

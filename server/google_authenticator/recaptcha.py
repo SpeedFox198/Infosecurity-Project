@@ -14,7 +14,9 @@ def create_assessment(
         recaptcha_action: Action name corresponding to the token.
     """
 
-    client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
+    client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient.from_service_account_json(
+        filename="recaptcha service account.json"
+    )
 
     # Set the properties of the event to be tracked.
     event = recaptchaenterprise_v1.Event()
@@ -59,8 +61,4 @@ def create_assessment(
             "The reCAPTCHA score for this token is: "
             + str(response.risk_analysis.score)
         )
-        # Get the assessment name (id). Use this to annotate the assessment.
-        assessment_name = client.parse_assessment_path(response.name).get("assessment")
-        print(f"Assessment name: {assessment_name}")
-    return response
-
+        return (response.risk_analysis.score <= 0.75)

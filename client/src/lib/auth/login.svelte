@@ -5,7 +5,8 @@
   let username = ""
   let password = ""
 
-  const loginSubmit = async () => {
+  const loginSubmit = async (token) => {
+    console.log(token);
     const response = await fetch("https://localhost:8443/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -13,9 +14,10 @@
             "Accept": "application/json",
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({"username": username, "password": password})
-    })
-    const result = await response.json()
+        body: JSON.stringify({"username": username, "password": password, "token": token})
+    });
+    const result = await response.json();
+    console.log(result);
 
     if (!response.ok) {
       loginError = result.message
@@ -25,15 +27,11 @@
     location.replace("/chat")
   }
   
-  onMount(() => {
-    grecaptcha.enterprise.ready(async () => {
-      const token = await grecaptcha.enterprise.execute('6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf', {action: 'homepage'});
-      // IMPORTANT: The 'token' that results from execute is an encrypted response sent by
-      // reCAPTCHA Enterprise to the end user's browser.
-      // This token must be validated by creating an assessment.
-      // See https://cloud.google.com/recaptcha-enterprise/docs/create-assessment
-    });
-  });
+  function onSubmit(token) {
+    console.log(token);
+    loginSubmit(token);
+    
+  }
 </script>
 
 <svelte:head>
@@ -69,7 +67,8 @@
         >
         <label for="floatingPassword">Password</label>
       </div>
-      <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
+      <button class="g-recaptcha login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" data-sitekey="6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf" data-action="login" data-callback="
+      onSubmit">
       Log in
       </button>
       {#if loginError}
