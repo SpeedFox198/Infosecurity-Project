@@ -5,6 +5,7 @@ import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
 import { room_id, allRooms } from "$lib/stores/room";
 import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
+import { lockScroll } from "$lib/stores/scroll";
 
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
@@ -114,7 +115,9 @@ async function addMsgBatch(data) {
 
   // Store the messages in stores
   await msgStorage.updateMsg(room_messages);
+  lockScroll.unlock();
   await allMsgs.addMsg(message_ids, data.room_id, true);
+  lockScroll.lock();
 }
 
 

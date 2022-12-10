@@ -4,6 +4,7 @@ import { beforeUpdate, afterUpdate, onMount } from "svelte";
 import { msgStorage, allMsgs } from "$lib/stores/message";
 import { room_id } from "$lib/stores/room";
 import { count } from "$lib/stores/count";
+import { lockScroll } from "$lib/stores/scroll";
 
 import Message from "$lib/chat/message/Message.svelte";
 
@@ -24,8 +25,9 @@ onMount(() => {
 
 
 beforeUpdate(() => {
-  if (loadingMsgs) {  // If loading old messages
-    currentScroll = display.scrollHeight - display.scrollTop;
+  if (loadingMsgs) {  // When loading older messages
+    if (!$lockScroll) currentScroll = display.scrollHeight - display.scrollTop;
+    autoScroll = false;
   } else {            // Check if need to autoscroll to latest message
     autoScroll = display && display.scrollTop + display.clientHeight === display.scrollHeight;
   }
@@ -33,9 +35,7 @@ beforeUpdate(() => {
 
 
 afterUpdate(() => {
-  if (loadingMsgs) {        // If loading old messages
-  console.log('then height', display.scrollHeight)
-    console.log('currentscroll ',currentScroll);
+  if (loadingMsgs && !$lockScroll) {  // If loading old messages
     display.scrollTo(0, display.scrollHeight - currentScroll);
     loadingMsgs = false;
   } else if (autoScroll) {  // Scroll if at bottom of screen
@@ -44,9 +44,8 @@ afterUpdate(() => {
 });
 
 
-async function loadOldMsgs() {
-  console.log('scroll height', display.scrollHeight)
-  if (!loadingMsgs && display && display.scrollTop < 500) {
+function loadOldMsgs() {
+  if (!loadingMsgs && display && display.scrollTop < 333) {
     loadingMsgs = true;
     const { n, extra } = count.nextN($room_id);
     getRoomMsgs($room_id, n, extra);
