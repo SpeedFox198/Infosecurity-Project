@@ -1,10 +1,9 @@
 <script>
 import { onMount } from "svelte";
-import { io } from "socket.io-client";
 
-import { msgStorage, allMsgs, getTempId } from "$lib/stores/messages";
-import { room_id, allRooms } from "$lib/stores/rooms";
-import { user_id, allUsers } from "$lib/stores/users";
+import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
+import { room_id, allRooms } from "$lib/stores/room";
+import { user_id, allUsers } from "$lib/stores/user";
 
 import Message from "$lib/chat/message/Message.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
@@ -12,34 +11,30 @@ import MessageInput from "$lib/chat/message/MessageInput.svelte";
 
 $: roomMsgs = ($allMsgs || {})[$room_id] || [];
 
-const namespace = "https://localhost:8443";
-const transports = { transports: ["websocket"] };
-let socket;  // Forward declare socket :)
+// SocketIO instance
+export let socket;
 
 
 onMount(async () => {
-  // SocketIO instance
-  socket = io(namespace, transports);
-
-  socket.on("connect", async () => {
-    console.log("connected to SocketIO server"); // TODO(SpeedFox198): remove this later lmao
-  });
-
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
     allRooms.set(data);  // Set list of rooms
     allMsgs.initRooms(data)  // Initialise empty arrays for rooms
   });
 
+
   socket.on("receive_message", addMsg);
+
 
   socket.on("sent_success", async data => {
     const { message_id, temp_id, time, room_id } = data;  // Unpack data
+
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
     msgStorage.changeId(temp_id, message_id, time);
     allMsgs.changeId(temp_id, message_id, room_id);
   });
+
 
   socket.on("receive_room_messages", async data => {
     msgStorage.updateMsg(data.message_id, data.room_messages);
@@ -68,14 +63,6 @@ async function sendMsg(event) {
   socket.emit("send_message", msg);
 }
 
-// Get latest 20n+1 to 20n+20 messages from room
-async function getRoomMsgs(n) {
-  socket.emit("get_room_messages", {
-    room_id: $room_id,
-    start: 20*n + 1,
-    end: 20*n + 20
-  });
-}
 
 async function getUser(user_id) {
   const url = `https://localhost:8443/api/user/${user_id}`;

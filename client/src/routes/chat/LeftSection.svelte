@@ -1,8 +1,12 @@
 <script>
-import { room_id, allRooms } from "$lib/stores/rooms";
+import { room_id, allRooms } from "$lib/stores/room";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
+
+
+// SocketIO instance
+export let socket;
 
 
 async function selectGrp(new_room) {
