@@ -8,4 +8,6 @@ __pycache__/
 mkcert.exe
 cert.pem
 key.pem
+
+key.key
 logs/*.log
