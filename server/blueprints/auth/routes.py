@@ -19,6 +19,7 @@ from models import (
 )
 from models.request_data import LoginBody
 from models.response_data import UserData
+from google_authenticator import create_assessment
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -30,6 +31,11 @@ async def login(data: LoginBody):
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
         user = result.scalars().first()
+        print("checkpoint 1")
+        recaptchachecker = create_assessment("eminent-cache-371001","6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf",data.token,"login")
+        print("checkpoint 2")
+        if recaptchachecker == False:
+            return {"message": "invalid credentials"}, 401
 
         if not user:
             return {"message": "invalid credentials"}, 401

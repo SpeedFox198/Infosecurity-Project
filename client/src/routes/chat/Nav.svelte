@@ -1,8 +1,3 @@
-<script>
-  import {page} from "$app/stores"
-  let currentUser = $page.data.user
-</script>
-
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <ul class="navbar-nav me-auto mb-lg-0 edit">

@@ -3,7 +3,7 @@ import { room_id, allRooms } from "$lib/stores/rooms";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
-
+import ProfileArea from "./ProfileArea.svelte";
 
 async function selectGrp(new_room) {
   room_id.set(new_room);
@@ -27,6 +27,8 @@ async function selectGrp(new_room) {
   </div>
 </div>
 
+<footer>
+</footer>
 
 <style>
 .left-section {
