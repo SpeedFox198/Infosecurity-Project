@@ -5,7 +5,7 @@ from datetime import datetime
 logger = logging.getLogger("bubbles_log")
 logger.setLevel(logging.INFO)
 
-# Log
+# Log setup to rotate to new files every midnight
 log_name = f"logs/{datetime.now().strftime('%d-%m-%Y')}-app.log"
 log_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
