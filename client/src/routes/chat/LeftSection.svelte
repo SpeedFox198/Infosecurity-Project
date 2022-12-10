@@ -1,16 +1,24 @@
 <script>
 import { room_id, allRooms } from "$lib/stores/room";
+import { count } from "$lib/stores/count";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
 
 
 // SocketIO instance
-export let socket;
+export let getRoomMsgs;
 
 
 async function selectGrp(new_room) {
+  // Set selected room_id
   room_id.set(new_room);
+
+  // Get room messages via socket if n is 0
+  if (!$count[$room_id]) {
+    const { n, extra } = count.next($room_id);
+    getRoomMsgs($room_id, n, extra);
+  }
 }
 </script>
 

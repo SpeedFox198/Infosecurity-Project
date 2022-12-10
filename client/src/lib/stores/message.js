@@ -20,9 +20,14 @@ export const msgStorage = (() => {
   const { subscribe, update } = writable({});
 
   // Adds a new message or updates an existing message
-  async function updateMsg(message_id, msg) {
+  async function updateMsg(msg, message_id) {
     update(storage => {
-      storage[message_id] = msg;  // Add new message to storage
+      // Read documentation for function in user.js for how this logic works
+      if (message_id) {
+        storage[message_id] = msg;  // Add new message to storage
+      } else {
+        Object.assign(storage, msg);
+      }
       return storage;
     });
   }
@@ -61,9 +66,8 @@ export const allMsgs = (() => {
 
       if (!add_prev) {  // Add new message to array
         roomMsgs.push(message_id);
-      }
-      else {  // Add older(previous) messages to front of array
-        roomMsgs.unshift.apply(message_id, roomMsgs);
+      } else {  // Add older(previous) messages to front of array
+        roomMsgs.unshift.apply(roomMsgs, message_id);
       }
 
       return storage;
@@ -72,7 +76,7 @@ export const allMsgs = (() => {
 
   async function initRooms(rooms) {
     update(storage => {
-      for (let i; i < rooms.length; i++) {
+      for (let i=0; i < rooms.length; i++) {
         storage[rooms[i].room_id] = [];
       }
       return storage;

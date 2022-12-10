@@ -22,8 +22,7 @@ export const allUsers = (() => {
     update(storage => {
       if (user_id) {
         storage[user_id] = user;
-      }
-      else {
+      } else {
         Object.assign(storage, user);
       }
       return storage;
