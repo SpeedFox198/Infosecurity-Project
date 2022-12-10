@@ -31,15 +31,8 @@ async def login(data: LoginBody):
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
         user = result.scalars().first()
-        print("checkpoint 1")
-        recaptchachecker = create_assessment("eminent-cache-371001","6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf",data.token,"login")
-        print("checkpoint 2")
-        if recaptchachecker == False:
-            return {"message": "invalid credentials"}, 401
-
         if not user:
             return {"message": "invalid credentials"}, 401
-
         device_id = str(uuid4())
         await add_logged_in_device(session, device_id, user.user_id, request)
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))

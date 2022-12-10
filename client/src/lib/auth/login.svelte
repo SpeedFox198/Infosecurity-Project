@@ -5,8 +5,7 @@
   let username = ""
   let password = ""
 
-  const loginSubmit = async (token) => {
-    console.log(token);
+  const loginSubmit = async () => {
     const response = await fetch("https://localhost:8443/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -14,7 +13,7 @@
             "Accept": "application/json",
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({"username": username, "password": password, "token": token})
+        body: JSON.stringify({"username": username, "password": password})
     });
     const result = await response.json();
     console.log(result);
@@ -26,12 +25,7 @@
 
     location.replace("/chat")
   }
-  
-  function onSubmit(token) {
-    console.log(token);
-    loginSubmit(token);
-    
-  }
+
 </script>
 
 <svelte:head>
@@ -67,8 +61,7 @@
         >
         <label for="floatingPassword">Password</label>
       </div>
-      <button class="g-recaptcha login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" data-sitekey="6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf" data-action="login" data-callback="
-      onSubmit">
+      <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
       Log in
       </button>
       {#if loginError}

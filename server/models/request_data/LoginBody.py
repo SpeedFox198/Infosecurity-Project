@@ -5,4 +5,3 @@ from dataclasses import dataclass
 class LoginBody:
     username: str
     password: str
-    token: str
