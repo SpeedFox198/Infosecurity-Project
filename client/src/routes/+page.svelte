@@ -1,8 +1,18 @@
 <script>
   import Login from "$lib/auth/login.svelte"
   import Signup from "$lib/auth/signup.svelte"
+  export let form
 
   let signupDisplay = false
+  let errors
+  
+  if (form?.loginError) {
+    errors = form.loginError
+  }
+  
+  if (form?.cfError) {
+    errors = form.cfError
+  }
 
   const toggleSignupOn = () => {
     signupDisplay = !signupDisplay
@@ -28,7 +38,7 @@
         <Signup toggleSignupOn={toggleSignupOn}/>
         {:else}
         <!-- Login -->
-        <Login toggleSignupOn={toggleSignupOn} />
+        <Login toggleSignupOn={toggleSignupOn} errors={errors} />
         {/if}
       </div>
     </div>

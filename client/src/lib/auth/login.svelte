@@ -1,36 +1,9 @@
 <script>
-  import {onMount} from 'svelte'
+  import { Turnstile } from "svelte-turnstile"
   export let toggleSignupOn
-  let loginError
-  let username = ""
-  let password = ""
-
-  const loginSubmit = async () => {
-    const response = await fetch("https://localhost:8443/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({"username": username, "password": password})
-    });
-    const result = await response.json();
-    console.log(result);
-
-    if (!response.ok) {
-      loginError = result.message
-      return
-    }
-
-    location.replace("/chat")
-  }
-
+  export let errors
 </script>
 
-<svelte:head>
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcEnmMjAAAAAACQJ-aJ3Y9XQyMj7vlf23LpN5Kf"></script>
-</svelte:head>
 
 <div class="login card rounded-4 shadow">
   <div class=" p-5 pb-4 border-bottom-0">
@@ -38,14 +11,14 @@
   </div>
 
   <div class="card-body p-5 pt-0">
-    <form action="" on:submit|preventDefault={loginSubmit}>
+    <form method="POST" action="?/login">
       <div class="form-floating mb-3">
         <input
           type="text"
+          name="username"
           class="form-control rounded-3"
           id="floatingInput"
           placeholder="name@example.com"
-          bind:value={username}
           required
         >
         <label for="floatingInput">Email address or username</label>
@@ -53,20 +26,21 @@
       <div class="form-floating mb-3">
         <input
           type="password"
+          name="password"
           class="form-control rounded-3"
           id="floatingPassword"
           placeholder="Password"
-          bind:value={password}
           required
         >
         <label for="floatingPassword">Password</label>
       </div>
+      <Turnstile siteKey="0x4AAAAAAABjATniBKt9vZiC"/>
+      {#if errors}
+        <p class="text-danger">{errors}</p>
+      {/if}
       <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
       Log in
       </button>
-      {#if loginError}
-        <p class="text-danger">Invalid credentials!</p>
-      {/if}
       <a class="forgot-pw card-link text-center" href="/">Forgotten password?</a>
 
       <hr class="my-4" />
