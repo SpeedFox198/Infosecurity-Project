@@ -1,5 +1,7 @@
 <script>
+    import { Turnstile } from "svelte-turnstile"
     export let toggleSignupOn
+    export let errors
 
     let email
     let username
@@ -43,22 +45,22 @@
         </div>
 
         <div class="card-body p-5 pt-0">
-          <form class="">
+          <form method="POST" action="?/signup">
             <!-- email address -->
             <div class="form-floating mb-3">
-              <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" bind:value={email} required>
+              <input name="email" type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" bind:value={email} required>
               <label for="floatingInput">Email address</label>
             </div>
 
             <!-- username -->
             <div class="form-floating mb-3">
-              <input type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" bind:value={username} required>
+              <input name="username" type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" bind:value={username} required>
               <label for="floatingInput">Username</label>
             </div>
 
             <!-- password -->
             <div class="form-floating mb-3">
-              <input type="password"
+              <input name="password" type="password"
                class="form-control rounded-3"
                bind:value={password}
                on:click={showRequirements}
@@ -84,7 +86,7 @@
 
             <!-- confirm password -->
             <div class="form-floating mb-3">
-              <input type="password"
+              <input name="confirmpassword" type="password"
               class="form-control rounded-3" 
               bind:value={confirmPassword}
               id="floatingPassword" 
@@ -92,7 +94,10 @@
               required>
               <label for="floatingPassword">Confirm password</label>
             </div>
-
+            <Turnstile siteKey="0x4AAAAAAABjATniBKt9vZiC"/>
+            {#if errors}
+              <p class="text-danger">{errors}</p>
+            {/if}
             <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Sign up</button>
             <small class="text-muted">By clicking Sign up, you agree to our <a href="https://discord.com/terms">terms of service</a>.</small>
               
