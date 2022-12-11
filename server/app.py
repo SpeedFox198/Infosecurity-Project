@@ -7,7 +7,7 @@ from quart_auth import (
 )
 import quart_auth
 import socketio
-from quart_schema import QuartSchema
+from quart_schema import QuartSchema, RequestSchemaValidationError
 
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
@@ -51,6 +51,10 @@ async def before_request():
 async def unauthorized(*_):
     return {"message": "Not authorized"}, 401
 
+
+@app.errorhandler(RequestSchemaValidationError)
+async def invalid_schema(*_):
+    return {"message": "Invalid JSON body"}, 400
 
 # The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
