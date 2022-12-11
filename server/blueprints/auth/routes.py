@@ -19,7 +19,6 @@ from models import (
 )
 from models.request_data import LoginBody
 from models.response_data import UserData
-from google_authenticator import create_assessment
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
