@@ -19,9 +19,30 @@ from models import (
 )
 from models.request_data import LoginBody
 from models.response_data import UserData
+from models.request_data import SignUpBody
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
+@auth_bp.post("sign-up")
+@validate_request(SignUpBody)
+async def sign_up(data: SignUpBody):
+    async with async_session() as session:
+        statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
+        result = await session.execute(statement)
+        user = result.scalars().first()
+        if user:
+            return {"message": "user already exists"}, 409
+        user = User(email=data.username, password=data.password)
+        session.add(user)
+        await session.commit()
+        device_id = str(uuid4())
+        await add_logged_in_device(session, device_id, user.user_id, request)
+        login_user(AuthedUser(f"{user.user_id}.{device_id}"))
+        return {"message": "sign up success"}, 200
+
+@auth_bp.post("OTP")
+async def OTP():
+    return {"message": "sign up success"}, 200
 
 @auth_bp.post("/login")
 @validate_request(LoginBody)
@@ -32,11 +53,15 @@ async def login(data: LoginBody):
         user = result.scalars().first()
         if not user:
             return {"message": "invalid credentials"}, 401
+
         device_id = str(uuid4())
         await add_logged_in_device(session, device_id, user.user_id, request)
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))
         return {"message": "login success"}, 200
 
+@auth_bp.post("/twoFA")
+async def twoFA():
+    return {"message": "login success"}, 200
 
 @auth_bp.post("/logout")
 @login_required
