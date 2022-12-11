@@ -41,7 +41,7 @@ export const actions = {
       }
     }
     
-    let cookie = response.headers.get("set-cookie").split("=")[1]
+    const cookie = response.headers.get("set-cookie").split("=")[1]
     cookies.set("QUART_AUTH", cookie)
     throw redirect(302, "/chat")
   }
@@ -58,7 +58,6 @@ async function validateCfToken(token, secret) {
       secret: secret
     })
   })
-  
 
   const data = await response.json()
   
