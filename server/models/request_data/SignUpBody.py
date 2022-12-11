@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-
 @dataclass
-class LoginBody:
+class SignUpBody:
     username: str
     password: str
+    email: str
