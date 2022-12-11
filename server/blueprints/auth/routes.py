@@ -23,7 +23,8 @@ from models.request_data import SignUpBody
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
-@auth_bp.post("sign-up")
+
+@auth_bp.post("/sign-up")
 @validate_request(SignUpBody)
 async def sign_up(data: SignUpBody):
     async with async_session() as session:
@@ -40,9 +41,11 @@ async def sign_up(data: SignUpBody):
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))
         return {"message": "sign up success"}, 200
 
-@auth_bp.post("OTP")
+
+@auth_bp.post("/OTP")
 async def OTP():
     return {"message": "sign up success"}, 200
+
 
 @auth_bp.post("/login")
 @validate_request(LoginBody)
@@ -59,9 +62,11 @@ async def login(data: LoginBody):
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))
         return {"message": "login success"}, 200
 
-@auth_bp.post("/twoFA")
-async def twoFA():
+
+@auth_bp.post("/2fa")
+async def two_fa():
     return {"message": "login success"}, 200
+
 
 @auth_bp.post("/logout")
 @login_required
