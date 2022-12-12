@@ -60,4 +60,17 @@ async function selectGrp(new_room) {
   height: 100%;
   overflow-y: scroll;
 }
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--grey-shadow);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 0.6rem;
+}
 </style>
