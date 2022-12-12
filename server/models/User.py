@@ -25,7 +25,6 @@ class User(Base):
     email = Column(VARCHAR(255), unique=True, nullable=False)
     password = Column(VARCHAR(255), nullable=False)
     avatar = Column(VARCHAR(255))
-    verified = Column(Boolean, default=False)
     dark_mode = Column(Boolean, default=False)
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
