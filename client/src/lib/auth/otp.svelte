@@ -23,22 +23,22 @@
         <hr class="my-4" />
       </form>
     </div>
-  </div>
+</div>
 
-  <style>
+<style>
 
-    .login{
-      background-color: var(--white);
-      margin: 8rem
+  .login{
+    background-color: var(--white);
+    margin: 8rem
+  }
+  
+  .login-btn{
+    background-color: var(--primary-dark)
+  }
+  
+  @media(max-width: 576px) {
+    .login {
+      margin: 0rem
     }
-    
-    .login-btn{
-      background-color: var(--primary-dark)
-    }
-    
-    @media(max-width: 576px) {
-      .login {
-        margin: 0rem
-      }
-    }
-  </style>
+  }
+</style>

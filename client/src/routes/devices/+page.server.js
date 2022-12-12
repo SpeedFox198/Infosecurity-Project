@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals, fetch }) {
-    if (!locals.user) {
+    if (!(locals.user && locals.user.verified)) {
         throw redirect(302, "/")
     }
    

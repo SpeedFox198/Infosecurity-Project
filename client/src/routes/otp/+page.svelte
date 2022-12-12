@@ -1,5 +1,5 @@
 <script>
-    import Otp from '$lib/auth/otp.svelte'
+    import OTP from '$lib/auth/otp.svelte'
   </script>
   
   
@@ -15,7 +15,7 @@
           <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
         </div>
         <div class="col-md-6">
-          <Otp/>
+          <OTP />
         </div>
       </div>
     </div>
