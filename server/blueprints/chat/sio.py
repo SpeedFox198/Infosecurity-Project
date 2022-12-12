@@ -1,4 +1,5 @@
 import socketio
+import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Message
 from utils import to_unix
@@ -197,8 +198,29 @@ async def get_room_messages(sid, data):
     limit  = MESSAGE_LOAD_NUMBER
     offset = MESSAGE_LOAD_NUMBER * n
 
-    # Get room messsages
-    room_messages = tmp_msgs[room_id]
+    room_messages = ()  # Default room messages to empty tuple
+
+    # Get room messsages from database
+    async with async_session() as session:
+        statement = sa.select(
+            Message.message_id,
+            Message.user_id,
+            Message.time,
+            Message.content,
+            Message.type
+        ).where(
+            Message.room_id == room_id
+        ).order_by(Message.time.desc()).limit(limit).offset(offset)
+
+        results = (await session.execute(statement)).all()
+        room_messages = [{
+            "message_id": results[i].message_id,
+            "user_id": results[i].user_id,
+            "time": to_unix(results[i].time),
+            "content": results[i].content,
+            "type": results[i].type
+        } for i in range(len(results)-1, -1, -1)]
+
     await sio.emit("receive_room_messages", {
         "room_id": room_id,
         "room_messages": room_messages

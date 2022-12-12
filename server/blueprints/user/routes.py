@@ -28,7 +28,8 @@ async def user_details(user_id):
 
     async with async_session() as session:
         statement = sa.select(User.username, User.avatar).where(User.user_id == user_id)
-        user = (await session.execute(statement)).first()
+        # TODO(SpeedFox198): handle error if more than one result is returned (read sqlalchemy docs)
+        user = (await session.execute(statement)).one()
 
     if not user:
         return {"message": "User does not exist."}, 404
