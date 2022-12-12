@@ -15,7 +15,7 @@
           <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
         </div>
         <div class="col-md-6">
-            <Otp/>
+          <Otp/>
         </div>
       </div>
     </div>
