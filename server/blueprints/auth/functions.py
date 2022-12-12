@@ -1,5 +1,9 @@
 from ua_parser import user_agent_parser
 import aiohttp
+import random
+import string
+
+from google_authenticator.google_email_send import gmail_send
 
 
 async def get_user_agent_data(user_agent: str) -> tuple[str, str]:
@@ -26,4 +30,12 @@ async def get_location_from_ip(ip_address: str) -> str:
 
             return f"{data['regionName']}, {data['country']}"
 
+def generate_otp() -> str:
+    # Generate a 6 digit OTP
+    return "".join(random.choice(string.digits) for i in range(6))
+
+def send_otp_email(email: str, otp: str):
+    subject = "OTP for registration"
+    message = f"Do not reply to this email.\nPlease enter {otp} as your OTP to complete your registration."
+    gmail_send(email, subject, message)
 

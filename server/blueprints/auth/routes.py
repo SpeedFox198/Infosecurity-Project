@@ -20,6 +20,7 @@ from models import (
 from models.request_data import LoginBody
 from models.response_data import UserData
 from models.request_data import SignUpBody
+from .functions import generate_otp, send_otp_email
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -28,18 +29,19 @@ auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 @validate_request(SignUpBody)
 async def sign_up(data: SignUpBody):
     async with async_session() as session:
-        statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
+        statement = sa.select(User).where((User.email == data.email) | (User.username == data.username))
         result = await session.execute(statement)
-        user = result.scalars().first()
-        if user:
-            return {"message": "user already exists"}, 409
-        user = User(email=data.username, password=data.password)
+        existing_user = result.scalars().first()
+
+        if existing_user:
+            return {"message": "User already exists"}, 409
+
+        user = User(username=data.username, email=data.email, password=data.password)
         session.add(user)
         await session.commit()
-        device_id = str(uuid4())
-        await add_logged_in_device(session, device_id, user.user_id, request)
-        login_user(AuthedUser(f"{user.user_id}.{device_id}"))
-        return {"message": "sign up success"}, 200
+        otp = generate_otp()
+        send_otp_email(user.email, otp)
+        return {"message": "User created"}, 200
 
 
 @auth_bp.post("/OTP")

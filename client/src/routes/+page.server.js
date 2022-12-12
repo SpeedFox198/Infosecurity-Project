@@ -83,9 +83,7 @@ export const actions = {
       }
     }
     throw redirect(302, "/OTP")
-
   }
-  
 }
 
 async function validateCfToken(token, secret) {
