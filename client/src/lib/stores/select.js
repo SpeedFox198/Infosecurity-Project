@@ -15,20 +15,6 @@ export const selectedMsgs = (() => {
     });
   }
 
-  function add(message_id) {
-    update(storage => {
-      storage.add(message_id);
-      return storage;
-    });
-  }
-
-  function remove(message_id) {
-    update(storage => {
-      storage.delete(message_id);
-      return storage;
-    });
-  }
-
   function clear(message_id) {
     update(storage => {
       storage.clear(message_id);
@@ -36,7 +22,7 @@ export const selectedMsgs = (() => {
     });
   }
 
-  return { subscribe, toggle, add, remove, clear };
+  return { subscribe, toggle, clear };
 })();
 
 
