@@ -22,7 +22,6 @@ from models import (
 from models.request_data import LoginBody, SignUpBody, OTPBody
 from models.response_data import UserData
 
-from .functions import generate_otp, send_otp_email
 from db_access.failed_attempts import get_failed_attempt, create_failed_attempt, update_failed_attempt, delete_failed_attempt
 from db_access.account_lockout import get_lockout, create_lockout, delete_lockout
 from utils.logging import log_info
@@ -34,7 +33,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 @auth_bp.post("/sign-up")
 @validate_request(SignUpBody)
 async def sign_up(data: SignUpBody):
-    username_regex = r'^[a-zA-Z0-9_-]{0,32}$'
+    username_regex = r'^[a-zA-Z0-9_-]{3,32}$'
     if not re.fullmatch(username_regex, data.username):
         return {"message": "Invalid username"}, 400
 
