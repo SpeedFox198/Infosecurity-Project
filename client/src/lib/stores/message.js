@@ -32,6 +32,7 @@ export const msgStorage = (() => {
     });
   }
 
+  // Change message_id from temp_id to new id received from server
   async function changeId(temp_id, message_id, time) {
     update(storage => {
       // Change temp_id to message_id

@@ -6,9 +6,11 @@ import { room_id, allRooms } from "$lib/stores/room";
 import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
+import { selectMode } from "$lib/stores/select";
 
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
+import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 
 
 // SocketIO instance
@@ -42,6 +44,32 @@ onMount(async () => {
 
 
   socket.on("receive_room_messages", addMsgBatch);
+
+// TODO(SpeedFox198): continue here
+  socket.on("message_deleted", async data => {
+    // Decrease extra counter for room by number of messages deleted
+    // If n was 0 stop proccess (cuz no msg loaded, no nid delete)
+    // TODO(SpeedFox198): consider reverting count minusExtra function's weird syntax
+    // Remove message_id from msgStorage
+    // Remove messsage from allMsgs in room_id
+      // consider diff function
+      // for every msg
+        // get message index in list
+        // if message is head message, change next message to head
+    // TODO(SpeedFox198): consider doing the UI first before doing these
+
+    // Just gonan write here cuz why not:
+    // When adding new messages: (func1)
+      // If prev diff user_id, add msg as head message
+      // else, add msg is smol msg
+    // When adding old msgs:
+      // for each message
+        // perform *func1 on list of old msg
+        // check last old msg in list, compare with existing first msg
+        // if same user_id
+          // old -> head
+          // first -> smol
+  });
 });
 
 
@@ -133,6 +161,16 @@ async function formatMsg(data) {
 
   return { message_id, msg, room_id };
 }
+
+
+async function deleteMsgs(event) {
+  const data = event.detail;
+  socket.emit("delete_messages", data);
+}
+
+async function removeMsgs(data) {
+
+}
 </script>
 
 
@@ -150,8 +188,13 @@ async function formatMsg(data) {
     <!-- Messages Display Section -->
     <MessageDisplay getRoomMsgs={getRoomMsgs}/>
 
-    <!-- Messages Display Section -->
-    <MessageInput on:message={sendMsg}/>
+    {#if $selectMode}
+      <!-- Select Menu -->
+      <SelectMenu on:delete={deleteMsgs}/>
+    {:else}
+      <!-- Messages Display Section -->
+      <MessageInput on:message={sendMsg}/>
+    {/if}
   {:else}
     <div class="">
       <!-- TODO(SpeedFox198): add welcome page? lol -->

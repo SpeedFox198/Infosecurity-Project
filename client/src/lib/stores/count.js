@@ -40,5 +40,20 @@ export const count = (() => {
     return { n, extra };
   }
 
+  // TODO(SpeedFox198): rename them to proper names
+  function minusExtra(room_id) {
+    let n, extra;
+  
+    update(storage => {
+      const room_count = _get(storage, room_id);
+      n = room_count.n;
+      // When room messages are not loaded yet, do not modify extra value
+      extra = n ? room_count.extra-- : 0;
+      return storage;
+    });
+
+    return { n, extra };
+  }
+
   return { subscribe, nextN, nextExtra };
 })();
