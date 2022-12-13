@@ -6,9 +6,11 @@ import { room_id, allRooms } from "$lib/stores/room";
 import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
+import { selectMode } from "$lib/stores/select";
 
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
+import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 
 
 // SocketIO instance
@@ -133,6 +135,11 @@ async function formatMsg(data) {
 
   return { message_id, msg, room_id };
 }
+
+
+async function deleteMsgs(data) {
+  console.log(data)  // TODO(SpeedFox198): work on deleteMsgs
+}
 </script>
 
 
@@ -150,8 +157,13 @@ async function formatMsg(data) {
     <!-- Messages Display Section -->
     <MessageDisplay getRoomMsgs={getRoomMsgs}/>
 
-    <!-- Messages Display Section -->
-    <MessageInput on:message={sendMsg}/>
+    {#if $selectMode}
+      <!-- Select Menu -->
+      <SelectMenu on:delete={deleteMsgs}/>
+    {:else}
+      <!-- Messages Display Section -->
+      <MessageInput on:message={sendMsg}/>
+    {/if}
   {:else}
     <div class="">
       <!-- TODO(SpeedFox198): add welcome page? lol -->

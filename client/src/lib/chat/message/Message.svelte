@@ -50,7 +50,7 @@ function selectMsg() {
     <div class="bubble">
 
       {#if !$selectMode}
-        <button class="options" on:click={selectOption}><i class="fa-solid fa-ellipsis"></i></button>
+        <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis"></i></button>
       {/if}
 
       {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
