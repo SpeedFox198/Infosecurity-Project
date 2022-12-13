@@ -53,9 +53,9 @@ function loadOldMsgs() {
   }
 }
 
+
 function selectMsg(message_id) {
   selectedMsgs.toggle(message_id);
-  console.log($selectedMsgs)
 }
 </script>
 
@@ -63,12 +63,14 @@ function selectMsg(message_id) {
 <!-- Messages Display Section -->
 <div class="chat" bind:this={display} on:scroll={loadOldMsgs}>
   <div class="my-2"></div>
+
   {#each roomMsgs as message_id}
     <Message
       msg={$msgStorage[message_id]}
       selected={$selectedMsgs.has(message_id)}
       select={() => selectMsg(message_id)}/>
   {/each}
+
   <div id="anchor"></div>
 </div>
 

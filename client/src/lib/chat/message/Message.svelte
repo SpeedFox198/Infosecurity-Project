@@ -31,8 +31,13 @@ function selectMsg() {
 </script>
 
 
+
+
 <!-- Messages Bubble -->
-<div class="message d-flex {msg.sent ? "sent" : ""} {selected ? "selected" : ""}" on:click={selectMsg} on:keydown>
+<div class="message d-flex {msg.sent ? "sent" : ""} {selected ? "selected" : ""} {$selectMode ? "selecting" : ""}" on:click={selectMsg} on:keydown>
+  {#if $selectMode}
+    <i class="check fa-{selected ? "solid" : "regular"} fa-circle{selected ? "-check" : ""}"></i>
+  {/if}
 
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
     <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
@@ -75,6 +80,10 @@ function selectMsg() {
 
 .selected {
   background-color: var(--highlight);
+}
+
+.selecting {
+  cursor: pointer;
 }
 
 .username {
@@ -163,5 +172,9 @@ span {
 
 .bubble:hover .options, .tail:hover ~ .bubble .options {
   display: block;
+}
+
+.check {
+  color: var(--primary);
 }
 </style>
