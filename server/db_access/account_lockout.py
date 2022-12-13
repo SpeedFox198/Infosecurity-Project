@@ -2,6 +2,7 @@ from datetime import datetime
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Lockout
+from models.User import User
 
 #Create lockout
 async def create_lockout(user_id):
@@ -32,3 +33,10 @@ async def delete_lockout(user_id):
             await session.commit()
         except:
             return False
+
+#Get email from username
+async def get_email(username: str) -> str:
+    async with async_session() as session:
+        statement = sa.select(User.email).where(User.username == username)
+        result = await session.execute(statement)
+        return result.first()[0]

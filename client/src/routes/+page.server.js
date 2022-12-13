@@ -90,7 +90,7 @@ export const actions = {
         signupError: result.message
       }
     }
-    throw redirect(302, "/OTP")
+    throw redirect(302, "/otp")
   }
 }
 
