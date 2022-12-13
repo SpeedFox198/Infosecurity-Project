@@ -75,19 +75,24 @@ async def login(data: LoginBody):
                 #Check if a failed attempt exists
                 if get_failed_attempt(data.username)[1] == False:
                     create_failed_attempt(data.username, 1)
+                    await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
                     return {"message": "invalid credentials"}, 401
                     
                 #Update failed attempt if less than 5
                 if get_failed_attempt(data.username)[1] < 5 and get_failed_attempt(data.username)[1] > 0:
                     update_failed_attempt(data.username, get_failed_attempt(data.username)[1] + 1)
+                    await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
                     return {"message": "invalid credentials"}, 401
 
                 #Check if 5 failed attempts have been made
                 if get_failed_attempt(data.username)[1] == 5:
                     create_lockout(data.username)
                     delete_failed_attempt(data.username)
+                    await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
                     return {"message": "invalid credentials"}, 401
+                    
             else:
+                await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
                 return {"message": "invalid credentials"}, 401
         #Check if account is locked
         if get_lockout(data.username)[1] is not None:
@@ -97,7 +102,6 @@ async def login(data: LoginBody):
             else:
                 delete_lockout(data.username)
                 #Lock out timer expired
-            await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
             return {"message": "invalid credentials"}, 401
 
         await add_logged_in_device(session, device_id, user.user_id, browser, os, location)
