@@ -22,7 +22,14 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
     <img class="rounded-circle" src={msg.avatar} alt="User Avatar">
   </div>
-    <div class="bubble mt-auto">
+
+    {#if msg.sent}
+      <div class="right-tail"></div>
+    {:else}
+      <div class="left-tail"></div>
+    {/if}
+
+    <div class="bubble">
       {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
         <div class="username">{msg.username}</div>
       {/if}
@@ -49,16 +56,33 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
 
 .bubble {
   max-width: 75%;
-  padding: 0.5rem 0.6rem 0.65rem 0.8rem;
   background-color: var(--grey);
-  border-radius: 1.1rem;
   text-align: left;
+  padding: 0.5rem 0.6rem 0.65rem 0.8rem;
+  border-radius: 0 1.1rem 1.1rem 1.1rem;
 }
 
-.sent .bubble {
+.sent > .bubble {
+  border-radius: 1.1rem 0 1.1rem 1.1rem;
   background-color: var(--primary);
-  padding: 0.5rem 0.7rem 0.65rem 0.6rem;
+  padding: 0.65rem 0.7rem 0.65rem 0.6rem;
   color: var(--white);
+}
+
+.left-tail {
+  width: 0;
+  height: 0;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid var(--grey);
+  color: var(--grey);
+}
+
+.right-tail {
+  width: 0;
+  height: 0;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid var(--primary);
+  color: var(--primary);
 }
 
 .info-section {
