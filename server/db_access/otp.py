@@ -1,33 +1,38 @@
 import sqlalchemy as sa
-from db_access.globals import async_session
-from models import User
+from sqlalchemy.exc import SQLAlchemyError
 
-#Create OTP
-async def create_otp(user_id, otp, password):
+import models
+from db_access.globals import async_session
+from utils.logging import log_exception
+
+
+# Create OTP
+async def create_otp(email, otp, password) -> None:
     async with async_session() as session:
-        statement = sa.insert(User).values(user_id=user_id, otp=otp, password=password)
+        statement = sa.insert(models.OTP).values(email=email, otp=otp, password=password)
         try:
             await session.execute(statement)
             await session.commit()
-        except:
-            return False
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
-#Retrieve OTP
-async def get_otp(user_id):
+
+# Retrieve OTP
+async def get_otp(email) -> models.OTP | None:
     async with async_session() as session:
-        statement = sa.select(User).where(User.user_id == user_id)
+        statement = sa.select(models.OTP).where(models.OTP.email == email)
         result = await session.execute(statement)
         otp = result.scalars().first()
         if otp:
             return otp
-        return False
 
-#Delete OTP
-async def delete_otp(user_id):
+
+# Delete OTP
+async def delete_otp(email):
     async with async_session() as session:
-        statement = sa.delete(User).where(User.user_id == user_id)
+        statement = sa.delete(models.OTP).where(models.OTP.email == email)
         try:
             await session.execute(statement)
             await session.commit()
-        except:
+        except SQLAlchemyError:
             return False

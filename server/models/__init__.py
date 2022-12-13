@@ -11,4 +11,4 @@ from .Group import Group
 from .Lockout import Lockout
 from .FailedAttempts import FailedAttempts
 from .TwoFA import TwoFA
-
+from .OTP import OTP
