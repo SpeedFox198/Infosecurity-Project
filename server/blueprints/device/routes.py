@@ -44,9 +44,10 @@ async def get_devices():
 @device_bp.delete("/<string:device_id>")
 @login_required
 async def remove_device(device_id):
-    status = await remove_logged_in_device(device_id, await current_user.user_id)
-    if status == "fail":
+    deleted = await remove_logged_in_device(device_id, await current_user.user_id)
+
+    if not deleted:
         return {"message": "failed to remove device"}, 404
 
-    await log_info(f"{current_user.username} has removed device {device_id}")
+    await log_info(f"User {await current_user.username} has removed device {device_id}")
     return {"message": "device removed successfully"}
