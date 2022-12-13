@@ -1,7 +1,7 @@
 from datetime import datetime
 import sqlalchemy as sa
 from db_access.globals import async_session
-from server.models import Lockout
+from models import Lockout
 
 #Create lockout
 async def create_lockout(user_id):

@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
 from db_access.globals import async_session
-from server.models import FailedAttempts
+from models import FailedAttempts
 
 #Create failed login attempt
 async def create_failed_attempt(user_id, attempt_no):
