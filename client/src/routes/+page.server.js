@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import tough from "tough-cookie"
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({locals}) {
@@ -41,8 +42,15 @@ export const actions = {
       }
     }
     
-    const cookie = response.headers.get("set-cookie").split("=")[1]
-    cookies.set("QUART_AUTH", cookie)
+    const Cookie = tough.Cookie
+    const quartCookie = Cookie.parse(response.headers.get("set-cookie"))
+    cookies.set(quartCookie.key, quartCookie.value, {
+      path: quartCookie.path,
+      httpOnly: quartCookie.httpOnly,
+      sameSite: quartCookie.sameSite,
+      maxAge: quartCookie.maxAge,
+    })
+
     throw redirect(302, "/chat")
   },
   signup: async ({request}) => {
