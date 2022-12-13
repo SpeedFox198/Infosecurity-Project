@@ -5,6 +5,7 @@ import { msgStorage, allMsgs } from "$lib/stores/message";
 import { room_id } from "$lib/stores/room";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
+import { selectedMsgs } from "$lib/stores/select";
 
 import Message from "$lib/chat/message/Message.svelte";
 
@@ -21,7 +22,7 @@ let currentScroll;
 
 onMount(() => {
   autoScroll = true;  // Scroll the first time it is loaded
-})
+});
 
 
 beforeUpdate(() => {
@@ -51,15 +52,25 @@ function loadOldMsgs() {
     getRoomMsgs($room_id, n, extra);
   }
 }
+
+
+function selectMsg(message_id) {
+  selectedMsgs.toggle(message_id);
+}
 </script>
 
 
 <!-- Messages Display Section -->
 <div class="chat" bind:this={display} on:scroll={loadOldMsgs}>
   <div class="my-2"></div>
+
   {#each roomMsgs as message_id}
-    <Message msg={$msgStorage[message_id]}/>
+    <Message
+      msg={$msgStorage[message_id]}
+      selected={$selectedMsgs.has(message_id)}
+      select={() => selectMsg(message_id)}/>
   {/each}
+
   <div id="anchor"></div>
 </div>
 

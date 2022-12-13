@@ -1,6 +1,7 @@
 <script>
 import { room_id, allRooms } from "$lib/stores/room";
 import { count } from "$lib/stores/count";
+import { selectedMsgs } from "$lib/stores/select";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
@@ -13,6 +14,9 @@ export let getRoomMsgs;
 async function selectGrp(new_room) {
   // Set selected room_id
   room_id.set(new_room);
+
+  // Clear any selected messages in previous room
+  selectedMsgs.clear();
 
   // Get room messages via socket if n is 0
   if (!$count[$room_id]) {

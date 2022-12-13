@@ -2,6 +2,8 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
 
+from quart import request
+
 logger = logging.getLogger("bubbles_log")
 logger.setLevel(logging.INFO)
 
@@ -33,9 +35,9 @@ async def log_info(message: str) -> None:
     logger.info(message)
 
 
-async def log_exception() -> None:
-    logger.exception("Exception happened")
-
-
 async def log_critical(message: str) -> None:
     logger.critical(message)
+
+
+async def log_exception(error: Exception) -> None:
+    await log_error(f"Exception {type(error).__name__} happened at {request.path}")
