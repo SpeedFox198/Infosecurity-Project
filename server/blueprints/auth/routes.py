@@ -1,4 +1,5 @@
 import datetime
+import re
 from uuid import uuid4
 
 from quart import Blueprint, request
@@ -33,6 +34,10 @@ auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 @auth_bp.post("/sign-up")
 @validate_request(SignUpBody)
 async def sign_up(data: SignUpBody):
+    username_regex = r'^[a-zA-Z0-9_-]{0,32}$'
+    if not re.fullmatch(username_regex, data.username):
+        return {"message": "Invalid username"}, 400
+
     async with async_session() as session:
         statement = sa.select(User).where((User.email == data.email) | (User.username == data.username))
         result = await session.execute(statement)
