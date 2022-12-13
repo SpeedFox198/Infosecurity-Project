@@ -1,13 +1,12 @@
 from datetime import datetime
 
-from quart import request
 from sqlalchemy.exc import SQLAlchemyError
 
 from db_access.globals import async_session
 import sqlalchemy as sa
 
 from models import Device
-from utils.logging import log_error
+from utils.logging import log_exception
 
 
 async def add_logged_in_device(sql_session,
@@ -27,7 +26,7 @@ async def add_logged_in_device(sql_session,
         await sql_session.commit()
     except SQLAlchemyError as err:
         await sql_session.rollback()
-        await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
+        await log_exception(err)
 
 
 async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
@@ -40,7 +39,7 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
             await session.commit()
         except SQLAlchemyError as err:
             await session.rollback()
-            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
+            await log_exception(err)
             return False
 
         check_deleted_device_statement = sa.exists(
@@ -60,7 +59,7 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
             return True
         except SQLAlchemyError as err:
             await session.rollback()
-            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
+            await log_exception(err)
             return False
 
 
@@ -77,4 +76,4 @@ async def get_device(user_id: str, device_id: str) -> Device | None:
             return result.scalars().first()
         except SQLAlchemyError as err:
             await session.rollback()
-            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
+            await log_exception(err)

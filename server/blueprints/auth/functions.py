@@ -39,3 +39,8 @@ def send_otp_email(email: str, otp: str):
     message = f"Do not reply to this email.\nPlease enter {otp} as your OTP to complete your registration."
     gmail_send(email, subject, message)
 
+#Account lockout alert
+def send_alert_email(email: str):
+    subject = "Account lockout alert"
+    message = f"Do not reply to this email.\nYour account has been locked out due to too many failed login attempts. If it was not you, please change your password."
+    gmail_send(email, subject, message)

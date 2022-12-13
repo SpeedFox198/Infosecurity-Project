@@ -58,7 +58,7 @@ export const actions = {
     const username = data.get("username")
     const email = data.get("email")
     const password = data.get("password")
-    const confirmPassword = data.get("confirmPassword")
+    const confirmPassword = data.get("confirmpassword")
     const cfToken = data.get("cf-turnstile-response")
     
     const { cfSuccess, cfError } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
@@ -75,7 +75,7 @@ export const actions = {
       }
     }
 
-    const response = await fetch("https://127.0.0.1:8443/api/auth/signup", {
+    const response = await fetch("https://127.0.0.1:8443/api/auth/sign-up", {
       method: "POST",
       credentials: "include",
       headers: {
@@ -90,7 +90,7 @@ export const actions = {
         signupError: result.message
       }
     }
-    throw redirect(302, "/OTP")
+    throw redirect(302, "/otp")
   }
 }
 

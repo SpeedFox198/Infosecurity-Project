@@ -3,8 +3,6 @@
     export let toggleSignupOn
     export let errors
 
-    let email
-    let username
     let password
     let confirmPassword
     let requirementsDisplay
@@ -48,13 +46,13 @@
           <form method="POST" action="?/signup">
             <!-- email address -->
             <div class="form-floating mb-3">
-              <input name="email" type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" bind:value={email} required>
+              <input name="email" type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" required>
               <label for="floatingInput">Email address</label>
             </div>
 
             <!-- username -->
             <div class="form-floating mb-3">
-              <input name="username" type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" bind:value={username} required>
+              <input name="username" type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" required>
               <label for="floatingInput">Username</label>
             </div>
 
