@@ -22,23 +22,26 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
     <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
   </div>
-
-    {#if msg.sent}
-      <div class="right-tail"></div>
-    {:else}
-      <div class="left-tail"></div>
-    {/if}
-
-    <div class="bubble">
-      {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
-        <div class="username">{msg.username}</div>
+    <div class="bubble-container d-flex justify-content-end flex-shrink-1">
+      {#if msg.sent}
+        <div class="right-tail"></div>
+      {:else}
+        <div class="left-tail"></div>
       {/if}
-      <span class="text-wrap text-break">
-        {msg.content}
-      </span>
-      <span class="hidden" aria-hidden="true">{time}</span>
-      <span class="time d-block">{time}</span>
+  
+      <div class="bubble">
+        <button class="options"><i class="fa-solid fa-ellipsis"></i></button>
+        {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
+          <div class="username">{msg.username}</div>
+        {/if}
+        <span class="text-wrap text-break">
+          {msg.content}
+        </span>
+        <span class="hidden" aria-hidden="true">{time}</span>
+        <span class="time d-block">{time}</span>
+      </div>
     </div>
+
 </div>
 
 
@@ -49,23 +52,35 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
   overflow-anchor: none;
 }
 
+.sent {
+  flex-direction: row-reverse;
+}
+
 .username {
   font-weight: bold;
   font-size: 0.85rem;
 }
 
-.bubble {
+.bubble-container {
   max-width: 75%;
+  margin-top: 0.4rem;
+}
+
+.sent .bubble-container {
+  flex-direction: row-reverse;
+}
+
+.bubble {
   background-color: var(--grey);
   text-align: left;
   padding: 0.5rem 0.6rem 0.65rem 0.8rem;
   border-radius: 0 1.1rem 1.1rem 1.1rem;
 }
 
-.sent > .bubble {
+.sent .bubble {
   border-radius: 1.1rem 0 1.1rem 1.1rem;
   background-color: var(--primary);
-  padding: 0.65rem 0.7rem 0.65rem 0.6rem;
+  padding: 0.5rem 0.8rem 0.65rem 0.6rem;
   color: var(--white);
 }
 
@@ -107,11 +122,21 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
   visibility: hidden;
 }
 
-.sent {
-  flex-direction: row-reverse;
-}
-
 span {
   vertical-align: top;
+}
+
+.options {
+  position: relative;
+  float: right;
+  padding: 0;
+  margin: -0.3rem 0 -1rem -1rem;
+  z-index: 10;
+  height: 0;
+  border: 0;
+}
+
+.sent .options {
+  margin: -0.6rem 0 -1rem -1rem;
 }
 </style>
