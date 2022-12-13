@@ -25,6 +25,7 @@
 	"dependencies": {
 		"socket.io-client": "^4.5.3",
 		"svelte-turnstile": "^0.3.0",
+		"tough-cookie": "^4.1.2",
 		"ws": "^8.11.0"
 	}
 }
