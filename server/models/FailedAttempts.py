@@ -1,10 +1,11 @@
-from uuid import uuid4
-
 from sqlalchemy import (
     Column,
     CHAR,
-    INTEGER
+    INTEGER,
+    ForeignKey
 )
+
+from models import User
 
 from db_access.globals import Base
 
@@ -15,5 +16,5 @@ class FailedAttempts (Base):
         self.user_id = user_id
         self.attempts = attempts
 
-    user_id = Column(CHAR(36), primary_key=True)
+    user_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)
     attempts = Column(INTEGER)

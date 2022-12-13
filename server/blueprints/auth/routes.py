@@ -1,3 +1,4 @@
+import datetime
 from uuid import uuid4
 
 from quart import Blueprint, request
@@ -20,7 +21,10 @@ from models import (
 from models.request_data import LoginBody
 from models.response_data import UserData
 from models.request_data import SignUpBody
+from server.models import FailedAttempts, Lockout
 from .functions import generate_otp, send_otp_email
+from db_access.failed_attempts import get_failed_attempt, create_failed_attempt, update_failed_attempt, delete_failed_attempt
+from db_access.account_lockout import get_lockout, create_lockout, delete_lockout
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -57,7 +61,35 @@ async def login(data: LoginBody):
         result = await session.execute(statement)
         user = result.scalars().first()
         if not user:
-            return {"message": "invalid credentials"}, 401
+            #Check if user exists
+            username_check = sa.select(User).where(User.email == data.username)
+            if await session.execute(username_check) == True:
+                
+                #Check if a failed attempt exists
+                if get_failed_attempt(data.username)[1] == False:
+                    create_failed_attempt(data.username, 1)
+                    return {"message": "invalid credentials"}, 401
+                    
+                #Update failed attempt if less than 5
+                if get_failed_attempt(data.username)[1] < 5 and get_failed_attempt(data.username)[1] > 0:
+                    update_failed_attempt(data.username, get_failed_attempt(data.username)[1] + 1)
+                    return {"message": "invalid credentials"}, 401
+
+                #Check if 5 failed attempts have been made
+                if get_failed_attempt(data.username)[1] == 5:
+                    create_lockout(data.username)
+                    delete_failed_attempt(data.username)
+                    return {"message": "invalid credentials"}, 401
+            else:
+                return {"message": "invalid credentials"}, 401
+        #Check if account is locked
+        if get_lockout(data.username)[1] is not None:
+            #Check if lockout is less than 5 minutes
+            if datetime.datetime.now() - get_lockout(data.username)[1] < datetime.timedelta(minutes=5):
+                return {"message": "invalid credentials"}, 401
+            else:
+                delete_lockout(data.username)
+                #Lock out timer expired
 
         device_id = str(uuid4())
         await add_logged_in_device(session, device_id, user.user_id, request)
