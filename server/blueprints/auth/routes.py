@@ -2,7 +2,7 @@ import datetime
 import re
 from uuid import uuid4
 from quart_session import Session
-from quart import Blueprint, request, session
+from quart import Blueprint, request, session as otp_session 
 from quart_auth import (
     login_user,
     logout_user,
@@ -54,8 +54,8 @@ async def sign_up(data: SignUpBody):
         otp = generate_otp()
         await create_otp(user.email, otp, user.password)
         send_otp_email(user.email, otp)
-        session["username"] = user.username
-        session["email"] = user.email
+        otp_session["username"] = user.username
+        otp_session["email"] = user.email
         await session.commit()
         return {"message": "User created"}, 200
 
@@ -63,15 +63,16 @@ async def sign_up(data: SignUpBody):
 @auth_bp.post("/OTP")
 @validate_request(OTPBody)
 async def OTP(data : OTPBody):
-    email = session.get("email")
+    email = otp_session.get("email")
     async with async_session() as session:
         #Grab OTP and password from database
+        print(await get_otp(email))
         otp = (await get_otp(email))[1]
     #Check if OTP is correct
     if otp == data.otp:
         #Delete OTP from database
         #Create user
-        username = session.get("username")
+        username = otp_session.get("username")
         password = (await get_otp(email))[2]
         user = User(username, email, password)
         session.add(user)
