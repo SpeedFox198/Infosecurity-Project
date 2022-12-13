@@ -33,9 +33,5 @@ async def log_info(message: str) -> None:
     logger.info(message)
 
 
-async def log_exception() -> None:
-    logger.exception("Exception happened")
-
-
 async def log_critical(message: str) -> None:
     logger.critical(message)
