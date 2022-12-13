@@ -54,7 +54,6 @@ export const actions = {
     throw redirect(302, "/chat")
   },
   signup: async ({request}) => {
-    console.log("signup activated")
     const data = await request.formData()
     const username = data.get("username")
     const email = data.get("email")
