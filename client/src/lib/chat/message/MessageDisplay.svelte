@@ -22,7 +22,7 @@ let currentScroll;
 
 onMount(() => {
   autoScroll = true;  // Scroll the first time it is loaded
-})
+});
 
 
 beforeUpdate(() => {
