@@ -1,9 +1,7 @@
 from datetime import datetime
 
-import quart
 from sqlalchemy.exc import SQLAlchemyError
 
-from blueprints.auth.functions import get_user_agent_data, get_location_from_ip
 from db_access.globals import async_session
 import sqlalchemy as sa
 
@@ -11,9 +9,7 @@ from models import Device
 from utils.logging import log_exception
 
 
-async def add_logged_in_device(sql_session, device_id: str, user_id: str, request: quart.Request) -> None:
-    browser, os = await get_user_agent_data(request.user_agent.string)
-    location = await get_location_from_ip(request.remote_addr)
+async def add_logged_in_device(sql_session, device_id: str, user_id: str, browser: str, os: str, location: str) -> None:
     statement = sa.insert(Device).values(device_id=device_id,
                                          user_id=user_id,
                                          time=datetime.now(),

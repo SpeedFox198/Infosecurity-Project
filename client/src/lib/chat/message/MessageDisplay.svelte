@@ -72,9 +72,21 @@ function loadOldMsgs() {
   border-left: 0.1rem solid var(--grey-shadow);
 }
 
-/* TODO(SpeedFox198): Remove when unused */
 #anchor {
   overflow-anchor: auto;
   height: 1rem;
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--grey-shadow);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 0.6rem;
 }
 </style>
