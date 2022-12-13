@@ -1,5 +1,12 @@
 <script>
     import OTP from '$lib/auth/otp.svelte'
+    export let form
+    
+    let errors
+
+    if (form?.otpError) {
+      errors = form.otpError
+    }
   </script>
   
   
@@ -15,7 +22,7 @@
           <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
         </div>
         <div class="col-md-6">
-          <OTP />
+          <OTP errors={errors}/>
         </div>
       </div>
     </div>

@@ -56,7 +56,7 @@ async def sign_up(data: SignUpBody):
         return {"message": "Sign up completed, move to OTP"}, 200
 
 
-@auth_bp.post("/OTP")
+@auth_bp.post("/otp")
 @validate_request(OTPBody)
 async def OTP(data: OTPBody):
     email = otp_session.get("email")
