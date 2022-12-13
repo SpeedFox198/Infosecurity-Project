@@ -20,7 +20,7 @@ const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
 <!-- Messages Bubble -->
 <div class="message d-flex {msg.sent ? "sent" : ""}">
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
-    <img class="rounded-circle" src={msg.avatar} alt="User Avatar">
+    <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
   </div>
 
     {#if msg.sent}
