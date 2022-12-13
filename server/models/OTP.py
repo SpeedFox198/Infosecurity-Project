@@ -3,8 +3,11 @@ from uuid import uuid4
 from sqlalchemy import (
     Column,
     CHAR,
-    INTEGER
+    INTEGER,
+    ForeignKey
 )
+
+from models import User
 
 from db_access.globals import Base
 
@@ -15,5 +18,5 @@ class OTP (Base):
         self.user_id = user_id
         self.otp = otp
 
-    user_id = Column(CHAR(36), primary_key=True)
+    user_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)
     otp = Column(INTEGER(6), nullable=False)

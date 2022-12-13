@@ -72,7 +72,6 @@ function loadOldMsgs() {
   border-left: 0.1rem solid var(--grey-shadow);
 }
 
-/* TODO(SpeedFox198): Remove when unused */
 #anchor {
   overflow-anchor: auto;
   height: 1rem;

@@ -37,7 +37,7 @@ async def connect(sid, environ, auth):
 @sio.event
 async def disconnect(sid):
     """ Event when client disconnects from server """
-    # TODO(SpeedFox198): remove if unused
+    # TODO(SpeedFox198): change to log later
     # print("disconnected:", sid)
 
 
