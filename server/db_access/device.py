@@ -1,12 +1,13 @@
 from datetime import datetime
 
+from quart import request
 from sqlalchemy.exc import SQLAlchemyError
 
 from db_access.globals import async_session
 import sqlalchemy as sa
 
 from models import Device
-from utils.logging import log_exception
+from utils.logging import log_error
 
 
 async def add_logged_in_device(sql_session,
@@ -24,9 +25,9 @@ async def add_logged_in_device(sql_session,
     try:
         await sql_session.execute(statement)
         await sql_session.commit()
-    except SQLAlchemyError:
+    except SQLAlchemyError as err:
         await sql_session.rollback()
-        await log_exception()
+        await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
 
 
 async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
@@ -37,9 +38,9 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
         try:
             await session.execute(delete_device_statement)
             await session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as err:
             await session.rollback()
-            await log_exception()
+            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
             return False
 
         check_deleted_device_statement = sa.exists(
@@ -57,9 +58,9 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
                 return False
 
             return True
-        except SQLAlchemyError:
+        except SQLAlchemyError as err:
             await session.rollback()
-            await log_exception()
+            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
             return False
 
 
@@ -74,6 +75,6 @@ async def get_device(user_id: str, device_id: str) -> Device | None:
         try:
             result = await session.execute(statement)
             return result.scalars().first()
-        except SQLAlchemyError:
+        except SQLAlchemyError as err:
             await session.rollback()
-            await log_exception()
+            await log_error(f"Exception happened: {type(err).__name__} at {request.path}")
