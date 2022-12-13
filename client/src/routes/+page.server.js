@@ -54,11 +54,12 @@ export const actions = {
     throw redirect(302, "/chat")
   },
   signup: async ({request}) => {
+    console.log("signup activated")
     const data = await request.formData()
     const username = data.get("username")
     const email = data.get("email")
     const password = data.get("password")
-    const confirmPassword = data.get("confirmPassword")
+    const confirmPassword = data.get("confirmpassword")
     const cfToken = data.get("cf-turnstile-response")
     
     const { cfSuccess, cfError } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
@@ -75,7 +76,7 @@ export const actions = {
       }
     }
 
-    const response = await fetch("https://127.0.0.1:8443/api/auth/signup", {
+    const response = await fetch("https://127.0.0.1:8443/api/auth/sign-up", {
       method: "POST",
       credentials: "include",
       headers: {
