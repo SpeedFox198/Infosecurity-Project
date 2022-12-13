@@ -6,7 +6,9 @@ export const actions = {
         const otp = data.get("otp")
         const response = await fetch("https://127.0.0.1:8443/api/auth/OTP", {   
             method: "POST",
+            credentials: "include",
             headers: {
+                "Accept": "application/json",
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({"otp": otp})

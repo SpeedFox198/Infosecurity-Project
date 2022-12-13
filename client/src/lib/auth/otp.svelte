@@ -7,7 +7,7 @@
       <form method="POST" action="?/otp">
         <div class="form-floating mb-3">
           <input
-            type="text"
+            type="number"
             name="otp"
             class="form-control rounded-3"
             id="floatingInput"

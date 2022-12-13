@@ -1,6 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import tough from "tough-cookie"
 
+
+const Cookie = tough.Cookie
+
 /** @type {import('./$types').PageServerLoad} */
 export async function load({locals}) {
     if (locals.user) {
@@ -42,7 +45,6 @@ export const actions = {
       }
     }
     
-    const Cookie = tough.Cookie
     const quartCookie = Cookie.parse(response.headers.get("set-cookie"))
     cookies.set(quartCookie.key, quartCookie.value, {
       path: quartCookie.path,
@@ -53,7 +55,7 @@ export const actions = {
 
     throw redirect(302, "/chat")
   },
-  signup: async ({request}) => {
+  signup: async ({request, cookies}) => {
     const data = await request.formData()
     const username = data.get("username")
     const email = data.get("email")
@@ -90,6 +92,15 @@ export const actions = {
         signupError: result.message
       }
     }
+
+    const otpCookie = Cookie.parse(response.headers.get("set-cookie"))
+    cookies.set(otpCookie.key, otpCookie.value, {
+      path: otpCookie.path,
+      httpOnly: otpCookie.httpOnly,
+      sameSite: otpCookie.sameSite,
+      maxAge: otpCookie.maxAge,
+    })
+
     throw redirect(302, "/otp")
   }
 }
