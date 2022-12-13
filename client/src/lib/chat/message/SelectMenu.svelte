@@ -1,5 +1,6 @@
 <script>
 import { createEventDispatcher } from "svelte";
+import { room_id } from "$lib/stores/room";
 import { selectedMsgs } from "$lib/stores/select";
 
 const dispatch = createEventDispatcher();
@@ -10,7 +11,10 @@ $: singular = num === 1;
 
 async function deleteMsgs(event) {
   // Trigger deletion of the selected messages
-  dispatch("delete", $selectedMsgs);
+  dispatch("delete", {
+    "messages": Array.from($selectedMsgs),
+    "room_id": $room_id
+  });
 
   // Clear any selected messages that are to be deleted
   selectedMsgs.clear();
