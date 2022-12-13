@@ -20,7 +20,8 @@ from models import (
 from models.request_data import LoginBody
 from models.response_data import UserData
 from models.request_data import SignUpBody
-from .functions import generate_otp, send_otp_email
+from utils.logging import log_info
+from .functions import generate_otp, send_otp_email, get_user_agent_data, get_location_from_ip
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -39,6 +40,7 @@ async def sign_up(data: SignUpBody):
         user = User(username=data.username, email=data.email, password=data.password)
         session.add(user)
         await session.commit()
+        await log_info(f"User {user.username} has been created using {user.email}")
         otp = generate_otp()
         send_otp_email(user.email, otp)
         return {"message": "User created"}, 200
@@ -52,16 +54,21 @@ async def OTP():
 @auth_bp.post("/login")
 @validate_request(LoginBody)
 async def login(data: LoginBody):
+    device_id = str(uuid4())
+    browser, os = await get_user_agent_data(request.user_agent.string)
+    location = await get_location_from_ip(request.remote_addr)
+
     async with async_session() as session:
         statement = sa.select(User).where((User.email == data.username) & (User.password == data.password))
         result = await session.execute(statement)
         user = result.scalars().first()
         if not user:
+            await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
             return {"message": "invalid credentials"}, 401
 
-        device_id = str(uuid4())
-        await add_logged_in_device(session, device_id, user.user_id, request)
+        await add_logged_in_device(session, device_id, user.user_id, browser, os, location)
         login_user(AuthedUser(f"{user.user_id}.{device_id}"))
+        await log_info(f"User {user.username} has logged in using {browser}, {os} from {location}")
         return {"message": "login success"}, 200
 
 

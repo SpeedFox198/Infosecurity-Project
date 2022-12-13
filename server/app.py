@@ -54,7 +54,7 @@ async def unauthorized(*_):
 
 @app.errorhandler(RequestSchemaValidationError)
 async def invalid_schema(*_):
-    return {"message": "Invalid JSON body"}, 400
+    return {"message": "Invalid request"}, 400
 
 # The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)

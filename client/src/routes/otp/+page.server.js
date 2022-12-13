@@ -5,8 +5,4 @@ export async function load({locals}) {
     if (!locals.user) {
         throw redirect(302, "/")
     }
-
-    if (locals.user.verified) {
-        throw redirect(302, "/")
-    }
 };

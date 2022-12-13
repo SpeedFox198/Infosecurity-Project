@@ -11,6 +11,7 @@ from db_access.globals import async_session
 from models import Device
 from models.response_data import DeviceListData, DeviceData
 from utils import to_unix
+from utils.logging import log_info
 
 device_bp = Blueprint("devices", __name__, url_prefix="/devices")
 
@@ -47,4 +48,5 @@ async def remove_device(device_id):
     if status == "fail":
         return {"message": "failed to remove device"}, 404
 
+    await log_info(f"{current_user.username} has removed device {device_id}")
     return {"message": "device removed successfully"}
