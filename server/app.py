@@ -7,8 +7,8 @@ from quart_auth import (
     logout_user
 )
 import quart_auth
-from quart_rate_limiter import RateLimit, RateLimiter
 import quart_rate_limiter
+from quart_rate_limiter import RateLimit, RateLimiter
 import socketio
 from quart_schema import QuartSchema, RequestSchemaValidationError
 
