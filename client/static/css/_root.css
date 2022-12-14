@@ -1,18 +1,26 @@
 :root {
     /* Colours */
     --black: #202223;
+
     --grey-dark: #54585b;
+
     --grey-shadow: #d2d7e8;
     --grey: #e1e5f2;
+
     --white: #ffffff;
+
     --primary-dark: #022b3a;
+
     --primary-shadow: #1a6f80;
     --primary: #1f7a8c;
+
     --primary-light-shadow: #b1cfed;
     --primary-light: #bfdbf7;
 
+    --red-dark: #aa3f35;
+
     /* Highlight */
-    --highlight: #1f7a8c2e;
+    --highlight-primary: #1f7a8c2e;
 
     /* Misc */
     --left-bar-length: 25rem;

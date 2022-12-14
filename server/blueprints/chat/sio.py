@@ -54,6 +54,7 @@ async def send_message(sid, data):
         data["reply_to"],
         data["type"]
     )
+    print("HERE HERE HERE", message)
 
     # Insert object into database
     async with async_session() as session:
@@ -81,11 +82,12 @@ async def send_message(sid, data):
 # TODO(SpeedFox198): authenticate and verify msg (user, and format)
 @sio.event
 async def get_room_messages(sid, data):
-    # print(f"Received {data}")  # TODO(SpeedFox198): change to log later
+    print(f"Received {data}")  # TODO(SpeedFox198): change to log later
     room_id = data["room_id"]
     n = data["n"]
+    extra = data["extra"]
     limit  = MESSAGE_LOAD_NUMBER
-    offset = MESSAGE_LOAD_NUMBER * n
+    offset = MESSAGE_LOAD_NUMBER * n + extra
 
     room_messages = ()  # Default room messages to empty tuple
 
@@ -114,3 +116,37 @@ async def get_room_messages(sid, data):
         "room_id": room_id,
         "room_messages": room_messages
     }, to=sid)
+
+
+# TODO(SpeedFox198): authenticate and verify msg (user, and format)
+# ensure user is part of room and is admin
+# ensure data in correct format, (length of data also?)
+@sio.event
+async def delete_messages(sid, data):
+    print(f"Received {data}")  # TODO(SpeedFox198): change to log later
+
+    messages = data["messages"]
+    room_id = data["room_id"]
+
+    # Delete messages from database (ensures that room_id is correct)
+    async with async_session() as session:
+        statement = sa.select(Message.message_id).where(
+            (Message.message_id.in_(messages))
+            & (Message.room_id == room_id)
+        )
+        result = (await session.execute(statement)).fetchall()
+        messages = [row[0] for row in result]
+        print(messages)
+
+        statement = sa.delete(Message).where(Message.message_id.in_(messages))
+        await session.execute(statement)
+
+        await session.commit()
+
+    # Tell other clients in same room to delete the same messages
+    await sio.emit("message_deleted", {
+        "messages": messages,
+        "room_id": room_id
+    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
+
+#TODO(SpeedFox198): after deletion rmb to decrease extra count in svelte stores!

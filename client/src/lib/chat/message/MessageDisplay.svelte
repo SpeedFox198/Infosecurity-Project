@@ -64,13 +64,15 @@ function selectMsg(message_id) {
 <div class="chat" bind:this={display} on:scroll={loadOldMsgs}>
   <div class="my-2"></div>
 
-  {#each roomMsgs as message_id}
+  <!-- Load each message in the room -->
+  {#each roomMsgs as messageInfo}
     <Message
-      msg={$msgStorage[message_id]}
-      selected={$selectedMsgs.has(message_id)}
-      select={() => selectMsg(message_id)}/>
+      msg={$msgStorage[messageInfo.message_id]}
+      selected={$selectedMsgs.has(messageInfo.message_id)}
+      select={() => selectMsg(messageInfo.message_id)}/>
   {/each}
 
+  <!-- Anchor page to bottom when at bottom -->
   <div id="anchor"></div>
 </div>
 

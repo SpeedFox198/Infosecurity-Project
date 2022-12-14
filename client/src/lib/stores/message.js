@@ -15,7 +15,24 @@ export const getTempId = (() => {
   }
 })();
 
-
+/*
+ * Stores a collection of message objects identified by their message_id
+ *
+ * Structure:
+ * {
+ *   <message_id>: {
+ *     sent: boolean,     // True if message was sent by current user
+ *     time: int,         // Timestamp in unix time format
+ *     content: str,      // Content of message
+ *     reply_to: str,     // message_id of message being replied to TODO(SpeedFox198): remove when unsused
+ *     type: str,         // Type of message
+ *     corner?: boolean,  // True if message is last of consecutive messages sent by same user
+ *     username?: str,    // Username of user that sent the message
+ *     avatar?: str       // Path to image of avatar of user
+ *   },
+ *   ...
+ * }
+ */
 export const msgStorage = (() => {
   const { subscribe, update } = writable({});
 
@@ -32,6 +49,7 @@ export const msgStorage = (() => {
     });
   }
 
+  // Change message_id from temp_id to new id received from server
   async function changeId(temp_id, message_id, time) {
     update(storage => {
       // Change temp_id to message_id
@@ -45,14 +63,39 @@ export const msgStorage = (() => {
     });
   }
 
-  return { subscribe, updateMsg, changeId };
+  async function deleteMsg(message_id) {
+    let msg;
+    update(storage => {
+      msg = storage[message_id];
+      delete storage[message_id];
+      return storage;
+    });
+    return msg;
+  }
+
+  return { subscribe, updateMsg, changeId, deleteMsg };
 })();
 
 
+/*
+ * Stores a collection of list of message_id and user_id for each room
+ *
+ * Structure:
+ * {
+ *   <room_id>: [{
+ *     message_id: <message_id>,
+ *     user_id: <user_id>
+ *   }, ...],
+ *   ...
+ * }
+ * 
+ * message_id are sorted in ascending order by time
+ * (Earliest message at index 0, latest message at final index)
+ */
 export const allMsgs = (() => {
   const { subscribe, update } = writable({});
 
-  async function addMsg(message_id, room_id, add_prev) {
+  async function addMsg(msgInfo, room_id, add_prev) {
     update(storage => {
 
       // Get room messages array
@@ -65,9 +108,9 @@ export const allMsgs = (() => {
       }
 
       if (!add_prev) {  // Add new message to array
-        roomMsgs.push(message_id);
+        roomMsgs.push(msgInfo);
       } else {  // Add older(previous) messages to front of array
-        roomMsgs.unshift.apply(roomMsgs, message_id);
+        roomMsgs.unshift.apply(roomMsgs, msgInfo);
       }
 
       return storage;
@@ -87,14 +130,33 @@ export const allMsgs = (() => {
     update(storage => {
 
       // Get index of temp_id in storage
-      const index = storage[room_id].indexOf(temp_id);
+      const index = storage[room_id].findIndex(msgInfo => msgInfo.message_id === temp_id);
 
       // Replace temp_id with message_id
-      if (index > -1) storage[room_id][index] = message_id;
+      if (index > -1) storage[room_id][index].message_id = message_id;
 
       return storage;
     });
   }
 
-  return { subscribe, addMsg, initRooms, changeId };
+  async function deleteMsg(room_id, message_id) {
+    let user_id, index;
+    update(storage => {
+      let roomMsgs = storage[room_id];
+      if (roomMsgs) {
+        // Get index of message_id in storage
+        index = roomMsgs.findIndex(msgInfo => msgInfo.message_id === message_id);
+        
+        // Delete message if found
+        if (index > -1); {
+          ({user_id} = roomMsgs[index]);  // Get user_id of message
+          roomMsgs.splice(index, 1);
+        }
+      }
+      return storage;
+    });
+    return { index, user_id };
+  }
+
+  return { subscribe, addMsg, initRooms, changeId, deleteMsg };
 })();

@@ -40,5 +40,19 @@ export const count = (() => {
     return { n, extra };
   }
 
-  return { subscribe, nextN, nextExtra };
+  // TODO(SpeedFox198): rename them to proper names
+  function decreaseExtra(room_id, amount) {
+    let n, extra;
+  
+    update(storage => {
+      const room_count = _get(storage, room_id);
+      n = room_count.n;
+      room_count.extra -= amount;
+      return storage;
+    });
+
+    return { n, extra };
+  }
+
+  return { subscribe, nextN, nextExtra, decreaseExtra };
 })();

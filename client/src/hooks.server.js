@@ -16,7 +16,8 @@ export const handle = async ({event, resolve}) => {
     const userResponse = await response.json()
 
     if (userResponse.message === "not authenticated") {
-        return await resolve(event)
+      event.cookies.delete("QUART_AUTH")
+      return await resolve(event)
     }
  
     event.locals.user = userResponse    
