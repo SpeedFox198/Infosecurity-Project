@@ -10,7 +10,7 @@ from models import User
 from db_access.globals import Base
 
 class FailedAttempts (Base):
-    __tablename__ = "FailedAttempts"
+    __tablename__ = "Failed_Attempts"
 
     def __init__ (self, user_id, attempts):
         self.user_id = user_id

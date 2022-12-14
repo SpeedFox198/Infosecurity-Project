@@ -52,7 +52,12 @@
 
             <!-- username -->
             <div class="form-floating mb-3">
-              <input name="username" type="text" class="form-control rounded-3" id="floatingInput" placeholder="username" required>
+              <input name="username"
+               type="text"
+               class="form-control rounded-3" 
+               id="floatingInput" 
+               placeholder="username" 
+               required>
               <label for="floatingInput">Username</label>
             </div>
 
@@ -61,7 +66,7 @@
               <input name="password" type="password"
                class="form-control rounded-3"
                bind:value={password}
-               on:click={showRequirements}
+               on:focus={showRequirements}
                on:keyup={checkPasswordRequirements}
                on:blur={hideRequirements}
                title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 or more characters" 

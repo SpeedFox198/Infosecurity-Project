@@ -34,5 +34,6 @@ async def delete_otp(email):
         try:
             await session.execute(statement)
             await session.commit()
-        except SQLAlchemyError:
-            return False
+        except SQLAlchemyError as err:
+            await session.rollback()
+            await log_exception(err)
