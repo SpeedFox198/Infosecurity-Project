@@ -19,6 +19,8 @@ from models import AuthedUser
 from quart import Quart
 from quart_cors import cors
 
+from utils.logging import log_warning
+
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
@@ -44,6 +46,9 @@ async def before_request():
     valid_device = await get_device(await current_user.user_id, await current_user.device_id)
 
     if not valid_device:
+        await log_warning(
+            f"Access attempt was made with an invalid device by {await current_user.username}"
+        )
         logout_user()
 
 
