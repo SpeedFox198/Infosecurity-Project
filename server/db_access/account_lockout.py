@@ -26,7 +26,6 @@ async def get_lockout(user_id: str) -> Lockout | None:
         statement = sa.select(Lockout).where(Lockout.user_id == user_id)
         result = await session.execute(statement)
         lockout = result.scalars().first()
-        print(lockout)
         if lockout:
             return lockout
 
