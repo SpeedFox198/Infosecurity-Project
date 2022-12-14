@@ -121,9 +121,19 @@ async function getUser(user_id) {
 
 async function addMsg(data) {
   const roomMsgs = $allMsgs[data.room_id] || [];
-  let prev_id;
-  if (roomMsgs.length) prev_id = roomMsgs[roomMsgs.length - 1].user_id_;
+  let prevInfo, prev_id;
+  if (roomMsgs.length) {
+    prevInfo = roomMsgs[roomMsgs.length - 1];
+    prev_id = prevInfo.user_id_;
+  }
+  
   const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
+  
+  if (prev_id === user_id_) {
+    prevMsg = $msgStorage[prevInfo.message_id];
+    delete prevMsg.corner;
+    await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
+  }
 
   await msgStorage.updateMsg(msg, message_id);
   await allMsgs.addMsg({ user_id_, message_id }, room_id);
@@ -133,15 +143,17 @@ async function addMsg(data) {
 async function addMsgBatch(data) {
   let messageInfoList = [];
   let room_messages = {};
-  let msg, message_id, user_id_, prev_id;
+  let msg, message_id, user_id_, prevMsg, prev_id;
 
   // Go through messages and format them for display in JavaScript
   for (let i=0; i < data.room_messages.length; i++) {
     // Get message and message_id
     ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id));
-    messageInfoList.push({user_id_, message_id});// Add message_id to list
-    delete msg.message_id;                       // Remove message_id property from message
-    room_messages[message_id] = msg;             // Add message to object
+    messageInfoList.push({user_id_, message_id});   // Add message_id to list
+    delete msg.message_id;                          // Remove message_id property from message
+    room_messages[message_id] = msg;                // Add message to object
+    if (prev_id === user_id_) delete prevMsg.corner;// Delete corner if not consecutive message 
+    prevMsg = msg;
     prev_id = user_id_;
   }
 
@@ -152,6 +164,7 @@ async function addMsgBatch(data) {
     msg = $msgStorage[msgInfo.message_id];
     delete msg.username;
     delete msg.avatar;
+    delete prevMsg.corner;
     msgStorage.updateMsg(msg, msgInfo.message_id);
   }
 
@@ -168,13 +181,14 @@ async function formatMsg(data, prev_id) {
   const { message_id, room_id, time, content, reply_to, type } = data;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
+  const corner = true;  // For styling corner of last consecutive message
   let msg;
 
   // Check if previous message is sent by same user
   if (prev_id && prev_id === user_id_){
     
     // Continuous messages have no avatar
-    msg = { sent, time, content, reply_to, type };
+    msg = { sent, time, content, reply_to, type, corner };
     
   } else {
     
@@ -184,7 +198,7 @@ async function formatMsg(data, prev_id) {
     const avatar = user.avatar;
     const username = user.username;
  
-    msg = { sent, username, avatar, time, content, reply_to, type };
+    msg = { sent, username, avatar, time, content, reply_to, type, corner };
 
   }
 

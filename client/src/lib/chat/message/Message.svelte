@@ -37,8 +37,6 @@ function selectMsg() {
 </script>
 
 
-
-
 <!-- Messages Bubble -->
 <div
   class="message d-flex"
@@ -46,6 +44,7 @@ function selectMsg() {
   class:selecting={$selectMode}
   class:selected
   class:consecutive={!msg.avatar}
+  class:corner={msg.corner}
   on:click={selectMsg} on:keydown
 >
   {#if $selectMode}
@@ -131,11 +130,20 @@ function selectMsg() {
 }
 
 .consecutive .bubble {
-  border-radius: 0.7rem 1.1rem 1.1rem 0.7rem;
+  border-top-left-radius: 0.7rem;
 }
 
 .sent.consecutive .bubble {
-  border-radius: 1.1rem 0.7rem 0.7rem 1.1rem;
+  border-top-left-radius: 1.1rem;
+  border-top-right-radius: 0.7rem;
+}
+
+.corner .bubble {
+  border-bottom-left-radius: 1.1rem;
+}
+
+.sent.corner .bubble {
+  border-bottom-right-radius: 1.1rem;
 }
 
 .tail {
