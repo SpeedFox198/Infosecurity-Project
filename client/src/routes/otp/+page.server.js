@@ -10,6 +10,7 @@ export const actions = {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
+                "Cookie": request.headers.get("cookie")
             },
             body: JSON.stringify({"otp": otp})
         });  

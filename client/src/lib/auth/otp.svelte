@@ -11,6 +11,7 @@
         <div class="form-floating mb-3">
           <input
             type="number"
+            step="1"
             name="otp"
             class="form-control rounded-3"
             id="floatingInput"
