@@ -31,7 +31,7 @@ QuartSchema(app)
 
 rate_limiter = RateLimiter(
     app,
-    default_limits=[RateLimit(2, timedelta(seconds=10))]
+    default_limits=[RateLimit(15, timedelta(minutes=1))]
 )
 
 auth_manager = AuthManager()
