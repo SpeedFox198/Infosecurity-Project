@@ -47,30 +47,23 @@ onMount(async () => {
 
 
   socket.on("message_deleted", async data => {
-    
+    const room_id = data.room_id;
+    let roomCount = $count[room_id];
+
+    // If room is not laoded yet, end deletion (no message for deleting)
+    if (!roomCount || roomCount.n === 0) return;
+
     // Delete every message in list
-    let message_id, room_id;
+    let message_id;
     let countRemoved = 0;
     for (let i=0; i < data.messages.length; i++) {
       message_id = data.messages[i];
-      room_id = data.room_id;
       
       // Remove message from storage
       countRemoved += await removeMsg(message_id, room_id);
     }
 
-    // TODO(SpeedFox198): attempt deletion, 
-    // return actual number deleted and decrease extra count from there
-
-    // Decrease extra counter for room by number of messages deleted
-    // const { n } = count.minusExtra(data.room_id);
-
-    // If n was 0 stop proccess
-    // As no messages in room was loaded, no need to delete from storage
-    // if (n === 0) return;
-
-    // TODO(SpeedFox198): consider reverting count minusExtra function's weird syntax
-
+    count.decreaseExtra(room_id, countRemoved);
   });
 });
 
