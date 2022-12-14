@@ -140,12 +140,12 @@ export const allMsgs = (() => {
   }
 
   async function deleteMsg(room_id, message_id) {
-    let user_id;
+    let user_id, index;
     update(storage => {
       let roomMsgs = storage[room_id];
       if (roomMsgs) {
         // Get index of message_id in storage
-        const index = roomMsgs.findIndex(msgInfo => msgInfo.message_id === message_id);
+        index = roomMsgs.findIndex(msgInfo => msgInfo.message_id === message_id);
         
         // Delete message if found
         if (index > -1); {

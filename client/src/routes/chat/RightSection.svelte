@@ -214,21 +214,25 @@ async function deleteMsgs(event) {
 // Removes message from storage and updates messages for UI, returns true if message removed
 async function removeMsg(message_id, room_id) {
     // Delete and retrieve message from msgStorage
-    const msg = msgStorage.deleteMsg(message_id);
+    const msg = await msgStorage.deleteMsg(message_id);
 
     // If message not in storage, skip deletion (nothing to delete)
     if (!msg) return 0;
 
     // Delete and retrieve message index in list
-    const { index, user_id } = allMsgs.deleteMsg(room_id, message_id);
+    const { index, user_id } = await allMsgs.deleteMsg(room_id, message_id);
 
     // Only continue deletion if message was found (a check just in case)
     if (index <= -1) return 0;
 
+
+    // Get info of previous and next messages
+    const roomMsgs = $allMsgs[room_id];
+    const nextInfo = roomMsgs[index];
+    const prevInfo = roomMsgs[index-1];
+
     // If message has avatar, add avatar to next message
-    let roomMsgs = $allMsgs[room_id];
     if (msg.avatar) {
-      let nextInfo = roomMsgs[index];
 
       // If next message is sent by same user
       if (nextInfo && nextInfo.user_id == user_id) {
@@ -241,13 +245,27 @@ async function removeMsg(message_id, room_id) {
 
     // If message is last of continuos, add rounded corner to previous message
     if (msg.corner) {
-      let prevInfo = roomMsgs[index-1];
 
       // If previous message is sent by same user
       if (prevInfo && prevInfo.user_id == user_id) {
         let prevMsg = $msgStorage[prevInfo.message_id];
         prevMsg.corner = true;
         msgStorage.updateMsg(prevMsg, prevInfo.message_id);
+      }
+    }
+
+    // If previous and next messages are sent by same person merge formats
+    if (msg.corner) {
+
+      // If previous message is sent by same user
+      if (prevInfo && nextInfo && prevInfo.user_id == nextInfo.user_id) {
+        let prevMsg = $msgStorage[prevInfo.message_id];
+        let nextMsg = $msgStorage[nextInfo.message_id];
+        delete prevMsg.corner
+        delete nextMsg.username
+        delete nextMsg.avatar
+        msgStorage.updateMsg(prevMsg, prevInfo.message_id);
+        msgStorage.updateMsg(nextMsg, nextInfo.message_id);
       }
     }
 

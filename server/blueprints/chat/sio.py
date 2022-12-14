@@ -54,6 +54,7 @@ async def send_message(sid, data):
         data["reply_to"],
         data["type"]
     )
+    print("HERE HERE HERE", message)
 
     # Insert object into database
     async with async_session() as session:
@@ -81,7 +82,7 @@ async def send_message(sid, data):
 # TODO(SpeedFox198): authenticate and verify msg (user, and format)
 @sio.event
 async def get_room_messages(sid, data):
-    # print(f"Received {data}")  # TODO(SpeedFox198): change to log later
+    print(f"Received {data}")  # TODO(SpeedFox198): change to log later
     room_id = data["room_id"]
     n = data["n"]
     extra = data["extra"]
