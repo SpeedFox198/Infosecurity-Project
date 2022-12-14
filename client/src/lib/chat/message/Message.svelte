@@ -101,6 +101,11 @@ function selectMsg() {
   background-color: var(--highlight-primary);
 }
 
+.corner {
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
 .username {
   font-weight: bold;
   font-size: 0.85rem;
@@ -108,7 +113,8 @@ function selectMsg() {
 
 .bubble-container {
   max-width: 75%;
-  margin-top: 0.4rem;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
 }
 
 .consecutive .bubble-container {
