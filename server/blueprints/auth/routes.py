@@ -1,8 +1,7 @@
 import datetime
 import re
 from uuid import uuid4
-from quart_session import Session
-from quart import Blueprint, request, session as otp_session 
+from quart import Blueprint, request, session as otp_session
 from quart_auth import (
     login_user,
     logout_user,
@@ -21,8 +20,6 @@ from models import (
 from models.request_data import LoginBody, SignUpBody, OTPBody
 from models.response_data import UserData
 
-from .functions import generate_otp, send_otp_email
-from db_access.failed_attempts import get_failed_attempt, create_failed_attempt, update_failed_attempt, delete_failed_attempt
 from db_access.account_lockout import get_lockout, create_lockout, delete_lockout, get_email
 from db_access.otp import get_otp, create_otp, delete_otp
 from db_access.failed_attempts import get_failed_attempt, create_failed_attempt, update_failed_attempt, \
@@ -50,37 +47,38 @@ async def sign_up(data: SignUpBody):
             return {"message": "User already exists"}, 409
 
         user = User(username=data.username, email=data.email, password=data.password)
-        await log_info(f"User {user.username} has been created using {user.email}")
+
         otp = generate_otp()
         await create_otp(user.email, otp, user.password)
         send_otp_email(user.email, otp)
         otp_session["username"] = user.username
         otp_session["email"] = user.email
-        await session.commit()
-        return {"message": "User created"}, 200
+        return {"message": "Sign up completed, move to OTP"}, 200
 
 
-@auth_bp.post("/OTP")
+@auth_bp.post("/otp")
 @validate_request(OTPBody)
-async def OTP(data : OTPBody):
+async def OTP(data: OTPBody):
     email = otp_session.get("email")
-    async with async_session() as session:
-        #Grab OTP and password from database
-        print(await get_otp(email))
-        otp = (await get_otp(email))[1]
-    #Check if OTP is correct
-    if otp == data.otp:
-        #Delete OTP from database
-        #Create user
-        username = otp_session.get("username")
-        password = (await get_otp(email))[2]
-        user = User(username, email, password)
-        session.add(user)
-        await delete_otp(email)
-        await session.commit()
-        return {"message": "sign up success"}, 200
-    else:
+
+    # Grab OTP and password from database
+    otp = await get_otp(email)
+
+    # Check if OTP is correct
+    if otp.otp != data.otp:
         return {"message": "invalid OTP"}, 401
+
+    # Delete OTP from database
+    # Create user
+    username = otp_session.get("username")
+    password = otp.password
+    user = User(username, email, password)
+    with async_session() as session:
+        session.add(user)
+
+    await delete_otp(email)
+    await log_info(f"User {user.username} has been created using {user.email}")
+    return {"message": "User successfully created"}, 200
 
 
 @auth_bp.post("/login")
@@ -93,7 +91,7 @@ async def login(data: LoginBody):
     async with async_session() as session:
         statement = sa.select(User).where(
             (
-                (User.email == data.username) | (User.username == data.username)
+                    (User.email == data.username) | (User.username == data.username)
             )
             & (User.password == data.password)
         )
@@ -122,12 +120,12 @@ async def login(data: LoginBody):
                     await create_lockout(data.username)
                     await delete_failed_attempt(data.username)
 
-                    #Grab email
+                    # Grab email
                     email = (await get_email(data.username))[1]
 
-                    #Send alert email
+                    # Send alert email
                     send_alert_email(email)
-                    
+
                     await log_info(f"User {data.username} has failed to log in using {browser}, {os} from {location}")
                     return {"message": "invalid credentials"}, 401
 
