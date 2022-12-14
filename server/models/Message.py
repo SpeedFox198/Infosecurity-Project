@@ -10,7 +10,7 @@ from sqlalchemy.dialects.mysql import ENUM
 class Message(Base):
     __tablename__ = "Message"
 
-    def __init__(self, user_id:str, room_id:str, content:str, reply_to=None, type_="text"):
+    def __init__(self, user_id:str, room_id:str, content:str, reply_to:str=None, type_:str="text"):
         self.message_id = str(uuid4())
         self.user_id = user_id
         self.room_id = room_id
