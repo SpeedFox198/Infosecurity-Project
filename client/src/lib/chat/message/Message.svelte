@@ -111,6 +111,10 @@ function selectMsg() {
   margin-top: 0.4rem;
 }
 
+.consecutive .bubble-container {
+  margin-top: 0.15rem;
+}
+
 .sent .bubble-container {
   flex-direction: row-reverse;
 }

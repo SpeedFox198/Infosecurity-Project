@@ -57,18 +57,6 @@ onMount(async () => {
         // get message index in list
         // if message is head message, change next message to head
     // TODO(SpeedFox198): consider doing the UI first before doing these
-
-    // Just gonan write here cuz why not:
-    // When adding new messages: (func1)
-      // If prev diff user_id, add msg as head message
-      // else, add msg is smol msg
-    // When adding old msgs:
-      // for each message
-        // perform *func1 on list of old msg
-        // check last old msg in list, compare with existing first msg
-        // if same user_id
-          // old -> head
-          // first -> smol
   });
 });
 
@@ -126,11 +114,11 @@ async function addMsg(data) {
     prevInfo = roomMsgs[roomMsgs.length - 1];
     prev_id = prevInfo.user_id_;
   }
-  
+
   const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
-  
+
   if (prev_id === user_id_) {
-    prevMsg = $msgStorage[prevInfo.message_id];
+    let prevMsg = $msgStorage[prevInfo.message_id];
     delete prevMsg.corner;
     await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
   }
