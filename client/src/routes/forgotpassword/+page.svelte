@@ -11,7 +11,7 @@
   
   
   <svelte:head>
-    <title>Bubbles | One Time Password</title>
+    <title>Bubbles | Forgot Password</title>
   </svelte:head>
   
   <main class="background h-100">

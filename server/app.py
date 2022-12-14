@@ -1,4 +1,5 @@
 import asyncio
+from datetime import timedelta
 
 from quart_auth import (
     AuthManager,
@@ -6,6 +7,8 @@ from quart_auth import (
     logout_user
 )
 import quart_auth
+from quart_rate_limiter import RateLimit, RateLimiter
+import quart_rate_limiter
 import socketio
 from quart_schema import QuartSchema, RequestSchemaValidationError
 
@@ -26,6 +29,9 @@ app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
 QuartSchema(app)
 
+rate_limiter = RateLimiter(
+    default_limits=[RateLimit(2, timedelta(seconds=10))]
+)
 
 auth_manager = AuthManager()
 auth_manager.user_class = AuthedUser
@@ -52,6 +58,11 @@ async def before_request():
         logout_user()
 
 
+@app.errorhandler(quart_rate_limiter.RateLimitExceeded)
+async def rate_limit_exceeded(*_):
+    return {"message": "Rate limit exceeded"}, 429
+
+
 @app.errorhandler(quart_auth.Unauthorized)
 async def unauthorized(*_):
     return {"message": "Not authorized"}, 401
@@ -61,6 +72,8 @@ async def unauthorized(*_):
 async def invalid_schema(*_):
     return {"message": "Invalid request"}, 400
 
+
 # The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
 sio_app = socketio.ASGIApp(sio, app)
+

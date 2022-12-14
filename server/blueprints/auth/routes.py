@@ -175,6 +175,7 @@ async def login(data: LoginBody):
         return {"message": "invalid credentials"}, 401
 
 
+
 @auth_bp.post("/2fa")
 async def two_fa():
     return {"message": "login success"}, 200
