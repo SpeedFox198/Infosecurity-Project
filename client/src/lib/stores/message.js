@@ -15,20 +15,21 @@ export const getTempId = (() => {
   }
 })();
 
+
 /*
  * Stores a collection of message objects identified by their message_id
  *
  * Structure:
  * {
  *   <message_id>: {
- *     sent: boolean,     // True if message was sent by current user
- *     time: int,         // Timestamp in unix time format
- *     content: str,      // Content of message
- *     reply_to: str,     // message_id of message being replied to TODO(SpeedFox198): remove when unsused
- *     type: str,         // Type of message
- *     corner?: boolean,  // True if message is last of consecutive messages sent by same user
- *     username?: str,    // Username of user that sent the message
- *     avatar?: str       // Path to image of avatar of user
+ *     sent: boolean;     - True if message was sent by current user
+ *     time: int;         - Timestamp in unix time format
+ *     content: str;      - Content of message
+ *     reply_to: str;     - message_id of message being replied to TODO(SpeedFox198): remove when unsused
+ *     type: str;         - Type of message
+ *     corner?: boolean;  - True if message is last of consecutive messages sent by same user
+ *     username?: str;    - Username of user that sent the message
+ *     avatar?: str;      - Path to image of avatar of user
  *   },
  *   ...
  * }

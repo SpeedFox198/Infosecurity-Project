@@ -1,7 +1,26 @@
 import { writable } from "svelte/store";
 
 
-// TODO(SpeedFox198): add documentations and comments
+/*
+ * Counts offset for requesting past undisplayed messages
+ * Each room stores 2 counting variables:
+ *   n:
+ *     - Represents the "nth" 20-blocks of messages that has been received
+ *     - E.g.: n=0 offset=0, n=1 offset=20, n=2 offset=40
+ *   extra:
+ *     - Represents the extra amount of offset needed due to sending/deleting messages
+ * 
+ * Example:
+ * n=0, extra= 0, offset = 0
+ * n=2, extra= 5, offset = 2*20 +5 = 45
+ * n=3, extra=-2, offset = 3*20 -2 = 58
+ * 
+ * Structure:
+ * {
+ *   <room_id>: { n, extra },
+ *   ...
+ * }
+ */
 export const count = (() => {
   const { subscribe, update } = writable({});
 

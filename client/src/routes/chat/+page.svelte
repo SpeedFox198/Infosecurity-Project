@@ -45,7 +45,6 @@ beforeUpdate(async () => {
 // Get latest 20n+1 to 20n+20 messages from room
 async function getRoomMsgs(room_id, n, extra) {
   socket.emit("get_room_messages", { room_id, n, extra });
-  console.log({n, extra})
 }
 </script>
 

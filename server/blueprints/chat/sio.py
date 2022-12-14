@@ -12,12 +12,22 @@ sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLO
 
 
 # TODO(SpeedFox198): remove temp values
-temp_rooms = [
-    {"icon": "/default.png", "name": "Grp Chat", "room_id": "room_1"},
-    {"icon": "/default.png", "name": "Grp Chat", "room_id": "room_2"},
-    {"icon": "/galaxy.jpg", "name": "Grp Chat", "room_id": "room_3"},
-    {"icon": "/favicon.svg", "name": "Grp Chat", "room_id": "room_4"}
+temp_rooms1 = [
+    {"icon": "/default.png", "name": "Grp Chat", "room_id": "room_1", "disappearing":False},
+    {"icon": "/default.png", "name": "Grp Chat", "room_id": "room_2", "disappearing":False},
+    {"icon": "/galaxy.jpg", "name": "Grp Chat", "room_id": "room_3", "disappearing":False},
+    {"icon": "/favicon.svg", "name": "Grp Chat", "room_id": "room_4", "disappearing":True}
 ]
+
+class C:
+    def __init__(self, disappearing):
+        self.disappearing = disappearing
+temp_rooms = {
+    "room_1": C(False),
+    "room_2": C(False),
+    "room_3": C(False),
+    "room_4": C(True)
+}
 
 
 # TODO(SpeedFox198): do authentication
@@ -26,12 +36,12 @@ async def connect(sid, environ, auth):
     """ Event when client connects to server """
     # print("connected:", sid)
     # Do authentication
-    for room in temp_rooms:
+    for room in temp_rooms1:
         sio.enter_room(sid, room["room_id"])
     # print(f"{sid} joined: {sio.rooms(sid)}")
 
     # Send room_ids that client belongs to
-    await sio.emit("rooms_joined", temp_rooms, to=sid)
+    await sio.emit("rooms_joined", temp_rooms1, to=sid)
 
 
 @sio.event
@@ -46,15 +56,26 @@ async def disconnect(sid):
 async def send_message(sid, data):
     print(f"Received {data}")  # TODO(SpeedFox198): change to log later
 
+    room_id = data["room_id"]
+
+    # Verify room
+    # TODO(SpeedFox198): change when room is made
+    if room_id not in temp_rooms:
+        return  # TODO(SpeedFox198): consider if want error message
+
+    room = temp_rooms[room_id]
+
     # Create message object
     message = Message(
         data["user_id"],
-        data["room_id"],
+        room_id,
         data["content"],
         data["reply_to"],
         data["type"]
     )
-    print("HERE HERE HERE", message)
+
+    if room.disappearing:
+        ...
 
     # Insert object into database
     async with async_session() as session:
@@ -147,6 +168,4 @@ async def delete_messages(sid, data):
     await sio.emit("message_deleted", {
         "messages": messages,
         "room_id": room_id
-    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
-
-#TODO(SpeedFox198): after deletion rmb to decrease extra count in svelte stores!
+    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid (client side must del 1st)
