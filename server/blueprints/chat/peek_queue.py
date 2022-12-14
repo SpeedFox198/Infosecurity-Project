@@ -1,4 +1,4 @@
-from queue import Queue, Empty, time
+from queue import Queue, Empty, time, deque
 
 
 class PeekQueue(Queue):
@@ -9,6 +9,13 @@ class PeekQueue(Queue):
 
     If maxsize is <= 0, the queue size is infinite.
     '''
+
+
+    def __init__(self, data:list=None, maxsize:int=0) -> None:
+        super().__init__(maxsize)
+        if data is not None:
+            self.queue = deque(data)
+
 
     def peek(self, block=True, timeout=None):
         """

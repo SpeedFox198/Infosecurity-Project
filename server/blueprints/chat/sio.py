@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Message
 from utils import to_unix
+from .disappearing import messages_queue, add_disappearing_messages
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -19,7 +20,7 @@ temp_rooms1 = [
     {"icon": "/favicon.svg", "name": "Grp Chat", "room_id": "room_4", "disappearing":True}
 ]
 
-class C:
+class C:  # Temp class lmao
     def __init__(self, disappearing):
         self.disappearing = disappearing
 temp_rooms = {
@@ -74,13 +75,15 @@ async def send_message(sid, data):
         data["type"]
     )
 
-    if room.disappearing:
-        ...
-
     # Insert object into database
     async with async_session() as session:
         async with session.begin():
             session.add(message)
+
+    # If room has disappearing messages enabled
+    if room.disappearing:
+        await add_disappearing_messages(message.message_id, seconds=15)
+
 
     # Forward messages to other clients in same room
     await sio.emit("receive_message", {
@@ -157,7 +160,6 @@ async def delete_messages(sid, data):
         )
         result = (await session.execute(statement)).fetchall()
         messages = [row[0] for row in result]
-        print(messages)
 
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
@@ -165,7 +167,37 @@ async def delete_messages(sid, data):
         await session.commit()
 
     # Tell other clients in same room to delete the same messages
+    await delete_client_messages(messages, room_id)
+    # TODO(SpeedFox198): skip_sid=sid (client side must del 1st)
+
+
+
+async def delete_expired_messages(messages):
+    async with async_session() as session:
+        statement = sa.select(Message.message_id, Message.room_id).where(Message.message_id.in_(messages))
+        result = (await session.execute(statement)).fetchall()
+        filter_ids = [row[0] for row in result]
+
+        statement = sa.delete(Message).where(Message.message_id.in_(filter_ids))
+        await session.execute(statement)
+
+        await session.commit()
+
+    # Format a dictionary of deleted messages
+    deleted = {}
+    for row in result:
+        messages = deleted.get(row[1], [])
+        if not messages:
+            deleted[row[1]] = messages
+        messages.append(row[0])
+
+    for room_id, messages in deleted.items():
+        await delete_client_messages(messages, room_id)
+
+
+async def delete_client_messages(messages, room_id, skip_sid=None):
+    """ Inform other clients in room to delete messages """
     await sio.emit("message_deleted", {
         "messages": messages,
         "room_id": room_id
-    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid (client side must del 1st)
+    }, room=room_id, skip_sid=skip_sid)
