@@ -9,6 +9,6 @@ from .Message import Message
 from .FriendRequest import FriendRequest
 from .Group import Group
 from .Lockout import Lockout
-from .FailedAttempts import FailedAttempts
+from .FailedAttempt import FailedAttempt
 from .TwoFA import TwoFA
 from .OTP import OTP
