@@ -111,7 +111,7 @@ else:
 
 # Test using safe file
 print("Test 2: ")
-file_id = asyncio.run(upload_file("C:\\Users\\xuxiz\\OneDrive\\Documents\\GitHub\\Infosecurity-Project\\server\\security_functions\\safe_file_2.txt"))
+file_id = asyncio.run(upload_file(r".\server\security_functions\safe_file_2.txt"))
 print("file id is = " + file_id)
 file_hash = asyncio.run(get_file_analysis(file_id))
 print("file hash = " + file_hash)
