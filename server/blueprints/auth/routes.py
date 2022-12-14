@@ -116,7 +116,7 @@ async def login(data: LoginBody):
 
     if not existing_user:
         await log_info(
-            f"Login using Username/email {data.username} has failed to login in using {browser}, {os} from location"
+            f"Login using Username/email {data.username} has failed to login in using {browser}, {os} from {location}"
         )
         return {"message": "invalid credentials"}, 401
 
@@ -147,7 +147,9 @@ async def login(data: LoginBody):
 
     if locked_out_user:
         if (datetime.datetime.now() - locked_out_user.lockout) < datetime.timedelta(minutes=5):
-            await log_warning(f"User {existing_user.username} has failed to log in due to account lockout.")
+            await log_warning(
+                f"User {existing_user.username} has failed to log in due to account lockout using {browser}, {os} from {location}"
+            )
             return {"message": "Your account is locked, please try again later."}, 401
 
         await delete_lockout(locked_out_user.user_id)
