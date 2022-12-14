@@ -133,7 +133,9 @@ async def delete_messages(sid, data):
             (Message.message_id.in_(messages))
             & (Message.room_id == room_id)
         )
-        x = (await session.execute(statement)).fetchall()
+        result = (await session.execute(statement)).fetchall()
+        messages = [row[0] for row in result]
+        print(messages)
 
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
@@ -141,6 +143,9 @@ async def delete_messages(sid, data):
         await session.commit()
 
     # Tell other clients in same room to delete the same messages
-    await sio.emit("message_deleted", messages, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
+    await sio.emit("message_deleted", {
+        "messages": messages,
+        "room_id": room_id
+    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
 
 #TODO(SpeedFox198): after deletion rmb to decrease extra count in svelte stores!

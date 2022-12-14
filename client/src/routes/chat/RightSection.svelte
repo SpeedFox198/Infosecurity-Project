@@ -45,18 +45,32 @@ onMount(async () => {
 
   socket.on("receive_room_messages", addMsgBatch);
 
-// TODO(SpeedFox198): continue here
+
   socket.on("message_deleted", async data => {
+    
+    // Delete every message in list
+    let message_id, room_id;
+    let countRemoved = 0;
+    for (let i=0; i < data.messages.length; i++) {
+      message_id = data.messages[i];
+      room_id = data.room_id;
+      
+      // Remove message from storage
+      countRemoved += await removeMsg(message_id, room_id);
+    }
+
+    // TODO(SpeedFox198): attempt deletion, 
+    // return actual number deleted and decrease extra count from there
+
     // Decrease extra counter for room by number of messages deleted
-    // If n was 0 stop proccess (cuz no msg loaded, no nid delete)
+    // const { n } = count.minusExtra(data.room_id);
+
+    // If n was 0 stop proccess
+    // As no messages in room was loaded, no need to delete from storage
+    // if (n === 0) return;
+
     // TODO(SpeedFox198): consider reverting count minusExtra function's weird syntax
-    // Remove message_id from msgStorage
-    // Remove messsage from allMsgs in room_id
-      // consider diff function
-      // for every msg
-        // get message index in list
-        // if message is head message, change next message to head
-    // TODO(SpeedFox198): consider doing the UI first before doing these
+
   });
 });
 
@@ -112,7 +126,7 @@ async function addMsg(data) {
   let prevInfo, prev_id;
   if (roomMsgs.length) {
     prevInfo = roomMsgs[roomMsgs.length - 1];
-    prev_id = prevInfo.user_id_;
+    prev_id = prevInfo.user_id;
   }
 
   const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
@@ -124,7 +138,7 @@ async function addMsg(data) {
   }
 
   await msgStorage.updateMsg(msg, message_id);
-  await allMsgs.addMsg({ user_id_, message_id }, room_id);
+  await allMsgs.addMsg({ user_id: user_id_, message_id }, room_id);
 }
 
 
@@ -137,7 +151,7 @@ async function addMsgBatch(data) {
   for (let i=0; i < data.room_messages.length; i++) {
     // Get message and message_id
     ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id));
-    messageInfoList.push({user_id_, message_id});   // Add message_id to list
+    messageInfoList.push({user_id: user_id_, message_id});   // Add message_id to list
     delete msg.message_id;                          // Remove message_id property from message
     room_messages[message_id] = msg;                // Add message to object
     if (prev_id === user_id_) delete prevMsg.corner;// Delete corner if not consecutive message 
@@ -147,8 +161,7 @@ async function addMsgBatch(data) {
 
   // Update current most top message accordingly
   let msgInfo = ($allMsgs[data.room_id] || [])[0];
-  if (msgInfo && msgInfo.user_id_ == prev_id) {
-    console.log(msgInfo.message_id)
+  if (msgInfo && msgInfo.user_id == prev_id) {
     msg = $msgStorage[msgInfo.message_id];
     delete msg.username;
     delete msg.avatar;
@@ -161,7 +174,6 @@ async function addMsgBatch(data) {
   lockScroll.unlock();
   await allMsgs.addMsg(messageInfoList, data.room_id, true);
   lockScroll.lock();
-  console.log($msgStorage)
 }
 
 
@@ -199,8 +211,47 @@ async function deleteMsgs(event) {
   socket.emit("delete_messages", data);
 }
 
-async function removeMsgs(data) {
+// Removes message from storage and updates messages for UI, returns true if message removed
+async function removeMsg(message_id, room_id) {
+    // Delete and retrieve message from msgStorage
+    const msg = msgStorage.deleteMsg(message_id);
 
+    // If message not in storage, skip deletion (nothing to delete)
+    if (!msg) return 0;
+
+    // Delete and retrieve message index in list
+    const { index, user_id } = allMsgs.deleteMsg(room_id, message_id);
+
+    // Only continue deletion if message was found (a check just in case)
+    if (index <= -1) return 0;
+
+    // If message has avatar, add avatar to next message
+    let roomMsgs = $allMsgs[room_id];
+    if (msg.avatar) {
+      let nextInfo = roomMsgs[index];
+
+      // If next message is sent by same user
+      if (nextInfo && nextInfo.user_id == user_id) {
+        let nextMsg = $msgStorage[nextInfo.message_id];
+        nextMsg.username = msg.username;
+        nextMsg.avatar = msg.avatar;
+        msgStorage.updateMsg(nextMsg, nextInfo.message_id);
+      }
+    }
+
+    // If message is last of continuos, add rounded corner to previous message
+    if (msg.corner) {
+      let prevInfo = roomMsgs[index-1];
+
+      // If previous message is sent by same user
+      if (prevInfo && prevInfo.user_id == user_id) {
+        let prevMsg = $msgStorage[prevInfo.message_id];
+        prevMsg.corner = true;
+        msgStorage.updateMsg(prevMsg, prevInfo.message_id);
+      }
+    }
+
+    return 1;
 }
 </script>
 

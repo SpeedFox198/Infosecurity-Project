@@ -15,7 +15,24 @@ export const getTempId = (() => {
   }
 })();
 
-
+/*
+ * Stores a collection of message objects identified by their message_id
+ *
+ * Structure:
+ * {
+ *   <message_id>: {
+ *     sent: boolean,     // True if message was sent by current user
+ *     time: int,         // Timestamp in unix time format
+ *     content: str,      // Content of message
+ *     reply_to: str,     // message_id of message being replied to TODO(SpeedFox198): remove when unsused
+ *     type: str,         // Type of message
+ *     corner?: boolean,  // True if message is last of consecutive messages sent by same user
+ *     username?: str,    // Username of user that sent the message
+ *     avatar?: str       // Path to image of avatar of user
+ *   },
+ *   ...
+ * }
+ */
 export const msgStorage = (() => {
   const { subscribe, update } = writable({});
 
@@ -46,7 +63,17 @@ export const msgStorage = (() => {
     });
   }
 
-  return { subscribe, updateMsg, changeId };
+  async function deleteMsg(message_id) {
+    let msg;
+    update(storage => {
+      msg = storage[message_id];
+      delete storage[message_id];
+      return storage;
+    });
+    return msg;
+  }
+
+  return { subscribe, updateMsg, changeId, deleteMsg };
 })();
 
 
@@ -57,7 +84,7 @@ export const msgStorage = (() => {
  * {
  *   <room_id>: [{
  *     message_id: <message_id>,
- *     user_id_: <user_id>
+ *     user_id: <user_id>
  *   }, ...],
  *   ...
  * }
@@ -112,5 +139,24 @@ export const allMsgs = (() => {
     });
   }
 
-  return { subscribe, addMsg, initRooms, changeId };
+  async function deleteMsg(room_id, message_id) {
+    let user_id;
+    update(storage => {
+      let roomMsgs = storage[room_id];
+      if (roomMsgs) {
+        // Get index of message_id in storage
+        const index = roomMsgs.findIndex(msgInfo => msgInfo.message_id === message_id);
+        
+        // Delete message if found
+        if (index > -1); {
+          ({user_id} = roomMsgs[index]);  // Get user_id of message
+          roomMsgs.splice(index, 1);
+        }
+      }
+      return storage;
+    });
+    return { index, user_id };
+  }
+
+  return { subscribe, addMsg, initRooms, changeId, deleteMsg };
 })();
