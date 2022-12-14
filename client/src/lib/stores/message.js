@@ -50,10 +50,25 @@ export const msgStorage = (() => {
 })();
 
 
+/*
+ * Stores a collection of list of message_id and user_id for each room
+ *
+ * Structure:
+ * {
+ *   <room_id>: [{
+ *     message_id: <message_id>,
+ *     user_id_: <user_id>
+ *   }, ...],
+ *   ...
+ * }
+ * 
+ * message_id are sorted in ascending order by time
+ * (Earliest message at index 0, latest message at final index)
+ */
 export const allMsgs = (() => {
   const { subscribe, update } = writable({});
 
-  async function addMsg(message_id, room_id, add_prev) {
+  async function addMsg(msgInfo, room_id, add_prev) {
     update(storage => {
 
       // Get room messages array
@@ -66,9 +81,9 @@ export const allMsgs = (() => {
       }
 
       if (!add_prev) {  // Add new message to array
-        roomMsgs.push(message_id);
+        roomMsgs.push(msgInfo);
       } else {  // Add older(previous) messages to front of array
-        roomMsgs.unshift.apply(roomMsgs, message_id);
+        roomMsgs.unshift.apply(roomMsgs, msgInfo);
       }
 
       return storage;
@@ -88,10 +103,10 @@ export const allMsgs = (() => {
     update(storage => {
 
       // Get index of temp_id in storage
-      const index = storage[room_id].indexOf(temp_id);
+      const index = storage[room_id].findIndex(msgInfo => msgInfo.message_id === temp_id);
 
       // Replace temp_id with message_id
-      if (index > -1) storage[room_id][index] = message_id;
+      if (index > -1) storage[room_id][index].message_id = message_id;
 
       return storage;
     });

@@ -3,6 +3,7 @@
     --black: #202223;
 
     --grey-dark: #54585b;
+
     --grey-shadow: #d2d7e8;
     --grey: #e1e5f2;
 
@@ -19,7 +20,7 @@
     --red-dark: #aa3f35;
 
     /* Highlight */
-    --highlight: #1f7a8c2e;
+    --highlight-primary: #1f7a8c2e;
 
     /* Misc */
     --left-bar-length: 25rem;

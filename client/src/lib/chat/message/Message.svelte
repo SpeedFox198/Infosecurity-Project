@@ -1,5 +1,5 @@
 <script>
-import { beforeUpdate } from "svelte";
+import { afterUpdate, beforeUpdate } from "svelte";
 import { selectMode } from "$lib/stores/select";
 
 
@@ -7,8 +7,12 @@ export let msg;
 export let selected;
 export let select;
 
+
+// When msg is undefined, set it to empty object
 beforeUpdate(() => msg = msg || {});
 
+
+// Formating timestamp
 const padZero = t => t < 10 ? "0" + t : t;
 
 const t = new Date(msg.time * 1000);
@@ -19,6 +23,8 @@ hours = hours ? hours : 12;
 
 const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
 
+
+// Selecting message logic
 let clicked = false;
 function selectOption() {
   clicked = true;
@@ -34,13 +40,22 @@ function selectMsg() {
 
 
 <!-- Messages Bubble -->
-<div class="message d-flex {msg.sent ? "sent" : ""} {selected ? "selected" : ""} {$selectMode ? "selecting" : ""}" on:click={selectMsg} on:keydown>
+<div
+  class="message d-flex"
+  class:sent={msg.sent}
+  class:selecting={$selectMode}
+  class:selected
+  class:consecutive={!msg.avatar}
+  on:click={selectMsg} on:keydown
+>
   {#if $selectMode}
     <i class="check fa-{selected ? "solid" : "regular"} fa-circle{selected ? "-check" : ""}"></i>
   {/if}
 
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
-    <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
+    {#if msg.avatar}
+      <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
+    {/if}
   </div>
 
   <div class="bubble-container d-flex justify-content-end flex-shrink-1">
@@ -53,7 +68,7 @@ function selectMsg() {
         <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis"></i></button>
       {/if}
 
-      {#if !msg.sent} <!-- TODO(SpeedFox198): rmb to udpate this! -->
+      {#if !msg.sent && msg.avatar}
         <div class="username">{msg.username}</div>
       {/if}
       <span class="text-wrap text-break">
@@ -70,7 +85,7 @@ function selectMsg() {
 
 <style>
 .message {
-  padding: 0 3rem 0.5rem;
+  padding: 0 3rem;
   overflow-anchor: none;
 }
 
@@ -79,11 +94,12 @@ function selectMsg() {
 }
 
 .selected {
-  background-color: var(--highlight);
+  background-color: var(--highlight-primary);
 }
 
-.selecting {
+.selecting:hover {
   cursor: pointer;
+  background-color: var(--highlight-primary);
 }
 
 .username {
@@ -104,14 +120,22 @@ function selectMsg() {
   background-color: var(--grey);
   text-align: left;
   padding: 0.5rem 0.6rem 0.65rem 0.8rem;
-  border-radius: 0 1.1rem 1.1rem 1.1rem;
+  border-radius: 0 1.1rem 1.1rem 0.7rem;
 }
 
 .sent .bubble {
-  border-radius: 1.1rem 0 1.1rem 1.1rem;
+  border-radius: 1.1rem 0 0.7rem 1.1rem;
   background-color: var(--primary);
   padding: 0.5rem 0.8rem 0.65rem 0.6rem;
   color: var(--white);
+}
+
+.consecutive .bubble {
+  border-radius: 0.7rem 1.1rem 1.1rem 0.7rem;
+}
+
+.sent.consecutive .bubble {
+  border-radius: 1.1rem 0.7rem 0.7rem 1.1rem;
 }
 
 .tail {
@@ -126,6 +150,10 @@ function selectMsg() {
   border-right: 0;
   border-left: 10px solid var(--primary);
   color: var(--primary);
+}
+
+.consecutive .tail {
+  visibility: hidden;
 }
 
 .info-section {

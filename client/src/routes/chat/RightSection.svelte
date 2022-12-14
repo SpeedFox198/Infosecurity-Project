@@ -120,46 +120,75 @@ async function getUser(user_id) {
 
 
 async function addMsg(data) {
-  const { message_id, msg, room_id } = await formatMsg(data);
+  const roomMsgs = $allMsgs[data.room_id] || [];
+  let prev_id;
+  if (roomMsgs.length) prev_id = roomMsgs[roomMsgs.length - 1].user_id_;
+  const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
 
   await msgStorage.updateMsg(msg, message_id);
-  await allMsgs.addMsg(message_id, room_id);
+  await allMsgs.addMsg({ user_id_, message_id }, room_id);
 }
 
 
 async function addMsgBatch(data) {
-  let message_ids = [];
+  let messageInfoList = [];
   let room_messages = {};
-  let msg, message_id;
+  let msg, message_id, user_id_, prev_id;
 
   // Go through messages and format them for display in JavaScript
   for (let i=0; i < data.room_messages.length; i++) {
     // Get message and message_id
-    ({ msg, message_id } = await formatMsg(data.room_messages[i]));
-    message_ids.push(message_id);         // Add message_id to list
-    delete msg.message_id;        // Remove message_id property from message
-    room_messages[message_id] = msg;      // Add message to object
+    ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id));
+    messageInfoList.push({user_id_, message_id});// Add message_id to list
+    delete msg.message_id;                       // Remove message_id property from message
+    room_messages[message_id] = msg;             // Add message to object
+    prev_id = user_id_;
+  }
+
+  // Update current most top message accordingly
+  let msgInfo = ($allMsgs[data.room_id] || [])[0];
+  if (msgInfo && msgInfo.user_id_ == prev_id) {
+    console.log(msgInfo.message_id)
+    msg = $msgStorage[msgInfo.message_id];
+    delete msg.username;
+    delete msg.avatar;
+    msgStorage.updateMsg(msg, msgInfo.message_id);
   }
 
   // Store the messages in stores
   await msgStorage.updateMsg(room_messages);
   lockScroll.unlock();
-  await allMsgs.addMsg(message_ids, data.room_id, true);
+  await allMsgs.addMsg(messageInfoList, data.room_id, true);
   lockScroll.lock();
+  console.log($msgStorage)
 }
 
 
-async function formatMsg(data) {
+async function formatMsg(data, prev_id) {
   const { message_id, room_id, time, content, reply_to, type } = data;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
-  let user = $allUsers[user_id_];
-  if (!user) user = await getUser(user_id_);
-  const avatar = user.avatar;
-  const username = user.username;
-  const msg = { sent, username, avatar, time, content, reply_to, type };
+  let msg;
 
-  return { message_id, msg, room_id };
+  // Check if previous message is sent by same user
+  if (prev_id && prev_id === user_id_){
+    
+    // Continuous messages have no avatar
+    msg = { sent, time, content, reply_to, type };
+    
+  } else {
+    
+    // New message from user has avatar and username
+    let user = $allUsers[user_id_];
+    if (!user) user = await getUser(user_id_);
+    const avatar = user.avatar;
+    const username = user.username;
+ 
+    msg = { sent, username, avatar, time, content, reply_to, type };
+
+  }
+
+  return { user_id_, message_id, msg, room_id };
 }
 
 
