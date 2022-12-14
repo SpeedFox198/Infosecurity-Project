@@ -30,6 +30,7 @@ app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
 QuartSchema(app)
 
 rate_limiter = RateLimiter(
+    app,
     default_limits=[RateLimit(2, timedelta(seconds=10))]
 )
 
@@ -58,9 +59,19 @@ async def before_request():
         logout_user()
 
 
+@app.errorhandler(500)
+async def server_error(*_):
+    return {"message": "Internal server error"}, 500
+
+
 @app.errorhandler(quart_rate_limiter.RateLimitExceeded)
 async def rate_limit_exceeded(*_):
     return {"message": "Rate limit exceeded"}, 429
+
+
+@app.errorhandler(404)
+async def not_found(*_):
+    return {"message": "Requested resource is not found"}, 404
 
 
 @app.errorhandler(quart_auth.Unauthorized)
@@ -76,4 +87,3 @@ async def invalid_schema(*_):
 # The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)
 sio_app = socketio.ASGIApp(sio, app)
-
