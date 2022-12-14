@@ -23,7 +23,7 @@ class Disappearing(Base):
             weeks(int): Number of weeks the message remains before it disappears
         """
         self.message_id = message_id
-        self.time = datetime.now() - timedelta(**kwargs)
+        self.time = datetime.now() + timedelta(**kwargs)
 
     message_id = Column(CHAR(36), ForeignKey(Message.message_id), primary_key=True)
     time = Column(TIMESTAMP())

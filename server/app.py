@@ -1,25 +1,21 @@
 import asyncio
 
-from quart_auth import (
-    AuthManager,
-    current_user,
-    logout_user
-)
 import quart_auth
 import socketio
-from quart_schema import QuartSchema, RequestSchemaValidationError
-
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
-from blueprints.chat import sio
+from blueprints.chat import job_disappear_messages, sio
 from blueprints.device import device_bp
 from blueprints.user import user_bp
 from db_access.device import get_device
 from models import AuthedUser
 from quart import Quart
+from quart_auth import AuthManager, current_user, logout_user
 from quart_cors import cors
-
+from quart_schema import QuartSchema, RequestSchemaValidationError
 from utils.logging import log_warning
+
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 app = Quart(__name__)
@@ -60,6 +56,26 @@ async def unauthorized(*_):
 @app.errorhandler(RequestSchemaValidationError)
 async def invalid_schema(*_):
     return {"message": "Invalid request"}, 400
+
+
+async def task_disappear_messages():
+    """ Task to run scheduled checking for disappearing of messages """
+    global scheduler
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(job_disappear_messages, "interval", seconds=1)
+    scheduler.start()
+
+
+@app.before_serving
+async def startup():
+    loop = asyncio.get_event_loop()
+    loop.create_task(task_disappear_messages())
+
+
+@app.after_serving
+async def finish():
+    scheduler.shutdown()
+
 
 # The SocketIO app
 # (which redirects non-SocketIO requests to Quart app)

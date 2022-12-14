@@ -2,7 +2,7 @@ import asyncio
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Disappearing
-from datetime import datetime
+from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .peek_queue import PeekQueue
@@ -22,17 +22,19 @@ class DisappearingQueue(PeekQueue):
 
     @property
     def has_expired_messages(self) -> bool:
+        if self.empty():
+            return False
         oldest_record = self.peek()
         now = datetime.now()
         return oldest_record.time <= now
 
 
-    def delete_expired(self) -> list:
+    def delete_expired(self) -> list[str]:
 
-        deleted = []  # Stores
+        deleted = []  # Stores messages_id of deleted messages
 
         while self.has_expired_messages:
-            deleted.append(self.get())
+            deleted.append(self.get().message_id)
 
         return deleted
 
@@ -41,9 +43,9 @@ async def get_disappearing_messages():
     async with async_session() as session:
         # TODO(SpeedFox198): need to add limit
         statement = sa.select(Disappearing).order_by(Disappearing.time)
-        messages = (await session.execute(statement)).all()
+        result = (await session.execute(statement)).all()
 
-    return DisappearingQueue(messages)
+    return DisappearingQueue([row[0] for row in result])
 
 
 # TODO(SpeedFox198): Add time paramater?
@@ -74,22 +76,9 @@ async def delete_disappearing_messages():
 
 
 async def check_disappearing_messages(callback):
-    ...
-    await callback()
-
-# Temp
-# Might change method to do this later
-expires = 15  # Seconds
+    if messages_queue.has_expired_messages:
+        expired = await delete_disappearing_messages()
+        await callback(expired)
 
 
-def run(callback):
-
-    async def job():
-        await check_disappearing_messages(callback)
-
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(job, "interval", seconds=3)
-    scheduler.start()
-    asyncio.get_event_loop().run_forever()
-
-messages_queue:DisappearingQueue = asyncio.run(get_disappearing_messages)
+messages_queue = asyncio.run(get_disappearing_messages())

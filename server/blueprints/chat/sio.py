@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Message
 from utils import to_unix
-from .disappearing import messages_queue, add_disappearing_messages
+from .disappearing import add_disappearing_messages, check_disappearing_messages
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -171,7 +171,6 @@ async def delete_messages(sid, data):
     # TODO(SpeedFox198): skip_sid=sid (client side must del 1st)
 
 
-
 async def delete_expired_messages(messages):
     async with async_session() as session:
         statement = sa.select(Message.message_id, Message.room_id).where(Message.message_id.in_(messages))
@@ -201,3 +200,7 @@ async def delete_client_messages(messages, room_id, skip_sid=None):
         "messages": messages,
         "room_id": room_id
     }, room=room_id, skip_sid=skip_sid)
+
+
+async def job_disappear_messages():
+    await check_disappearing_messages(delete_expired_messages)
