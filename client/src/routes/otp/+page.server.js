@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-    otp: async ({request}) => {
+    otp: async ({request, cookies}) => {
         const data = await request.formData()
         const otp = data.get("otp")
         const response = await fetch("https://127.0.0.1:8443/api/auth/otp", {   
@@ -20,6 +20,8 @@ export const actions = {
               otpError: result.message
             }
         }
+      
+        cookies.delete("session")
         throw redirect(302, "/")
     }
 }

@@ -12,21 +12,41 @@ from quart_auth import (
 from quart_schema import validate_request, validate_response
 
 import sqlalchemy as sa
+
 from db_access.device import remove_logged_in_device, add_logged_in_device
 from db_access.globals import async_session
 from models import (
     User,
     AuthedUser,
 )
-from models.request_data import LoginBody, SignUpBody, OTPBody
+from models.request_data import (
+    LoginBody,
+    SignUpBody,
+    OTPBody
+)
 from models.response_data import UserData
 
 from db_access.otp import get_otp, create_otp, delete_otp
-from db_access.failed_attempts import get_failed_attempt, create_failed_attempt, update_failed_attempt, \
+from db_access.failed_attempts import (
+    get_failed_attempt,
+    create_failed_attempt,
+    update_failed_attempt,
     delete_failed_attempts
-from db_access.account_lockout import get_lockout, create_lockout, delete_lockout, get_email
+)
+from db_access.account_lockout import (
+    get_lockout,
+    create_lockout,
+    delete_lockout,
+    get_email
+)
 from utils.logging import log_info, log_warning
-from .functions import generate_otp, send_otp_email, get_user_agent_data, get_location_from_ip, send_alert_email
+from .functions import (
+    generate_otp,
+    send_otp_email,
+    get_user_agent_data,
+    get_location_from_ip,
+    send_alert_email
+)
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -80,7 +100,7 @@ async def OTP(data: OTPBody):
 
     await delete_otp(email)
     await log_info(f"User {user.username} has been created using {user.email}")
-    otp_session.clear()
+
     return {"message": "User successfully created"}, 200
 
 
