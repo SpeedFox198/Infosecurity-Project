@@ -113,12 +113,12 @@ function selectMsg() {
 
 .bubble-container {
   max-width: 75%;
-  margin-top: 0.2rem;
-  margin-bottom: 0.2rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.07rem;
 }
 
 .consecutive .bubble-container {
-  margin-top: 0.15rem;
+  margin-top: 0.07rem;
 }
 
 .sent .bubble-container {

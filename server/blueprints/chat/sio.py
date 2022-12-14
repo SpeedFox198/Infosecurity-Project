@@ -54,6 +54,7 @@ async def send_message(sid, data):
         data["reply_to"],
         data["type"]
     )
+    print("HERE HERE HERE", message)
 
     # Insert object into database
     async with async_session() as session:
@@ -81,7 +82,7 @@ async def send_message(sid, data):
 # TODO(SpeedFox198): authenticate and verify msg (user, and format)
 @sio.event
 async def get_room_messages(sid, data):
-    # print(f"Received {data}")  # TODO(SpeedFox198): change to log later
+    print(f"Received {data}")  # TODO(SpeedFox198): change to log later
     room_id = data["room_id"]
     n = data["n"]
     extra = data["extra"]
@@ -133,7 +134,9 @@ async def delete_messages(sid, data):
             (Message.message_id.in_(messages))
             & (Message.room_id == room_id)
         )
-        x = (await session.execute(statement)).fetchall()
+        result = (await session.execute(statement)).fetchall()
+        messages = [row[0] for row in result]
+        print(messages)
 
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
@@ -141,6 +144,9 @@ async def delete_messages(sid, data):
         await session.commit()
 
     # Tell other clients in same room to delete the same messages
-    await sio.emit("message_deleted", messages, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
+    await sio.emit("message_deleted", {
+        "messages": messages,
+        "room_id": room_id
+    }, room=room_id)  # TODO(SpeedFox198): skip_sid=sid
 
 #TODO(SpeedFox198): after deletion rmb to decrease extra count in svelte stores!

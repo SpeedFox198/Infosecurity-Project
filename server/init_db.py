@@ -19,12 +19,13 @@ def get_messages(alice:str, bob:str) -> list[Message]:
         print(f"lmao\n{e}\nignore this")
 
     messages = []
+    back_to_the_future = len(read) * 18
     for i, x in enumerate(read):
         room, user, content = x.split(",")
         user_id = bob if user == "bob" else alice
         content = content[1:-2]
         msg = Message(user_id, room, content)
-        msg.time = datetime.now() + timedelta(seconds=17*i)
+        msg.time = datetime.now() + timedelta(seconds=17*i - back_to_the_future)
         messages.append(msg)
 
     return messages
