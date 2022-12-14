@@ -133,7 +133,7 @@ async def login(data: LoginBody):
         await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
         return {"message": "invalid credentials"}, 401
 
-    if failed_attempts == 5:
+    if failed_attempts.attempts == 5:
         await create_lockout(failed_attempts.user_id)
         await delete_failed_attempts(failed_attempts.user_id)
 
