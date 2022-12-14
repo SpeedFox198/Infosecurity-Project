@@ -114,7 +114,7 @@ async def login(data: LoginBody):
     async with async_session() as session:
         statement = sa.select(User).where(
             (
-                    (User.email == data.username) | (User.username == data.username)
+                (User.email == data.username) | (User.username == data.username)
             )
             & (User.password == data.password)
         )
