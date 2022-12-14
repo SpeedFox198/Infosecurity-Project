@@ -8,7 +8,7 @@ from db_access.globals import *
 # Windows specific issue https://stackoverflow.com/questions/61543406/asyncio-run-runtimeerror-event-loop-is-closed
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-file_path = r"./server/init_db.txt"
+file_path = r"./init_db.txt"
 def get_messages(alice:str, bob:str) -> list[Message]:
     """" Load pre made messages """
     read = []
