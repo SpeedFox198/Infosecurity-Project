@@ -19,11 +19,11 @@ export const actions = {
     const password = data.get("password")
     const cfToken = data.get("cf-turnstile-response")
     
-    const { cfSuccess, cfError } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
+    const { cfSuccess } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
 
     if (!cfSuccess) {
       return {
-        cfError: cfError || "Invalid CAPTCHA"
+        cfError: "Invalid CAPTCHA"
       }
     }
     
@@ -63,11 +63,11 @@ export const actions = {
     const confirmPassword = data.get("confirmpassword")
     const cfToken = data.get("cf-turnstile-response")
     
-    const { cfSuccess, cfError } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
+    const { cfSuccess } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
   
     if (!cfSuccess) {
       return {
-        cfError: cfError || "Invalid CAPTCHA"
+        cfError: "Invalid CAPTCHA"
       }
     }
 
@@ -109,9 +109,9 @@ async function validateCfToken(token, secret) {
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     headers: {
-      "content-type": "application/x-www-form-urlencoded",
+      "content-type": "application/json",
     },
-    body: new URLSearchParams({
+    body: JSON.stringify({
       response: token,
       secret: secret
     })
