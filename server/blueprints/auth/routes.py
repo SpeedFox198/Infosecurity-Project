@@ -27,11 +27,11 @@ from models.request_data import (
 from models.response_data import UserData
 
 from db_access.otp import get_otp, create_otp, delete_otp
-from db_access.failed_attempts import (
+from db_access.failed_attempt import (
     get_failed_attempt,
     create_failed_attempt,
     update_failed_attempt,
-    delete_failed_attempts
+    delete_failed_attempt
 )
 from db_access.account_lockout import (
     get_lockout,
@@ -121,46 +121,17 @@ async def login(data: LoginBody):
         result = await session.execute(statement)
         logged_in_user = result.scalars().first()
 
-    if logged_in_user:
-        await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os, location)
-        login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-        await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
-        return {"message": "login success"}, 200
-
     # Check if user exists
     async with async_session() as session:
         account_check_statement = sa.select(User).where(
             (User.username == data.username) | (User.email == data.username)
         )
-        existing_user = session.execute(account_check_statement)
+        existing_user = (await session.execute(account_check_statement)).scalars().first()
 
     if not existing_user:
         await log_info(
             f"Login using Username/email {data.username} has failed to login in using {browser}, {os} from {location}"
         )
-        return {"message": "invalid credentials"}, 401
-
-    failed_attempts = await get_failed_attempt(existing_user.user_id)
-
-    # Check if a failed attempt exists
-    if failed_attempts is None:
-        await create_failed_attempt(existing_user.user_id)
-        await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
-        return {"message": "invalid credentials"}, 401
-
-    if 5 > failed_attempts.attempts > 0:
-        await update_failed_attempt(failed_attempts.user_id, (failed_attempts.attempts + 1))
-        await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
-        return {"message": "invalid credentials"}, 401
-
-    if failed_attempts.attempts == 5:
-        await create_lockout(failed_attempts.user_id)
-        await delete_failed_attempts(failed_attempts.user_id)
-
-        lockout_user_email = await get_email(failed_attempts.user_id)
-        send_alert_email(lockout_user_email)
-
-        await log_warning(f"User {existing_user.username} has been locked out for 5 minutes.")
         return {"message": "invalid credentials"}, 401
 
     locked_out_user = await get_lockout(existing_user.user_id)
@@ -173,7 +144,36 @@ async def login(data: LoginBody):
             return {"message": "Your account is locked, please try again later."}, 401
 
         await delete_lockout(locked_out_user.user_id)
+
+    if logged_in_user:
+        await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os, location)
+        login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+        await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
+        return {"message": "login success"}, 200
+
+    failed_attempt = (await get_failed_attempt(existing_user.user_id))
+
+    # Check if a failed attempt exists
+    if failed_attempt is None:
+        await create_failed_attempt(existing_user.user_id)
+        await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
         return {"message": "invalid credentials"}, 401
+
+    if 5 > failed_attempt.attempts > 0:
+        await update_failed_attempt(failed_attempt.user_id, (failed_attempt.attempts + 1))
+        await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
+        return {"message": "invalid credentials"}, 401
+
+    if failed_attempt.attempts == 5:
+        await create_lockout(failed_attempt.user_id)
+        await delete_failed_attempt(failed_attempt.user_id)
+
+        lockout_user_email = await get_email(failed_attempt.user_id)
+        send_alert_email(lockout_user_email)
+
+        await log_warning(f"User {existing_user.username} has been locked out for 5 minutes.")
+        return {"message": "invalid credentials"}, 401
+
 
 
 @auth_bp.post("/2fa")

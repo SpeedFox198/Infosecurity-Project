@@ -1,6 +1,8 @@
 import asyncio
+from datetime import timedelta
 
 import quart_auth
+import quart_rate_limiter
 import socketio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
@@ -22,6 +24,10 @@ app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
 QuartSchema(app)
 
+rate_limiter = quart_rate_limiter.RateLimiter(
+    app,
+    default_limits=[quart_rate_limiter.RateLimit(15, timedelta(minutes=1))]
+)
 
 auth_manager = AuthManager()
 auth_manager.user_class = AuthedUser
@@ -46,6 +52,21 @@ async def before_request():
             f"Access attempt was made with an invalid device by {await current_user.username}"
         )
         logout_user()
+
+
+@app.errorhandler(500)
+async def server_error(*_):
+    return {"message": "Internal server error"}, 500
+
+
+@app.errorhandler(quart_rate_limiter.RateLimitExceeded)
+async def rate_limit_exceeded(*_):
+    return {"message": "Rate limit exceeded"}, 429
+
+
+@app.errorhandler(404)
+async def not_found(*_):
+    return {"message": "Requested resource is not found"}, 404
 
 
 @app.errorhandler(quart_auth.Unauthorized)
