@@ -3,13 +3,19 @@ import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Message
 from utils import to_unix
-from .disappearing import add_disappearing_messages, check_disappearing_messages
+
+from .disappearing import DisappearingQueue
+
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
+
 sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
+
+# Create and get a queue disappearing messages
+messages_queue = DisappearingQueue()
 
 
 # TODO(SpeedFox198): remove temp values
@@ -82,7 +88,7 @@ async def send_message(sid, data):
 
     # If room has disappearing messages enabled
     if room.disappearing:
-        await add_disappearing_messages(message.message_id, seconds=15)
+        await messages_queue.add_disappearing_messages(message.message_id, seconds=15)
 
 
     # Forward messages to other clients in same room
@@ -203,4 +209,11 @@ async def delete_client_messages(messages, room_id, skip_sid=None):
 
 
 async def job_disappear_messages():
-    await check_disappearing_messages(delete_expired_messages)
+    # print("Job ran")  # TODO(SpeedFox198): Change to log
+    await messages_queue.check_disappearing_messages(delete_expired_messages)
+
+
+async def task_disappear_messages(scheduler):
+    """ Task to run scheduled checking for disappearing of messages """
+    scheduler.add_job(job_disappear_messages, "interval", seconds=10)
+    scheduler.start()

@@ -1,9 +1,8 @@
-import asyncio
+from datetime import datetime
+
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Disappearing
-from datetime import datetime, timedelta
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .peek_queue import PeekQueue
 
@@ -19,6 +18,11 @@ class DisappearingQueue(PeekQueue):
     """
     Stores a queue of records of disappearing messages
     """
+
+    async def init_from_db(self) -> None:
+        """ Initialise queue by fetching from database """
+        self.__init__(await self.get_disappearing_messages())
+
 
     @property
     def has_expired_messages(self) -> bool:
@@ -39,46 +43,44 @@ class DisappearingQueue(PeekQueue):
         return deleted
 
 
-async def get_disappearing_messages():
-    async with async_session() as session:
-        # TODO(SpeedFox198): need to add limit
-        statement = sa.select(Disappearing).order_by(Disappearing.time)
-        result = (await session.execute(statement)).all()
+    # TODO(SpeedFox198): Add time paramater?
+    async def add_disappearing_messages(self, message_id:str, **kwargs):
 
-    return DisappearingQueue([row[0] for row in result])
+        # Create new record of message to disappear
+        record = Disappearing(message_id, **kwargs)
 
+        async with async_session() as session:
+            async with session.begin():
+                session.add(record)
 
-# TODO(SpeedFox198): Add time paramater?
-async def add_disappearing_messages(message_id:str, **kwargs):
-
-    # Create new record of message to disappear
-    record = Disappearing(message_id, **kwargs)
-
-    async with async_session() as session:
-        async with session.begin():
-            session.add(record)
-
-    messages_queue.put(record)
+        self.put(record)
 
 
-async def delete_disappearing_messages():
-    # Delete records from queue
-    expired = messages_queue.delete_expired()
+    async def delete_disappearing_messages(self):
+        # Delete records from queue
+        expired = self.delete_expired()
 
-    # Delete records from database
-    async with async_session() as session:
+        # Delete records from database
+        async with async_session() as session:
 
-        statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(expired))
-        await session.execute(statement)
-        await session.commit()
+            statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(expired))
+            await session.execute(statement)
+            await session.commit()
 
-    return expired
-
-
-async def check_disappearing_messages(callback):
-    if messages_queue.has_expired_messages:
-        expired = await delete_disappearing_messages()
-        await callback(expired)
+        return expired
 
 
-messages_queue = asyncio.run(get_disappearing_messages())
+    async def check_disappearing_messages(self, callback):
+        if self.has_expired_messages:
+            expired = await self.delete_disappearing_messages()
+            await callback(expired)
+
+
+    @staticmethod
+    async def get_disappearing_messages():
+        async with async_session() as session:
+            # TODO(SpeedFox198): need to add limit
+            statement = sa.select(Disappearing).order_by(Disappearing.time)
+            result = (await session.execute(statement)).all()
+
+        return [row[0] for row in result]

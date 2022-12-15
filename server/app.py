@@ -4,11 +4,11 @@ from datetime import timedelta
 import quart_auth
 import quart_rate_limiter
 import socketio
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
-from blueprints.chat import job_disappear_messages, sio
+from blueprints.chat import sio, task_disappear_messages, messages_queue
 from blueprints.device import device_bp
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.user import user_bp
 from db_access.device import get_device
 from models import AuthedUser
@@ -20,6 +20,7 @@ from utils.logging import log_warning
 
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+scheduler = AsyncIOScheduler()
 app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
 QuartSchema(app)
@@ -37,7 +38,7 @@ api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(device_bp)
 app.register_blueprint(api_bp)
-app.secret_key = "secret123"
+app.secret_key = "secret123"  # TODO(br1ght): change this lmao
 
 
 @app.before_request
@@ -79,18 +80,10 @@ async def invalid_schema(*_):
     return {"message": "Invalid request"}, 400
 
 
-async def task_disappear_messages():
-    """ Task to run scheduled checking for disappearing of messages """
-    global scheduler
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(job_disappear_messages, "interval", seconds=1)
-    scheduler.start()
-
-
 @app.before_serving
 async def startup():
-    loop = asyncio.get_event_loop()
-    loop.create_task(task_disappear_messages())
+    await messages_queue.init_from_db()
+    await task_disappear_messages(scheduler)
 
 
 @app.after_serving
