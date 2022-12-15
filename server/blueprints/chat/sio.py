@@ -215,5 +215,5 @@ async def job_disappear_messages():
 
 async def task_disappear_messages(scheduler):
     """ Task to run scheduled checking for disappearing of messages """
-    scheduler.add_job(job_disappear_messages, "interval", seconds=10)
+    scheduler.add_job(job_disappear_messages, "interval", seconds=5)
     scheduler.start()
