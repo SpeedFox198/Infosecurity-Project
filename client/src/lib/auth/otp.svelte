@@ -10,9 +10,13 @@
       <form method="POST" action="?/otp">
         <div class="form-floating mb-3">
           <input
-            type="number"
-            step="1"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
             name="otp"
+            pattern="\d{6}"
+            maxlength="6"
+            title="6 character OTP"
             class="form-control rounded-3"
             id="floatingInput"
             placeholder="123456"
