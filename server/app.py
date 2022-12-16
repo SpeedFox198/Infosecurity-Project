@@ -38,7 +38,10 @@ api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(device_bp)
 app.register_blueprint(api_bp)
-app.secret_key = "secret123"  # TODO(br1ght): change this lmao
+
+app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"
+app.config["QUART_AUTH_SALT"] = "IwPsU_TTTM_kKqr_nQglx7qUKwW1lLpZqtoHN9sWTpc"
+app.config["QUART_AUTH_DURATION"] = 14 * 60 * 60
 
 
 @app.before_request
