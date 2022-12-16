@@ -53,7 +53,7 @@ export const actions = {
       maxAge: 60 * 24 * 60 * 60, // formatted as (days * hours * minutes * seconds)
     })
 
-    throw redirect(302, "/chat")
+    throw redirect(301, "/chat")
   },
   signup: async ({request, cookies}) => {
     const data = await request.formData()
@@ -101,7 +101,7 @@ export const actions = {
       maxAge: otpCookie.maxAge,
     })
 
-    throw redirect(302, "/otp")
+    throw redirect(301, "/otp")
   }
 }
 
