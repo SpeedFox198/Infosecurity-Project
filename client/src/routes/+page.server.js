@@ -50,7 +50,7 @@ export const actions = {
       path: quartCookie.path,
       httpOnly: quartCookie.httpOnly,
       sameSite: quartCookie.sameSite,
-      maxAge: quartCookie.maxAge,
+      maxAge: 60 * 24 * 60 * 60, // formatted as (days * hours * minutes * seconds)
     })
 
     throw redirect(302, "/chat")
