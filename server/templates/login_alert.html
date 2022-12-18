@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <p>Dear {{ user.username }},</p>
+  <p>
+    This email was generated because a new log-in has occurred for the account {{ user.username }} on {{ date }}
+    originating from:
+  </p>
+  <div class="info-box">
+    <ul>
+      <li>
+        Location: {{ location }}
+      </li>
+      <li>
+        Operating System: {{ os }}
+      </li>
+      <li>
+        Browser: {{ browser }}
+      </li>
+      <li>
+        IP address: {{ ip_addr }}
+      </li>
+    </ul>
+  </div>
+  <p>
+    If you have initiated this login, you can safely ignore this email. If not, you should immediately
+    change your Bubbles password.
+  </p>
+  <p>
+    We strongly recommend that you enable two-factor authentication if you haven't already. 
+  </p>
+  
+  <p>
+    Thanks,
+    <br/>
+    Bubbles Team
+  </p>
+
+</body>
+</html>

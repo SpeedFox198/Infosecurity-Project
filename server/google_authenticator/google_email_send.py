@@ -7,6 +7,15 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 
+def create_message(to, subject, body):
+    message = EmailMessage()
+    message["To"] = to
+    message["Subject"] = subject
+    message["From"] = "bubblesarepretty126@gmail.com"
+    message.add_alternative(body, subtype="html")
+    return base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+
 def gmail_send(email, subject, content):
     """Create and send an email message
     Print the returned  message id
@@ -19,24 +28,15 @@ def gmail_send(email, subject, content):
     service = get_service()
 
     try:
-        message = EmailMessage()
-
-        message.set_content(content)
-
-        message['To'] = email
-        message['From'] = 'bubblesarepretty126@gmail.com'
-        message['Subject'] = subject
-
         # encoded message
-        encoded_message = base64.urlsafe_b64encode(message.as_bytes()) \
-            .decode()
+        encoded_message = create_message(email, subject, content)
 
-        create_message = {
+        created_message = {
             'raw': encoded_message
         }
         # pylint: disable=E1101
         send_message = (service.users().messages().send
-                        (userId="me", body=create_message).execute())
+                        (userId="me", body=created_message).execute())
         print(F'Message Id: {send_message["id"]}')
     except HttpError as error:
         print(F'An error occurred: {error}')

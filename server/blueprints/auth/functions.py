@@ -1,9 +1,13 @@
+from datetime import datetime
+
+from quart import render_template
 from ua_parser import user_agent_parser
 import aiohttp
 import secrets
 import string
 
 from google_authenticator.google_email_send import gmail_send
+from models import User
 
 
 async def get_user_agent_data(user_agent: str) -> tuple[str, str]:
@@ -43,7 +47,25 @@ def send_otp_email(email: str, otp: str):
 
 
 # Account lockout alert
-def send_alert_email(email: str):
+def send_lockout_alert_email(email: str):
     subject = "Account lockout alert"
     message = f"Do not reply to this email.\nYour account has been locked out due to too many failed login attempts. If it was not you, please change your password."
     gmail_send(email, subject, message)
+
+
+async def send_login_alert_email(user: User,
+                                 browser: str,
+                                 os: str,
+                                 location: str,
+                                 ip_addr: str) -> None:
+    current_date = datetime.utcnow().strftime("%d %B %Y, %H:%M:%S UTC")
+    subject = "Your Bubbles Account - Successful Log-in"
+    message = await render_template("login_alert.html",
+                                    user=user,
+                                    browser=browser,
+                                    os=os,
+                                    location=location,
+                                    date=current_date,
+                                    ip_addr=ip_addr
+                                    )
+    gmail_send(user.email, subject, message)

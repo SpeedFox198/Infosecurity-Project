@@ -45,7 +45,7 @@ from .functions import (
     send_otp_email,
     get_user_agent_data,
     get_location_from_ip,
-    send_alert_email
+    send_lockout_alert_email, send_login_alert_email
 )
 
 auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
@@ -107,19 +107,11 @@ async def OTP(data: OTPBody):
 @auth_bp.post("/login")
 @validate_request(LoginBody)
 async def login(data: LoginBody):
+    invalid_cred_response = {"message": "Invalid credentials"}, 401
+
     device_id = str(uuid4())
     browser, os = await get_user_agent_data(request.user_agent.string)
     location = await get_location_from_ip(request.remote_addr)
-
-    async with async_session() as session:
-        statement = sa.select(User).where(
-            (
-                (User.email == data.username) | (User.username == data.username)
-            )
-            & (User.password == data.password)
-        )
-        result = await session.execute(statement)
-        logged_in_user = result.scalars().first()
 
     # Check if user exists
     async with async_session() as session:
@@ -132,7 +124,7 @@ async def login(data: LoginBody):
         await log_info(
             f"Login using Username/email {data.username} has failed to login in using {browser}, {os} from {location}"
         )
-        return {"message": "invalid credentials"}, 401
+        return invalid_cred_response
 
     locked_out_user = await get_lockout(existing_user.user_id)
 
@@ -141,12 +133,23 @@ async def login(data: LoginBody):
             await log_warning(
                 f"User {existing_user.username} has failed to log in due to account lockout using {browser}, {os} from {location}"
             )
-            return {"message": "Your account is locked, please try again later."}, 401
+            return invalid_cred_response
 
         await delete_lockout(locked_out_user.user_id)
 
+    async with async_session() as session:
+        statement = sa.select(User).where(
+            (
+                (User.email == data.username) | (User.username == data.username)
+            )
+            & (User.password == data.password)
+        )
+        result = await session.execute(statement)
+        logged_in_user = result.scalars().first()
+
     if logged_in_user:
         await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os, location)
+        await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
         login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
         await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
         return {"message": "login success"}, 200
@@ -157,23 +160,22 @@ async def login(data: LoginBody):
     if failed_attempt is None:
         await create_failed_attempt(existing_user.user_id)
         await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
-        return {"message": "invalid credentials"}, 401
+        return invalid_cred_response
 
     if 5 > failed_attempt.attempts > 0:
         await update_failed_attempt(failed_attempt.user_id, (failed_attempt.attempts + 1))
         await log_info(f"User {existing_user.username} has failed to log in using {browser}, {os} from {location}")
-        return {"message": "invalid credentials"}, 401
+        return invalid_cred_response
 
     if failed_attempt.attempts == 5:
         await create_lockout(failed_attempt.user_id)
         await delete_failed_attempt(failed_attempt.user_id)
 
         lockout_user_email = await get_email(failed_attempt.user_id)
-        send_alert_email(lockout_user_email)
+        send_lockout_alert_email(lockout_user_email)
 
         await log_warning(f"User {existing_user.username} has been locked out for 5 minutes.")
-        return {"message": "invalid credentials"}, 401
-
+        return invalid_cred_response
 
 
 @auth_bp.post("/2fa")
