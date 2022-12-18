@@ -37,10 +37,14 @@ temp_rooms = {
 }
 
 
-# TODO(SpeedFox198): do authentication
+# TODO(SpeedFox198): do authentication & logging
 @sio.event
 async def connect(sid, environ, auth):
     """ Event when client connects to server """
+    print("\n\n\n"+"="*20+"\n\n\n")
+    print(auth)
+    print(auth.__dict__)
+    print("\n\n\n"+"="*20+"\n\n\n")
     # print("connected:", sid)
     # Do authentication
     for room in temp_rooms1:

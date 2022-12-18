@@ -10,6 +10,7 @@ from .peek_queue import PeekQueue
 # For now, only implement disappearing messages in 15 seconds
 # Make it check every 3 seconds
 # And also for now load all message from db without care for the freaking universe
+# LMAO
 # http://mysql.rjweb.org/doc.php/deletebig
 # https://dev.mysql.com/doc/refman/5.7/en/partitioning.html
 
@@ -19,11 +20,6 @@ class DisappearingQueue(PeekQueue):
     Stores a queue of records of disappearing messages
     """
 
-    async def init_from_db(self) -> None:
-        """ Initialise queue by fetching from database """
-        self.__init__(await self.get_disappearing_messages())
-
-
     @property
     def has_expired_messages(self) -> bool:
         if self.empty():
@@ -31,6 +27,22 @@ class DisappearingQueue(PeekQueue):
         oldest_record = self.peek()
         now = datetime.now()
         return oldest_record.time <= now
+
+
+    async def init_from_db(self) -> None:
+        """ Initialise queue by fetching from database """
+        self.__init__(await self.get_disappearing_messages())
+
+
+    @staticmethod
+    async def get_disappearing_messages() -> list[Disappearing]:
+        """ Retrieves and returns records of disappearing messages from database """
+        async with async_session() as session:
+            # TODO(SpeedFox198): need to add limit
+            statement = sa.select(Disappearing).order_by(Disappearing.time)
+            result = (await session.execute(statement)).all()
+
+        return [row[0] for row in result]
 
 
     def delete_expired(self) -> list[str]:
@@ -74,13 +86,3 @@ class DisappearingQueue(PeekQueue):
         if self.has_expired_messages:
             expired = await self.delete_disappearing_messages()
             await callback(expired)
-
-
-    @staticmethod
-    async def get_disappearing_messages():
-        async with async_session() as session:
-            # TODO(SpeedFox198): need to add limit
-            statement = sa.select(Disappearing).order_by(Disappearing.time)
-            result = (await session.execute(statement)).all()
-
-        return [row[0] for row in result]

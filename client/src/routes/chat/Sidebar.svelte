@@ -27,8 +27,8 @@ async function selectGrp(new_room) {
 </script>
 
 
-<!-- Left Section -->
-<div class="d-flex flex-column flex-shrink-0 left-section">
+<!-- Left Sidebar -->
+<div class="d-flex flex-column flex-shrink-0 sidebar">
   
   <!-- Profile & Settings Section -->
   <div class="d-flex top-left">
@@ -47,7 +47,7 @@ async function selectGrp(new_room) {
 </footer>
 
 <style>
-.left-section {
+.sidebar {
   width: var(--left-bar-length);
   background-color: var(--primary-light);
 }

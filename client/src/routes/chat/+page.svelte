@@ -7,7 +7,7 @@
 import { beforeUpdate } from "svelte";
 import { io } from "socket.io-client";
 
-import LeftSection from "./LeftSection.svelte";
+import Sidebar from "./Sidebar.svelte";
 import RightSection from "./RightSection.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
@@ -50,7 +50,7 @@ async function getRoomMsgs(room_id, n, extra) {
 
 
 <main class="d-flex flex-nowrap h-100">
-  <LeftSection getRoomMsgs={getRoomMsgs}/>
+  <Sidebar getRoomMsgs={getRoomMsgs}/>
   <RightSection socket={socket} getRoomMsgs={getRoomMsgs}/>
 </main>
 
