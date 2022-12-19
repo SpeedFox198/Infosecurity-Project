@@ -31,6 +31,18 @@ async def add_logged_in_device(sql_session,
 
 async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
     async with async_session() as session:
+        device_exists_statement = sa.select(Device).where(sa.exists(
+            sa.select(Device)
+            .where(
+                (Device.device_id == device_id) & (Device.user_id == user_id)
+            )
+        ))
+
+        device_exists = (await session.execute(device_exists_statement)).scalar()
+
+        if device_exists is None:
+            return False
+
         delete_device_statement = sa.delete(Device).where((Device.device_id == device_id) & (Device.user_id == user_id))
 
         # Try to delete the selected device
@@ -42,18 +54,10 @@ async def remove_logged_in_device(device_id: str, user_id: str) -> bool:
             await log_exception(err)
             return False
 
-        check_deleted_device_statement = sa.exists(
-            sa.select(Device)
-            .where((Device.device_id == device_id) & (Device.user_id == user_id))
-        )
-
         try:
-            device_exists = (await session.execute(
-                sa.select(Device)
-                .where(check_deleted_device_statement)
-            )).scalar()
+            device_exists_after_delete = (await session.execute(device_exists_statement)).scalar()
 
-            if device_exists is not None:
+            if device_exists_after_delete is not None:
                 return False
 
             return True

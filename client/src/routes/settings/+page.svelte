@@ -3,6 +3,9 @@
 </svelte:head>
 
 <script>
-    import LeftSide from "./LeftSide.svelte";
-    import RightSide from "./RightSide.svelte"; 
+  import LeftNav from "./LeftNav.svelte";
+  import RightSide from "./RightSide.svelte"; 
 </script>
+
+<LeftNav />
+<RightSide />

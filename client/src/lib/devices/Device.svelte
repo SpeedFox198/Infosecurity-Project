@@ -15,8 +15,8 @@
 		if (!response.ok) {
 			removeError = result.message;
 		}
-
-		location.reload()
+    
+    location.reload()
 	};
 </script>
 

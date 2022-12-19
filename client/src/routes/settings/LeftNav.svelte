@@ -1,70 +1,47 @@
-<nav>
-    <ul>>
-        <li><a href="#">Profile</a></li>
-        <li><a href="#">Devices</a></li>
-        <li><a href="#">Privacy</a></li>
-        <li><a href="#">Logout</a></li>
-    </ul>
-</nav>
+<script>
+	import SettingBlock from "$lib/settings/SettingBlock.svelte";
+
+</script>
+
+<div class="d-flex flex-column flex-shrink-0 sidebar">
+  
+  <!-- Chat List Section -->
+  <div class="d-flex flex-column bottom-left">
+    <SettingBlock settingName="Device" />
+  </div>
+
+</div>
+
 
 <style>
-    nav ul{
-    margin:0;
-    padding:0;
-    height:100%;
-    width:260px;
-    position:fixed;
-    top:0;
-    left:0;
-    background-color:#2b2626;
+.sidebar {
+  width: var(--left-bar-length);
+  background-color: var(--primary-light);
 }
 
-nav ul li{
-    list-style:none;
+.top-left {
+  /* position: absolute;
+  top: 0; */
+  height: 4rem;
+  width: var(--left-bar-length);
+  background-color: var(--primary);
 }
 
-
-nav ul li a{
-    display:block;
-    font-family:'montserrat';
-    text-decoration:none;
-    text-transform:uppercase;
-    font-size:17px;
-    color:#fff;
-    position:relative;
-    padding:15px 0px 15px 25px;
-    transition:all 0.5s;
+.bottom-left {
+  height: 100%;
+  overflow-y: scroll;
 }
 
-nav ul li a:before{
-    content:'';
-    position:absolute;
-    top:0;
-    right:0;
-    height:100%;
-    background:#e3e9f7;
-    border-radius:40px 0 0 40px;
-    z-index:-1;
-    transition:all 1s;
+::-webkit-scrollbar {
+  width: 0.5rem;
 }
 
-nav ul li a:hover{
-    color:#2b2626;
+::-webkit-scrollbar-track {
+  background: var(--grey-shadow);
 }
 
-nav ul li a:hover:before{
-    width:95%;
-}
-
-
-.wrapper{
-    margin-left:260px;
-}
-
-.section{
-    display:grid;
-    place-items:center;
-    min-height:100vh;
-    text-align:center;
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 0.6rem;
 }
 </style>
