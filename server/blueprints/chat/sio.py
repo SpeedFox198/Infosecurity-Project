@@ -6,6 +6,7 @@ from socketio.exceptions import ConnectionRefusedError
 from utils import to_unix
 
 from .disappearing import DisappearingQueue
+from .sio_auth_manager import SioAuthManager
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -17,6 +18,8 @@ sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLO
 # Create and get a queue disappearing messages
 messages_queue = DisappearingQueue()
 
+
+sio_auth_manager = SioAuthManager()
 
 # TODO(SpeedFox198): remove temp values
 temp_rooms1 = [
@@ -41,12 +44,9 @@ temp_rooms = {
 @sio.event
 async def connect(sid, environ, auth):
     """ Event when client connects to server """
-    print("\n\n\n"+"="*20+"\n\n\n")
-    print(environ["HTTP_COOKIE"])
-    print(auth)
-    print("\n\n\n"+"="*20+"\n\n\n")
-    # print("connected:", sid)
-    if False:
+    current_user = sio_auth_manager.get_user(environ["HTTP_COOKIE"])
+
+    if not await current_user.is_authenticated:
         raise ConnectionRefusedError("authentication failed")
 
     # Do authentication

@@ -6,7 +6,7 @@ import quart_rate_limiter
 import socketio
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
-from blueprints.chat import sio, task_disappear_messages, messages_queue
+from blueprints.chat import sio, task_disappear_messages, messages_queue, sio_auth_manager
 from blueprints.device import device_bp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.user import user_bp
@@ -33,6 +33,8 @@ rate_limiter = quart_rate_limiter.RateLimiter(
 auth_manager = AuthManager()
 auth_manager.user_class = AuthedUser
 auth_manager.init_app(app)
+
+sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
 
 api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)
