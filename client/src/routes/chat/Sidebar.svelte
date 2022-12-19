@@ -4,11 +4,14 @@ import { count } from "$lib/stores/count";
 import { selectedMsgs } from "$lib/stores/select";
 
 import Group from "$lib/chat/group/Group.svelte"
-import Nav from "./Nav.svelte";
 import ProfileBar from "$lib/settings/ProfileBar.svelte"
+import Nav from "./Nav.svelte";
+import Settings from "./Settings.svelte";
 
 // SocketIO instance
 export let getRoomMsgs;
+
+let displaySettings = false;
 
 
 async function selectGrp(new_room) {
@@ -24,12 +27,19 @@ async function selectGrp(new_room) {
     getRoomMsgs($room_id, n, extra);
   }
 }
+
+async function toggleSettings() {
+  displaySettings = !displaySettings;
+}
 </script>
 
 
 <!-- Left Sidebar -->
 <div class="d-flex flex-column flex-shrink-0 sidebar">
-  
+
+  <!-- Settings Display Section -->
+  <Settings display={displaySettings} toggleSettings={toggleSettings}/>
+
   <!-- Profile & Settings Section -->
   <div class="d-flex top-left">
     <Nav/>
@@ -42,12 +52,13 @@ async function selectGrp(new_room) {
     {/each}
   </div>
 
-  <ProfileBar />
+  <ProfileBar toggleSettings={toggleSettings}/>
 </div>
 
 
 <style>
 .sidebar {
+  position: relative;
   width: var(--left-bar-length);
   background-color: var(--primary-light);
 }

@@ -16,7 +16,7 @@ import { user_id } from "$lib/stores/user";
 const namespace = "https://localhost:8443";
 const options = {
   transports: ["websocket"],
-  auth: {
+  auth: {  // @TODO(SpeedFox198): remove if unused
     token: "abcd"
   }
 };
