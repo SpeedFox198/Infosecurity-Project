@@ -5,7 +5,7 @@ import { selectedMsgs } from "$lib/stores/select";
 
 import Group from "$lib/chat/group/Group.svelte"
 import Nav from "./Nav.svelte";
-import ProfileArea from "./ProfileArea.svelte";
+import ProfileBar from "$lib/settings/ProfileBar.svelte"
 
 // SocketIO instance
 export let getRoomMsgs;
@@ -41,10 +41,10 @@ async function selectGrp(new_room) {
       <Group grp={grp} selectGrp={selectGrp}/>
     {/each}
   </div>
+
+  <ProfileBar />
 </div>
 
-<footer>
-</footer>
 
 <style>
 .sidebar {
