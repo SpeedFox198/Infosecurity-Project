@@ -14,7 +14,12 @@ import { user_id } from "$lib/stores/user";
 
 
 const namespace = "https://localhost:8443";
-const transports = { transports: ["websocket"] };
+const options = {
+  transports: ["websocket"],
+  auth: {
+    token: "abcd"
+  }
+};
 
 let activity = "Chat"; // TODO(SpeedFox198): make this change according to chat u are at :)
 
@@ -34,7 +39,7 @@ beforeUpdate(async () => {
   _ran = true;
 
   // SocketIO instance
-  socket = io(namespace, transports);
+  socket = io(namespace, options);
 
   // TODO(SpeedFox198): remove this later lmao
   socket.on("connect", async () => {

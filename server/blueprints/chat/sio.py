@@ -2,10 +2,10 @@ import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Message
+from socketio.exceptions import ConnectionRefusedError
 from utils import to_unix
 
 from .disappearing import DisappearingQueue
-
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -42,10 +42,13 @@ temp_rooms = {
 async def connect(sid, environ, auth):
     """ Event when client connects to server """
     print("\n\n\n"+"="*20+"\n\n\n")
+    print(environ["HTTP_COOKIE"])
     print(auth)
-    print(auth.__dict__)
     print("\n\n\n"+"="*20+"\n\n\n")
     # print("connected:", sid)
+    if False:
+        raise ConnectionRefusedError("authentication failed")
+
     # Do authentication
     for room in temp_rooms1:
         sio.enter_room(sid, room["room_id"])
