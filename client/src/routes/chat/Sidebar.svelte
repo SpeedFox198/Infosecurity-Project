@@ -6,7 +6,7 @@ import { selectedMsgs } from "$lib/stores/select";
 import Group from "$lib/chat/group/Group.svelte"
 import ProfileBar from "$lib/settings/ProfileBar.svelte"
 import Nav from "./Nav.svelte";
-import Settings from "./Settings.svelte";
+import Settings from "$lib/settings/Settings.svelte";
 
 // SocketIO instance
 export let getRoomMsgs;
