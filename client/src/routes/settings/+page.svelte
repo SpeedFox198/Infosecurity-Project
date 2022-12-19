@@ -7,5 +7,7 @@
   import RightSide from "./RightSide.svelte"; 
 </script>
 
-<LeftNav />
-<RightSide />
+<main class="d-flex flex-nowrap h-100">
+  <LeftNav />
+  <RightSide />
+</main>
