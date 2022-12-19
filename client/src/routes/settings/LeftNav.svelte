@@ -19,6 +19,7 @@
   background-color: var(--primary-light);
 }
 
+/* TODO(SpeedFox198): remove when unused */
 .top-left {
   /* position: absolute;
   top: 0; */
@@ -30,18 +31,5 @@
 .bottom-left {
   height: 100%;
   overflow-y: scroll;
-}
-
-::-webkit-scrollbar {
-  width: 0.5rem;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--grey-shadow);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 0.6rem;
 }
 </style>

@@ -4,11 +4,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 
 body {
-    font-family: "Open Sans", "Segoe UI", sans-serif;
-    color: var(--black);
+  font-family: "Open Sans", "Segoe UI", sans-serif;
+  color: var(--black);
 }
 
-.navbar.navbar-2 .navbar-toggler-icon {
-    background-image: url('https://mdbootstrap.com/img/svg/hamburger2.svg?color=white');
 
+/* Scroll bar styles */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--grey-shadow);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 0.6rem;
 }

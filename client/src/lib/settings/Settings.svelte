@@ -4,66 +4,51 @@ export let toggleSettings;
 
 let settingsSection;
 
+let title = "Settings";
+
 </script>
 
 
-<div class="sidenav" class:display bind:this={settingsSection}>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="javascript:void(0)" class="closebtn" on:click={toggleSettings}>&times;</a>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="#">About</a>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="#">Services</a>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="#">Clients</a>
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="#">Contact</a>
+<div class="settings-section" class:display bind:this={settingsSection}>
+  <div class="section-title d-flex flex-row align-items-center p-2">
+    <div class="d-flex">
+      <button class="back d-flex align-items-center" type="button" disabled={!display} on:click={toggleSettings}>
+        <i class="fa-solid fa-arrow-left fs-5"></i>
+      </button>
+    </div>
+    <div class="d-flex">
+      <div class="ms-4 fs-5 fw-bold user-select-none">{title}</div>
+    </div>
+  </div>
+  <div class="row"></div>
 </div>
 
 
 <style>
-.sidenav {
+.settings-section {
   height: 100%;
   width: 0;
   position: absolute;
   z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
+  background-color: var(--primary-light);
   overflow-x: hidden;
-  transition: 0.25s;
-  padding-top: 60px;
-  text-align:center;
+  transition: 0.2s;
 }
 
-.sidenav a {
-  padding: 8px 8px 8px 32px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
-
-}
-
-.sidenav a:hover{
-  color: #f1f1f1;
-}
-
-.sidenav .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
-}
 
 .display {
   width: 100%;
 }
 
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
+.section-title {
+  height: 4rem;
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.back {
+  background-color: inherit;
+  border: 0;
+  color: var(--grey);
 }
 </style>
