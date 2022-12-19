@@ -7,7 +7,9 @@
   
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
-    <SettingBlock settingName="Device" />
+    <SettingBlock settingName="Profile" />
+    <SettingBlock settingName="Devices" />
+    <SettingBlock settingName="Privacy" />
   </div>
 
 </div>

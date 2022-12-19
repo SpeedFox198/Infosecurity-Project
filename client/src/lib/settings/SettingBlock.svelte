@@ -2,8 +2,7 @@
   export let settingName
 </script>
 
-<div class="group d-flex py-2"
-  on:keydown>
+<div class="group d-flex p-2">
   <div class="d-flex align-items-center">
     <span>{settingName}</span>
   </div>
