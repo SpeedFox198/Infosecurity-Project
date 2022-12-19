@@ -18,8 +18,8 @@ sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLO
 # Create and get a queue disappearing messages
 messages_queue = DisappearingQueue()
 
+sio_auth_manager = SioAuthManager()  # Authentication Manager
 
-sio_auth_manager = SioAuthManager()
 
 # TODO(SpeedFox198): remove temp values
 temp_rooms1 = [
@@ -40,7 +40,7 @@ temp_rooms = {
 }
 
 
-# TODO(SpeedFox198): do authentication & logging
+# TODO(SpeedFox198): logging
 @sio.event
 async def connect(sid, environ, auth):
     """ Event when client connects to server """
