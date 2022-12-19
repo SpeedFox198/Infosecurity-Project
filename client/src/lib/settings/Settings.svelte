@@ -20,7 +20,10 @@ let title = "Settings";
       <div class="ms-4 fs-5 fw-bold user-select-none">{title}</div>
     </div>
   </div>
-  <div class="row"></div>
+  <div class="row">
+    <!-- TODO(SpeedFox198): Continue from here, do the rows of settings options, make -->
+    <!-- Later on make a component for it -->
+  </div>
 </div>
 
 
