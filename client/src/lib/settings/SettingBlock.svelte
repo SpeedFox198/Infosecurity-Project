@@ -4,7 +4,7 @@
 
 <div class="group d-flex p-2">
   <div class="d-flex align-items-center">
-    <span>{settingName}</span>
+    <span class="px-3">{settingName}</span>
   </div>
 </div>
 
