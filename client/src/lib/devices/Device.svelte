@@ -88,6 +88,6 @@
 
 <style>
   .device-box {
-    background-color: var(--grey);
+    background-color: #1a6f8040;
   }
 </style>
