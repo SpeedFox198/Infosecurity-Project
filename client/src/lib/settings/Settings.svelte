@@ -2,26 +2,27 @@
 import SlidingMenu from "$lib/settings/SlidingMenu.svelte";
 import Option from "$lib/settings/Option.svelte";
 import DevicesMenu from "../devices/DevicesMenu.svelte";
-import { invalidate } from "$app/navigation"
+import { invalidate } from "$app/navigation";
 
 export let displaySettings;
 export let toggleSettings;
 
 let displayGeneral = false;
 let displaySecurity = false;
+let displaySusFiles = false;  // Scan suspicious files menu 
+let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑°༥°๑)
+let displayData = false;
 let displayDevices = false;
 
-function toggleGeneral() {
-  displayGeneral = !displayGeneral;
-}
-
-function toggleSecurity() {
-  displaySecurity = !displaySecurity;
-}
+const toggleGeneral = () => displayGeneral = !displayGeneral;
+const toggleSecurity = () => displaySecurity = !displaySecurity;
+const toggleSusFiles = () => displaySusFiles = !displaySusFiles;
+const toggleMagic = () => displayMagic = !displayMagic;
+const toggleData = () => displayData = !displayData;
 
 function toggleDevices() {
   displayDevices = !displayDevices;
-  invalidate("app:devices")
+  invalidate("app:devices");
 }
 </script>
 
@@ -43,6 +44,15 @@ function toggleDevices() {
 
 
 <SlidingMenu title="Privacy and Security" display={displaySecurity} on:click={toggleSecurity} right={true}>
+  <Option name="Scan incoming files" icon="file-shield" on:click={toggleSusFiles}/>
+  <Option name="Disappearing messages" icon="stopwatch" on:click={toggleMagic}/>
+  <Option name="Request personal data" icon="file-zipper" on:click={toggleData}/>
+</SlidingMenu>
+<SlidingMenu title="Scan incoming files" display={displaySusFiles} on:click={toggleSusFiles} right={true}>
+</SlidingMenu>
+<SlidingMenu title="Disappearing messages" display={displayMagic} on:click={toggleMagic} right={true}>
+</SlidingMenu>
+<SlidingMenu title="Request personal data" display={displayData} on:click={toggleData} right={true}>
 </SlidingMenu>
 
 

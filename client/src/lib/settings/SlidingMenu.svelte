@@ -23,7 +23,7 @@ export let title;
   </div>
   <div class="content">
     <!-- Put settings content here -->
-    <!-- TODO(SpeedFox198): remove default when unused -->
+    <!-- TODO(SpeedFox198): remove default values when unused -->
     <slot>Nothing here yet</slot>
   </div>
 </div>
