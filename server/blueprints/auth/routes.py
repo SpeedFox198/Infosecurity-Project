@@ -149,6 +149,7 @@ async def login(data: LoginBody):
 
     if logged_in_user:
         await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os, location)
+        # TODO(br1ght) re-enable when needed
         # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
         login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
         await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
