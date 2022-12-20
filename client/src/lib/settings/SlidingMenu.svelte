@@ -5,7 +5,7 @@ export let title;
 </script>
 
 
-<div class="settings-section" class:display class:right>
+<div class="settings-section {right ? "right": "left"}" class:display>
   <div class="section-title d-flex flex-row align-items-center p-2">
     <div class="d-flex">
       <button class="back d-flex align-items-center" type="button" disabled={!display} on:click>
@@ -26,25 +26,29 @@ export let title;
 .settings-section {
   height: 100%;
   width: 100%;
-  left: -100%;
-  right: initial;
   position: absolute;
   z-index: 1;
   background-color: var(--primary-light);
   overflow-x: hidden;
-  transition: 0.2s;
+  transition: 0.15s;
 }
 
-.settings-section.right {
+.left {
+  left: -100%;
+  right: initial;
+}
+
+.right {
   left: initial;
   right: -100%;
-  transition: 0.2s;
 }
 
-.display {
-  left: 0 !important;
-  right: 0 !important;
-  transition: 0.2s;
+.left.display {
+  left: 0;
+}
+
+.right.display {
+  right: 0;
 }
 
 .section-title {
