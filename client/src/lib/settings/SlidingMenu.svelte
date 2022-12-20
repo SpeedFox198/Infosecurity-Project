@@ -4,8 +4,12 @@ export let right;
 export let title;
 </script>
 
-
-<div class="settings-section {right ? "right": "left"}" class:display>
+<!--
+  Template for sliding menu
+  Set right to true for animation sliding in from right
+  Place contents of menu in slot
+-->
+<div class="settings-section" class:display class:right>
   <div class="section-title d-flex flex-row align-items-center p-2">
     <div class="d-flex">
       <button class="back d-flex align-items-center" type="button" disabled={!display} on:click>
@@ -27,15 +31,16 @@ export let title;
   height: 100%;
   width: 100%;
   position: absolute;
+  left: -100%;
+  right: initial;
   z-index: 1;
   background-color: var(--primary-light);
   overflow-x: hidden;
   transition: 0.15s;
 }
 
-.left {
-  left: -100%;
-  right: initial;
+.display {
+  left: 0;
 }
 
 .right {
@@ -43,11 +48,8 @@ export let title;
   right: -100%;
 }
 
-.left.display {
-  left: 0;
-}
-
 .right.display {
+  left: initial;
   right: 0;
 }
 

@@ -1,5 +1,5 @@
 <script>
-import { afterUpdate, beforeUpdate } from "svelte";
+import { beforeUpdate } from "svelte";
 import { selectMode } from "$lib/stores/select";
 
 
