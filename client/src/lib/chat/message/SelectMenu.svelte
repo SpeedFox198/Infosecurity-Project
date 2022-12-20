@@ -53,7 +53,7 @@ async function deleteMsgs(event) {
   position: absolute;
   bottom: 0;
   height: 4rem;
-  max-width: calc(100vw - 25rem);
+  max-width: calc(100vw - var(--left-bar-length));
   background-color: var(--grey);
   border-left: 0.1rem solid var(--grey-shadow);
 }

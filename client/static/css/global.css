@@ -16,10 +16,10 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--grey-shadow);
+  background: #00000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
+  background: var(--scrollbar-color);
   border-radius: 0.6rem;
 }

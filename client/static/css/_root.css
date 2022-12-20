@@ -24,4 +24,7 @@
 
     /* Misc */
     --left-bar-length: 25rem;
+
+    /* Scrollbar */
+    --scrollbar-color: #54585b49;
 }

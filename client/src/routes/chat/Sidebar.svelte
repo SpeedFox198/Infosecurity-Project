@@ -63,7 +63,7 @@ async function toggleSettings() {
 
 .top-left {
   /* position: absolute;
-top: 0; */
+  top: 0; */
   height: 4rem;
   width: var(--left-bar-length);
   background-color: var(--primary);

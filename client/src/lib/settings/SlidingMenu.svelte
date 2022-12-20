@@ -21,8 +21,11 @@ export let title;
       <div class="ms-4 fs-5 fw-bold user-select-none">{title}</div>
     </div>
   </div>
-  <!-- Put settings content here -->
-  <slot></slot>
+  <div class="content">
+    <!-- Put settings content here -->
+    <!-- TODO(SpeedFox198): remove default when unused -->
+    <slot>Nothing here yet</slot>
+  </div>
 </div>
 
 
@@ -65,5 +68,10 @@ export let title;
   background-color: inherit;
   border: 0;
   color: var(--grey);
+}
+
+.content {
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
 }
 </style>
