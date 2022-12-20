@@ -3,7 +3,7 @@ export let grp;
 export let selectGrp;
 </script>
 
-<div class="group d-flex py-2"
+<div class="group d-flex py-2 user-select-none"
   on:click={() => selectGrp(grp.room_id)}
   on:keydown>
   <div class="icon">

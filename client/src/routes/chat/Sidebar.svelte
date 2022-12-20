@@ -61,6 +61,7 @@ async function toggleSettings() {
   position: relative;
   width: var(--left-bar-length);
   background-color: var(--primary-light);
+  overflow-x: hidden;
 }
 
 .top-left {
