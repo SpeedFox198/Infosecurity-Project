@@ -1,10 +1,11 @@
 <script>
-export let display;
-export let toggleSettings;
-
-let settingsSection;
-
-let title = "Settings";
+	import SettingBlock from "./SettingBlock.svelte";
+  export let display;
+  export let toggleSettings;
+  
+  let settingsSection;
+  
+  let title = "Settings";
 
 </script>
 
@@ -23,6 +24,9 @@ let title = "Settings";
   <div class="row">
     <!-- TODO(SpeedFox198): Continue from here, do the rows of settings options, make -->
     <!-- Later on make a component for it -->
+    <SettingBlock settingName="Profile" />
+    <SettingBlock settingName="Privacy" />
+    <SettingBlock settingName="Devices" />
   </div>
 </div>
 

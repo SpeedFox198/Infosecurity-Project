@@ -9,7 +9,7 @@ export let toggleSettings;
 
 <div class="flex-column d-flex profile">
   <div class="profile-height d-flex align-items-center p-2">
-    <img src={ currentUser.avatar } alt="{ currentUser.username } profile picture" class="rounded-circle">
+    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle">
     <span class="px-2 fw-bolder">{ currentUser.username }</span>
     <button on:click={toggleSettings} type="button" title="Show settings" class="btn" >
       <i class="fa-solid fa-cog fs-4"></i>

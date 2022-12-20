@@ -4,7 +4,7 @@
 	export let data;
 
 	let currentUser = $page.data.user;
-  let {devices, errors} = data
+  $: ({devices, errors} = data)
 </script>
 
 <main class="h-100">

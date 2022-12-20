@@ -1,6 +1,7 @@
 <script>
 	export let device;
 	export let currentDeviceId;
+  import { invalidate } from "$app/navigation"
 
 	let time = new Date(device.time * 1000).toLocaleString('en-SG'); // JS uses milliseconds instead of seconds
 	let removeError;
@@ -16,7 +17,7 @@
 			removeError = result.message;
 		}
     
-    location.reload()
+    invalidate("app:devices")
 	};
 </script>
 
