@@ -12,11 +12,6 @@
 </footer>
 
 <style>
-  .image-size {
-    width: 50px;
-    height: 50px;
-  }
-
  .edit {
    padding-left: 80px;
    padding-right: 80px;
