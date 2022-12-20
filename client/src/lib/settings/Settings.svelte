@@ -12,6 +12,7 @@ let displaySecurity = false;
 
 function toggleDevices() {
   displayDevices = !displayDevices;
+  invalidate("app:devices")
 }
 function toggleSecurity() {
   displaySecurity = !displaySecurity;
