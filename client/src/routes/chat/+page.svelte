@@ -11,7 +11,8 @@ import Sidebar from "./Sidebar.svelte";
 import RightSection from "./RightSection.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
-
+import { deviceStore } from "$lib/stores/device"
+export let data;
 
 const namespace = "https://localhost:8443";
 const options = {
@@ -25,7 +26,7 @@ let activity = "Chat"; // TODO(SpeedFox198): make this change according to chat 
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
-
+$: deviceStore.set(data.devices)
 
 let socket;  // Forward declare socket :)
 

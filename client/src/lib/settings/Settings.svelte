@@ -1,15 +1,17 @@
 <script>
-import SlidingMenu from "$lib/settings/SlidingMenu.svelte";
-import Option from "$lib/settings/Option.svelte";
+  import SlidingMenu from "$lib/settings/SlidingMenu.svelte";
+  import Option from "$lib/settings/Option.svelte";
+	import DevicesMenu from "../devices/DevicesMenu.svelte";
+  import { invalidate } from "$app/navigation"
 
-export let displaySettings;
+export let display;
 export let toggleSettings;
 
 let displayDevices = false;
-let displaySecurity = false;
 
-const toggleDevices = () => displayDevices = !displayDevices;
-const toggleSecurity = () => displaySecurity = !displaySecurity;
+function toggleDevices() {
+  displayDevices = !displayDevices;
+}
 </script>
 
 <SlidingMenu title="Settings" display={displaySettings} on:click={toggleSettings} right={false}>
@@ -24,8 +26,8 @@ const toggleSecurity = () => displaySecurity = !displaySecurity;
 </SlidingMenu>
 
 
-<SlidingMenu title="Devices" display={displayDevices} right={true} on:click={toggleDevices} zIndex=2>
-  Devices SEttigngs
+<SlidingMenu title="Devices" display={displayDevices} right={true} on:click={toggleDevices}>
+  <DevicesMenu />
 </SlidingMenu>
 
 
