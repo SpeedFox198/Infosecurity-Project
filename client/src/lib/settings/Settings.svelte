@@ -4,13 +4,17 @@
 	import DevicesMenu from "../devices/DevicesMenu.svelte";
   import { invalidate } from "$app/navigation"
 
-export let display;
+export let displaySettings;
 export let toggleSettings;
 
 let displayDevices = false;
+let displaySecurity = false;
 
 function toggleDevices() {
   displayDevices = !displayDevices;
+}
+function toggleSecurity() {
+  displaySecurity = !displaySecurity;
 }
 </script>
 
