@@ -21,6 +21,7 @@ function toggleSecurity() {
 
 function toggleDevices() {
   displayDevices = !displayDevices;
+  invalidate("app:devices")
 }
 </script>
 
