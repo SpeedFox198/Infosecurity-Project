@@ -279,7 +279,7 @@ async function removeMsg(message_id, room_id) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay getRoomMsgs={getRoomMsgs}/>
+    <MessageDisplay {getRoomMsgs}/>
 
     {#if $selectMode}
       <!-- Select Menu -->

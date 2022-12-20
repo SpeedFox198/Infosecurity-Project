@@ -28,6 +28,7 @@ export let title;
 
 <style>
 .settings-section {
+  visibility: hidden;
   height: 100%;
   width: 100%;
   position: absolute;
@@ -40,6 +41,7 @@ export let title;
 }
 
 .display {
+  visibility: visible;
   left: 0;
 }
 

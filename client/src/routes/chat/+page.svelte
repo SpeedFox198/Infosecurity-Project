@@ -55,8 +55,8 @@ async function getRoomMsgs(room_id, n, extra) {
 
 
 <main class="d-flex flex-nowrap h-100">
-  <Sidebar getRoomMsgs={getRoomMsgs}/>
-  <RightSection socket={socket} getRoomMsgs={getRoomMsgs}/>
+  <Sidebar {getRoomMsgs}/>
+  <RightSection {socket} {getRoomMsgs}/>
 </main>
 
 

@@ -38,7 +38,7 @@ async function toggleSettings() {
 <div class="d-flex flex-column flex-shrink-0 sidebar">
 
   <!-- Settings Display Section -->
-  <Settings display={displaySettings} toggleSettings={toggleSettings}/>
+  <Settings {displaySettings} {toggleSettings}/>
 
   <!-- Profile & Settings Section -->
   <div class="d-flex top-left">
@@ -48,11 +48,11 @@ async function toggleSettings() {
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
     {#each $allRooms as grp}
-      <Group grp={grp} selectGrp={selectGrp}/>
+      <Group {grp} {selectGrp}/>
     {/each}
   </div>
 
-  <ProfileBar toggleSettings={toggleSettings}/>
+  <ProfileBar {toggleSettings}/>
 </div>
 
 
