@@ -1,9 +1,10 @@
 from quart_auth import BadSignature, Quart, _AuthSerializer, _get_config_or_default
 from werkzeug.sansio.http import parse_cookie
 from models import AuthedUser
+from utils.app_context import AppContext
 
 
-class SioAuthManager:
+class SioAuthManager(AppContext):
     """
     SocketIO Authentication Manager
 
@@ -11,23 +12,6 @@ class SioAuthManager:
 
     Raises RuntimeError if property is read without registering app.
     """
-
-    def __init__(self) -> None:
-        self._app = None
-
-
-    def register_app(self, app: Quart) -> None:
-        """ Registers a Quart app """
-        self._app = app
-
-
-    @property
-    def app(self) -> Quart:
-        """ Current Quart app """
-        if self._app is None:
-            raise RuntimeError("App is not registered")
-        return self._app
-
 
     def get_user(self, cookie) -> AuthedUser:
         """ Returns the current user after authenticating the user """

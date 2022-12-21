@@ -1,11 +1,11 @@
 from quart_auth import Quart
 
 
-class ContextManager:
+class AppContext:
     """
     App Context Manager
 
-    Uses: access Quart app from other parts of the poject
+    Usage: access Quart app from other parts of the poject
 
     Register a Quart app with `init_app` function.
 
