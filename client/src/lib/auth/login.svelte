@@ -1,5 +1,7 @@
 <script>
   import { Turnstile } from "svelte-turnstile"
+  import { enhance } from "$app/forms"
+
   export let toggleSignupOn
   export let errors
 </script>
@@ -11,7 +13,7 @@
   </div>
 
   <div class="card-body p-5 pt-0">
-    <form method="POST" action="?/login">
+    <form method="POST" action="?/login" use:enhance>
       <div class="form-floating mb-3">
         <input
           type="text"
