@@ -3,7 +3,7 @@ import re
 from uuid import uuid4
 from quart import Blueprint, request
 from quart import session as otp_session
-from security_functions.cryptography import *
+from security_functions.cryptography import pw_hash, pw_verify
 from quart_auth import (
     login_user,
     logout_user,
@@ -67,7 +67,7 @@ async def sign_up(data: SignUpBody):
         if existing_user:
             return {"message": "User already exists"}, 409
 
-        user = User(username=data.username, email=data.email, password=pw_hash(data.password)) # hash password before sending over to database
+        user = User(username=data.username, email=data.email, password=pw_hash(data.password))  # hash password before sending over to database
 
         otp = generate_otp()
         await create_otp(user.email, otp, user.password)
@@ -119,7 +119,7 @@ async def login(data: LoginBody):
         account_check_statement = sa.select(User).where(
             (User.username == data.username) | (User.email == data.username)
         )
-        existing_user = (await session.execute(account_check_statement)).scalars().first()
+        existing_user: User = (await session.execute(account_check_statement)).scalars().first()
 
     if not existing_user:
         await log_info(
@@ -138,17 +138,8 @@ async def login(data: LoginBody):
 
         await delete_lockout(locked_out_user.user_id)
 
-    async with async_session() as session:
-        statement = sa.select(User).where(
-            (
-                (User.email == data.username) | (User.username == data.username)
-            )
-            & (User.password == pw_hash(data.password)) # comparing new hash with old hash
-        )
-        result = await session.execute(statement)
-        logged_in_user = result.scalars().first()
-
-    if logged_in_user:
+    if pw_verify(existing_user.password, data.password):
+        logged_in_user = existing_user
         await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os, location)
         # TODO(br1ght) re-enable when needed
         # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
