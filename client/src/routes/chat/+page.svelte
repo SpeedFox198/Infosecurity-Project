@@ -33,6 +33,7 @@ let socket;  // Forward declare socket :)
 
 let _ran = false;  // Flag to prevent multiple connections
 // Using beforeUpdate instead as a hacky method to connect before onMount
+// TODO(SpeedFox198): consider using `if (browser)` to run this
 beforeUpdate(async () => {
 
   // Set flag to allow only running once

@@ -7,6 +7,7 @@ const dispatch = createEventDispatcher();
 
 $: num = $selectedMsgs.size;
 $: singular = num === 1;
+let invisible = false;
 
 
 async function deleteMsgs(event) {
@@ -40,7 +41,7 @@ async function deleteMsgs(event) {
 
     <!-- Submit Button -->
     <div class="col-1">
-      <button class="btn" type="button" on:click={deleteMsgs}>
+      <button class="btn" class:invisible type="button" on:click={deleteMsgs}>
         <i class="icon-trash fa-solid fa-trash"></i>
       </button>
     </div>

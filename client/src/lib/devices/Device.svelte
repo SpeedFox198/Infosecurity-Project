@@ -43,7 +43,7 @@
     invalidate('app:devices');
   };
 
-  let browserIcons = {
+  const browserIcons = {
     chrome: 'fa-brands fa-chrome',
     firefox: 'fa-brands fa-firefox-browser',
     edge: 'fa-brands fa-edge',

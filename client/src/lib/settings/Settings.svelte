@@ -1,7 +1,7 @@
 <script>
 import SlidingMenu from "$lib/settings/SlidingMenu.svelte";
 import Option from "$lib/settings/Option.svelte";
-import DevicesMenu from "../devices/DevicesMenu.svelte";
+import DevicesMenu from "$lib/devices/DevicesMenu.svelte";
 import { invalidate } from "$app/navigation";
 
 export let displaySettings;
