@@ -3,6 +3,7 @@ import re
 from uuid import uuid4
 from quart import Blueprint, request
 from quart import session as otp_session
+from security_functions.cryptography import *
 from quart_auth import (
     login_user,
     logout_user,
@@ -66,7 +67,7 @@ async def sign_up(data: SignUpBody):
         if existing_user:
             return {"message": "User already exists"}, 409
 
-        user = User(username=data.username, email=data.email, password=data.password)
+        user = User(username=data.username, email=data.email, password=pw_hash(data.password)) # hash password before sending over to database
 
         otp = generate_otp()
         await create_otp(user.email, otp, user.password)
@@ -142,7 +143,7 @@ async def login(data: LoginBody):
             (
                 (User.email == data.username) | (User.username == data.username)
             )
-            & (User.password == data.password)
+            & (User.password == pw_hash(data.password)) # comparing new hash with old hash
         )
         result = await session.execute(statement)
         logged_in_user = result.scalars().first()

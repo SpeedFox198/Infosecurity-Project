@@ -84,7 +84,7 @@ def decrypt(result:bytes):
 
 
 # Test
-generate_key()
-result = encrypt(data)
-print(result)
-print(decrypt(result))
+# generate_key()
+# result = encrypt(data)
+# print(result)
+# print(decrypt(result))

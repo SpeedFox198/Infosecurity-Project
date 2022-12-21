@@ -1,5 +1,6 @@
 <script>
 import { createEventDispatcher } from "svelte";
+import Dropzone from "dropzone";
 
 
 const dispatch = createEventDispatcher();
@@ -18,15 +19,59 @@ async function attachFile(event) {
   // Click the attachment input to prompt users to upload files
   attachmentInput.click();
 }
+
+Dropzone.options.uploadForm = {
+  // configurations
+  url: "/api/upload",
+  method: "post",
+  clickable: "#dropZone",
+  autoProcessQueue: false,
+  maxFiles: 1,
+  maxFilesize: 100000000 /* 100MB */,
+  acceptedFiles: ".avi, .mp3, .mp4, .gif, .jpeg, .jpg, .png, .pdf, .pptx, .sldm, .xlsm, .rar, .txt, .zip",
+
+  chunking: true,
+  chunkSize: 1000000 /* 1MB */,
+  retryChunks: true,
+  retryChunksLimit: 3,
+
+  createdImageThumbnails: true,
+  maxThumbnailsize: 10,
+  thumbnailWidth: 120,
+  thumbnailHeight: 120,
+  thumbnailMethod: "contain",
+
+  init:function() {
+    const dz = this;
+
+    // Add the file to the queue when the user selects a file
+    this.createElement.querySelector("button[type=submit]").addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dz.processQueue();
+    });
+
+    // Send the file to the server
+    this.on("sending", function(file, xhr, formData) {
+      formData.append("data", file);
+    });
+
+    this.on("success", function(file, response) {
+      dispatch("message", response);
+    });
+  }
+}
 </script>
 
 
 <!-- Texting Input Section -->
 <div class="container input-area">
-  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onSend}>
+  <form id="upload-form" class="row justify-content-center align-items-center dropzone h-100" on:submit|preventDefault={onSend}>
+    <!-- Dropzone preview -->
+    <div class="previews"></div>
 
     <!-- Attachments Input -->
-    <div class="col-1">
+    <div class="col-1" id="dropZone">
       <button class="btn" type="button" on:click={attachFile}>
         <img class="icon" src="/icons/paperclip.svg" alt="AttachFile">
       </button>
