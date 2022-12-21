@@ -1,7 +1,7 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import Message
+from models import AuthedUser, Message, Membership
 from socketio.exceptions import ConnectionRefusedError
 from utils import to_unix
 
@@ -10,6 +10,7 @@ from .sio_auth_manager import SioAuthManager
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
+SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
 
@@ -48,6 +49,9 @@ async def connect(sid, environ, auth):
 
     if not await current_user.is_authenticated:
         raise ConnectionRefusedError("authentication failed")
+
+    # Save user session
+    await save_user(sid, current_user)
 
     # Do authentication
     for room in temp_rooms1:
@@ -165,13 +169,32 @@ async def delete_messages(sid, data):
     messages = data["messages"]
     room_id = data["room_id"]
 
+    # Get user from session
+    user = await get_user(sid)
+    user_id = await user.user_id
+
     # Delete messages from database (ensures that room_id is correct)
     async with async_session() as session:
+        # statement = sa.select(Membership.is_admin).where(
+        #     (Membership.user_id == user_id)
+        #     & (Membership.room_id == room_id)
+        # )
+        # result = (await session.execute(statement)).one()
+        # is_admin = result[0]
+
+        # condition = (Message.message_id.in_(messages)) & (Message.room_id == room_id)
+
+        # if not is_admin:
+        #     condition &= (Message.user_id == user_id)
+
+        # statement = sa.select(Message.message_id).where(condition)
+
+
         statement = sa.select(Message.message_id).where(
             (Message.message_id.in_(messages))
             & (Message.room_id == room_id)
         )
-        result = (await session.execute(statement)).fetchall()
+        result = (await session.execute(statement)).all()
         messages = [row[0] for row in result]
 
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
@@ -182,6 +205,16 @@ async def delete_messages(sid, data):
     # Tell other clients in same room to delete the same messages
     await delete_client_messages(messages, room_id)
     # TODO(SpeedFox198): skip_sid=sid (client side must del 1st)
+
+
+async def save_user(sid:str, user:AuthedUser):
+    """ Save user object to sio session """
+    await sio.save_session(sid, {SIO_SESSION_USER_KEY: user})
+
+
+async def get_user(sid:str) -> AuthedUser | None:
+    """ Returns user object from sio session """
+    return (await sio.get_session(sid)).get(SIO_SESSION_USER_KEY, None)
 
 
 async def delete_expired_messages(messages):

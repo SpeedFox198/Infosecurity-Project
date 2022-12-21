@@ -1,0 +1,4 @@
+Group 1,favicon.svg
+Group 2,https://i.redd.it/jeuusd992wd41.jpg
+Group 3,https://i.redd.it/jeuusd992wd41.jpg
+Group 4,https://www.shutterstock.com/image-photo/surreal-concept-roll-world-dice-260nw-1356798002.jpg
