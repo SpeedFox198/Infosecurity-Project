@@ -1,5 +1,6 @@
 <script>
     import { Turnstile } from "svelte-turnstile"
+    import { enhance } from "$app/forms"
     export let toggleSignupOn
     export let errors
 
@@ -43,7 +44,7 @@
         </div>
 
         <div class="card-body p-5 pt-0">
-          <form method="POST" action="?/signup">
+          <form method="POST" action="?/signup" use:enhance>
             <!-- email address -->
             <div class="form-floating mb-3">
               <input name="email" type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" required>
