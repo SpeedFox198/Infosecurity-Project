@@ -4,13 +4,14 @@ from datetime import timedelta
 import quart_auth
 import quart_rate_limiter
 import socketio
-from blueprints.api import api_bp
-from blueprints.auth import auth_bp, auth_app_context
-from blueprints.chat import sio, task_disappear_messages, messages_queue, sio_auth_manager
-from blueprints.device import device_bp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from blueprints.api import api_bp
+from blueprints.auth import auth_bp
+from blueprints.chat import messages_queue, sio, sio_auth_manager, task_disappear_messages
+from blueprints.device import device_bp
 from blueprints.user import user_bp
 from db_access.device import get_device
+from itsdangerous import URLSafeTimedSerializer
 from models import AuthedUser
 from quart import Quart
 from quart_auth import AuthManager, current_user, logout_user
@@ -36,7 +37,6 @@ auth_manager.init_app(app)
 
 sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
 
-auth_app_context.register_app(app)  # Registers app to Auth App Context
 
 api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)
@@ -46,6 +46,8 @@ app.register_blueprint(api_bp)
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"
 app.config["QUART_AUTH_SALT"] = "IwPsU_TTTM_kKqr_nQglx7qUKwW1lLpZqtoHN9sWTpc"
 app.config["QUART_AUTH_DURATION"] = 60 * 24 * 60 * 60  # formatted as (days * hours * minutes * seconds)
+
+app.config["url_serialiser"] = URLSafeTimedSerializer(app.secret_key)
 
 
 @app.before_request

@@ -1,72 +1,42 @@
 import datetime
 import re
 from uuid import uuid4
-from quart import Blueprint, Quart, request
-from quart import session as otp_session
-from security_functions.cryptography import pw_hash, pw_verify
-from quart_auth import (
-    login_user,
-    logout_user,
-    login_required,
-    current_user
-)
-from quart_cors import cors
-from quart_schema import validate_request, validate_response
 
 import sqlalchemy as sa
-
-from db_access.device import remove_logged_in_device, add_logged_in_device
+from db_access.account_lockout import (create_lockout, delete_lockout,
+                                       get_email, get_lockout)
+from db_access.device import add_logged_in_device, remove_logged_in_device
+from db_access.failed_attempt import (create_failed_attempt,
+                                      delete_failed_attempt,
+                                      get_failed_attempt,
+                                      update_failed_attempt)
 from db_access.globals import async_session
-from models import (
-    User,
-    AuthedUser,
-)
-from models.request_data import (
-    LoginBody,
-    SignUpBody,
-    OTPBody,
-    LoginCallBackBody,
-    ForgotPasswordBody,
-    ResetPasswordBody
-)
-from models.response_data import UserData
-
-from db_access.otp import get_otp, create_otp, delete_otp
-from db_access.failed_attempt import (
-    get_failed_attempt,
-    create_failed_attempt,
-    update_failed_attempt,
-    delete_failed_attempt
-)
-from db_access.account_lockout import (
-    get_lockout,
-    create_lockout,
-    delete_lockout,
-    get_email
-)
-from utils.logging import log_info, log_warning
-from .functions import (
-    generate_otp,
-    send_otp_email,
-    get_user_agent_data,
-    get_location_from_ip,
-    send_lockout_alert_email, send_login_alert_email, send_password_recovery_email
-)
-
-saltkey = b'\x80\x1c\rqn\xb2\x7f\x03\x90\xeeA\x18ex\x0e\xc1\x14\xf7\xf3A\x8b\xbc\\]\x1ag\xd8\xcbk\xd3\x9a\x9a3\xce\x14\xbe\xc7\x1ak^K>\xb5jyu,:\xdaF\xc2\x08\xae5\xcf$\x90M[\xcd&\xc1\x90\x06\xa5i\x81\xfd70\xd3\x1d\x03\x06\xf4(Up6\x08b\xb6avj\x0b\x18\xcd\xb8\xb6=J\x190[\xa9b\r\xc1\r\x98v\xf3\xd7q\x13\xf3{W\xa2\x1b\xaa\x8b\xf2\xe6\xcf\xe8M|&\x86\x03\xe6Pfa\xea\x03'
-
-from utils.app_context import AppContext
-
-from google.oauth2 import id_token
+from db_access.otp import create_otp, delete_otp, get_otp
 from google.auth.transport import requests
+from google.oauth2 import id_token
+from itsdangerous import BadData, SignatureExpired
+from models import AuthedUser, User
+from models.request_data import (ForgotPasswordBody, LoginBody,
+                                 LoginCallBackBody, OTPBody, ResetPasswordBody,
+                                 SignUpBody)
+from models.response_data import UserData
+from quart import Blueprint, current_app, request
+from quart import session as otp_session
+from quart_auth import current_user, login_required, login_user, logout_user
+from quart_schema import validate_request, validate_response
+from security_functions.cryptography import pw_hash, pw_verify
+from utils.logging import log_info, log_warning
 
-from itsdangerous import SignatureExpired, URLSafeTimedSerializer, BadData
+from .functions import (generate_otp, get_location_from_ip,
+                        get_user_agent_data, send_lockout_alert_email,
+                        send_login_alert_email, send_otp_email,
+                        send_password_recovery_email)
 
-auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
 
-auth_app_context = AppContext()
+FORGET_PASSWORD_SALT = b'\x80\x1c\rqn\xb2\x7f\x03\x90\xeeA\x18ex\x0e\xc1\x14\xf7\xf3A\x8b\xbc\\]\x1ag\xd8\xcbk\xd3\x9a\x9a3\xce\x14\xbe\xc7\x1ak^K>\xb5jyu,:\xdaF\xc2\x08\xae5\xcf$\x90M[\xcd&\xc1\x90\x06\xa5i\x81\xfd70\xd3\x1d\x03\x06\xf4(Up6\x08b\xb6avj\x0b\x18\xcd\xb8\xb6=J\x190[\xa9b\r\xc1\r\x98v\xf3\xd7q\x13\xf3{W\xa2\x1b\xaa\x8b\xf2\xe6\xcf\xe8M|&\x86\x03\xe6Pfa\xea\x03'
 
-url_serialiser = URLSafeTimedSerializer(auth_app_context.secret_key)
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
 
 @auth_bp.post("/sign-up")
 @validate_request(SignUpBody)
@@ -195,8 +165,9 @@ async def two_fa():
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
 async def forgot_password(data : ForgotPasswordBody):
+    url_serialiser = current_app.config["url_serialiser"]
     email = data.email
-    token = url_serialiser.dumps(email, saltkey)
+    token = url_serialiser.dumps(email, FORGET_PASSWORD_SALT)
     send_password_recovery_email(email, token)
     return {"message": "Email Sent"}, 200
 
@@ -204,8 +175,9 @@ async def forgot_password(data : ForgotPasswordBody):
 @auth_bp.post("/reset-password")
 @validate_request(ResetPasswordBody)
 async def reset_password(data : ResetPasswordBody):
+    url_serialiser = current_app.config["url_serialiser"]
     try:
-        email = url_serialiser.loads(data.token, saltkey, max_age=3600)
+        email = url_serialiser.loads(data.token, FORGET_PASSWORD_SALT, max_age=3600)
     except SignatureExpired:
         return {"message": "Token has expired"}, 401
 
