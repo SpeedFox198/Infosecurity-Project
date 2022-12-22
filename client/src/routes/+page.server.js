@@ -105,6 +105,8 @@ export const actions = {
   }
 }
 
+
+
 async function validateCfToken(token, secret) {
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",

@@ -45,6 +45,10 @@ def send_otp_email(email: str, otp: str):
     message = f"Do not reply to this email.\nPlease enter {otp} as your OTP to complete your registration."
     gmail_send(email, subject, message)
 
+def send_password_recovery_email(email: str, token: str):
+    subject = "OTP for password recovery"
+    message = f"Do not reply to this email.\nPlease click on this link to reset your password." + token
+    gmail_send(email, subject, message)
 
 # Account lockout alert
 def send_lockout_alert_email(email: str):
