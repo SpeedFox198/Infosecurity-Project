@@ -28,6 +28,7 @@ class AppContext:
             raise RuntimeError("App is not registered")
         return self._app
 
+
     @property
     def secret_key(self) -> str:
         """ Quart app's secret key """

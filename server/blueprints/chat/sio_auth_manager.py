@@ -29,7 +29,7 @@ class SioAuthManager(AppContext):
             return None
         else:
             serializer = _AuthSerializer(
-                self.app.secret_key,
+                self.secret_key,
                 _get_config_or_default("QUART_AUTH_SALT", self.app),
             )
             try:
