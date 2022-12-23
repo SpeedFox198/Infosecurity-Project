@@ -13,7 +13,7 @@ export let title;
   <div class="section-title d-flex flex-row align-items-center p-2">
     <div class="d-flex">
       <button class="back d-flex align-items-center" type="button" disabled={!display} on:click>
-        <!-- TODO(SpeedFox198): rounded-circle, onhover ?? -->
+        <!-- TODO(UI)(SpeedFox198): rounded-circle, onhover ?? -->
         <i class="fa-solid fa-arrow-left fs-5"></i>
       </button>
     </div>
@@ -23,7 +23,7 @@ export let title;
   </div>
   <div class="content">
     <!-- Put settings content here -->
-    <!-- TODO(SpeedFox198): remove default values when unused -->
+    <!-- TODO(UI)(SpeedFox198): remove default values when unused -->
     <slot>Nothing here yet</slot>
   </div>
 </div>

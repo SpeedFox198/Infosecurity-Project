@@ -20,7 +20,7 @@ export let name;
 <style>
 .option {
   height: 4.5rem;
-  /* TODO(SpeedFox198): removed if unused */
+  /* TODO(UI)(SpeedFox198): removed if unused */
   /* border-bottom: 0.1rem solid var(--primary-light-shadow); */
 }
 

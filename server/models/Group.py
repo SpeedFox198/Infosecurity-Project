@@ -2,7 +2,7 @@ from db_access.globals import Base
 from sqlalchemy import CHAR, VARCHAR, Column
 
 
-DEFAULT_ICON_PATH = "/default.png"  # TODO(SpeedFox198): change this in the future
+DEFAULT_ICON_PATH = "/default.png"  # TODO(medium)(SpeedFox198): change this in the future
 
 
 class Group(Base):

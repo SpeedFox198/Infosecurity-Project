@@ -25,7 +25,7 @@ export const getTempId = (() => {
  *     sent: boolean;     - True if message was sent by current user
  *     time: int;         - Timestamp in unix time format
  *     content: str;      - Content of message
- *     reply_to: str;     - message_id of message being replied to TODO(SpeedFox198): remove when unsused
+ *     reply_to: str;     - message_id of message being replied to TODO(low)(SpeedFox198): remove when unsused
  *     type: str;         - Type of message
  *     corner?: boolean;  - True if message is last of consecutive messages sent by same user
  *     username?: str;    - Username of user that sent the message

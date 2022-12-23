@@ -17,12 +17,12 @@ export let data;
 const namespace = "https://localhost:8443";
 const options = {
   transports: ["websocket"],
-  auth: {  // @TODO(SpeedFox198): remove if unused
+  auth: {  // TODO(low)(SpeedFox198): remove if unused
     token: "abcd"
   }
 };
 
-let activity = "Chat"; // TODO(SpeedFox198): make this change according to chat u are at :)
+let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to chat u are at :)
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
@@ -33,7 +33,7 @@ let socket;  // Forward declare socket :)
 
 let _ran = false;  // Flag to prevent multiple connections
 // Using beforeUpdate instead as a hacky method to connect before onMount
-// TODO(SpeedFox198): consider using `if (browser)` to run this
+// TODO(low)(SpeedFox198): consider using `if (browser)` to run this
 beforeUpdate(async () => {
 
   // Set flag to allow only running once
@@ -43,7 +43,7 @@ beforeUpdate(async () => {
   // SocketIO instance
   socket = io(namespace, options);
 
-  // TODO(SpeedFox198): remove this later lmao
+  // TODO(medium)(SpeedFox198): remove this later lmao
   socket.on("connect", async () => {
     console.log("connected to SocketIO server");
   });
