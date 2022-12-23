@@ -205,8 +205,10 @@ async def login_callback(data: LoginCallBackBody):
     location = await get_location_from_ip(request.remote_addr)
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
-        id_info = id_token.verify_oauth2_token(data.token, requests.Request(),
-                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com")
+        id_info = id_token.verify_oauth2_token(data.token,
+                                               requests.Request(),
+                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com",
+                                               15)
 
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
@@ -242,8 +244,9 @@ async def login_callback(data: LoginCallBackBody):
             login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
             await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
             return {"message": "login success"}, 200
-    except ValueError:
+    except ValueError as err:
         # Invalid token
+        print(err)
         return {"message": "Invalid token or something went wrong with the process"}, 401
 
 
