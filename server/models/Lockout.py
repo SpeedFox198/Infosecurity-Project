@@ -9,8 +9,9 @@ from sqlalchemy import (
 )
 from db_access.globals import Base
 
+
 class Lockout (Base):
-    __tablename__ = "Lockout"
+    __tablename__ = "lockout"
 
     def __init__ (self, user_id):
         self.user_id = user_id

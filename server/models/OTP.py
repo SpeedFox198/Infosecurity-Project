@@ -8,7 +8,7 @@ from db_access.globals import Base
 
 
 class OTP(Base):
-    __tablename__ = "OTP"
+    __tablename__ = "otp"
 
     def __init__ (self, email, otp, password):
         self.email = email

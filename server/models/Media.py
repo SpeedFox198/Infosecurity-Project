@@ -4,7 +4,7 @@ from sqlalchemy import CHAR, VARCHAR, Column, ForeignKey
 
 
 class Media(Base):
-    __tablename__ = "Media"
+    __tablename__ = "media"
 
     message_id = Column(CHAR(36), ForeignKey(Message.message_id), primary_key=True)
     path = Column(VARCHAR(255))

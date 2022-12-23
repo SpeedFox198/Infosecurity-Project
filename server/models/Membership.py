@@ -10,9 +10,9 @@ from models import Room, User
 
 
 class Membership(Base):
-    __tablename__ = "Membership"
+    __tablename__ = "membership"
 
-    def __init__(self, room_id:str, user_id:str, is_admin:bool=False):
+    def __init__(self, room_id: str, user_id: str, is_admin: bool = False):
         self.room_id = room_id
         self.user_id = user_id
         self.is_admin = is_admin

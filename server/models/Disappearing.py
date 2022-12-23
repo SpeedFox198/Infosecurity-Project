@@ -6,7 +6,7 @@ from sqlalchemy import CHAR, TIMESTAMP, Column, ForeignKey
 
 
 class Disappearing(Base):
-    __tablename__ = "Disappearing"
+    __tablename__ = "disappearing"
 
     def __init__(self, message_id:str, **kwargs:int) -> None:
         """
