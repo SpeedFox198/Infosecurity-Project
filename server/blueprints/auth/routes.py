@@ -205,8 +205,10 @@ async def login_callback(data: LoginCallBackBody):
     location = await get_location_from_ip(request.remote_addr)
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
-        id_info = id_token.verify_oauth2_token(data.token, requests.Request(),
-                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com")
+        id_info = id_token.verify_oauth2_token(data.token,
+                                               requests.Request(),
+                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com",
+                                               15)
 
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
