@@ -1,12 +1,13 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, Message, Membership
+from models import AuthedUser, Group, Membership, Message, Room
 from socketio.exceptions import ConnectionRefusedError
 from utils import to_unix
 
 from .disappearing import DisappearingQueue
 from .sio_auth_manager import SioAuthManager
+
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -52,6 +53,9 @@ async def connect(sid, environ, auth):
 
     # Save user session
     await save_user(sid, current_user)
+
+    rooms = await get_room(current_user.user_id)
+    print(rooms)
 
     # Do authentication
     for room in temp_rooms1:
@@ -215,6 +219,37 @@ async def save_user(sid:str, user:AuthedUser):
 async def get_user(sid:str) -> AuthedUser | None:
     """ Returns user object from sio session """
     return (await sio.get_session(sid)).get(SIO_SESSION_USER_KEY, None)
+
+
+async def get_room(user_id:str):
+    rooms = []
+
+    async with async_session() as session:
+
+        statement = sa.select(
+            Room.room_id, Room.disappearing, Room.type, Membership.is_admin
+        ).join_from(Room, Membership
+        ).where(
+            Membership.user_id == user_id
+        )
+        result = (await session.execute(statement)).all()
+
+        rooms = [{
+            "room_id": row[0],
+            "disappearing": row[1],
+            "type": row[2],
+            "is_admin": row[3],
+        } for row in result]
+
+        for room in rooms:
+            if room["type"] != "group":
+                continue
+            statement = sa.select(Group.name, Group.icon).where(Group.room_id == room["room_id"])
+            result = (await session.execute(statement)).one()
+            room["name"] = result[0]
+            room["icon"] = result[1]
+
+    return rooms
 
 
 async def delete_expired_messages(messages):

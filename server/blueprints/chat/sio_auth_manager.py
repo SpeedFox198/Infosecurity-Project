@@ -1,4 +1,4 @@
-from quart_auth import BadSignature, Quart, _AuthSerializer, _get_config_or_default
+from quart_auth import BadSignature, _AuthSerializer, _get_config_or_default
 from werkzeug.sansio.http import parse_cookie
 from models import AuthedUser
 from utils.app_context import AppContext
