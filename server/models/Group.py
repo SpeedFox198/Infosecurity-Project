@@ -6,7 +6,7 @@ DEFAULT_ICON_PATH = "/default.png"  # TODO(SpeedFox198): change this in the futu
 
 
 class Group(Base):
-    __tablename__ = "Group"
+    __tablename__ = "group"
 
     def __init__(self, room_id:str, name:str, icon:str=DEFAULT_ICON_PATH):
         self.room_id = room_id

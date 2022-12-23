@@ -12,7 +12,7 @@ from db_access.globals import Base
 
 
 class User(Base):
-    __tablename__ = "User"
+    __tablename__ = "user"
 
     def __init__(self, username, email, password):
         self.user_id = str(uuid4())

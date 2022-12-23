@@ -14,7 +14,7 @@ from db_access.globals import async_session
 from db_access.otp import create_otp, delete_otp, get_otp
 from google.auth.transport import requests
 from google.oauth2 import id_token
-from itsdangerous import BadData, SignatureExpired
+from itsdangerous import BadData, SignatureExpired, URLSafeTimedSerializer
 from models import AuthedUser, User
 from models.request_data import (ForgotPasswordBody, LoginBody,
                                  LoginCallBackBody, OTPBody, ResetPasswordBody,
@@ -32,7 +32,6 @@ from .functions import (generate_otp, get_location_from_ip,
                         send_login_alert_email, send_otp_email,
                         send_password_recovery_email)
 
-
 FORGET_PASSWORD_SALT = b'\x80\x1c\rqn\xb2\x7f\x03\x90\xeeA\x18ex\x0e\xc1\x14\xf7\xf3A\x8b\xbc\\]\x1ag\xd8\xcbk\xd3\x9a\x9a3\xce\x14\xbe\xc7\x1ak^K>\xb5jyu,:\xdaF\xc2\x08\xae5\xcf$\x90M[\xcd&\xc1\x90\x06\xa5i\x81\xfd70\xd3\x1d\x03\x06\xf4(Up6\x08b\xb6avj\x0b\x18\xcd\xb8\xb6=J\x190[\xa9b\r\xc1\r\x98v\xf3\xd7q\x13\xf3{W\xa2\x1b\xaa\x8b\xf2\xe6\xcf\xe8M|&\x86\x03\xe6Pfa\xea\x03'
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -41,9 +40,13 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 @auth_bp.post("/sign-up")
 @validate_request(SignUpBody)
 async def sign_up(data: SignUpBody):
-    username_regex = r'^[a-zA-Z0-9_-]{3,32}$'
-    if not re.fullmatch(username_regex, data.username):
+    username_pattern = r'^[a-zA-Z0-9_-]{3,32}$'
+    if not re.fullmatch(username_pattern, data.username):
         return {"message": "Invalid username"}, 400
+
+    password_pattern = r'^(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])(?=\D*\d)[\w\W]{8,}$'
+    if not re.fullmatch(password_pattern, data.password):
+        return {"message": "Invalid password"}, 400
 
     async with async_session() as session:
         statement = sa.select(User).where((User.email == data.email) | (User.username == data.username))
@@ -53,7 +56,8 @@ async def sign_up(data: SignUpBody):
         if existing_user:
             return {"message": "User already exists"}, 409
 
-        user = User(username=data.username, email=data.email, password=pw_hash(data.password))  # hash password before sending over to database
+        user = User(username=data.username, email=data.email,
+                    password=pw_hash(data.password))  # hash password before sending over to database
 
         otp = generate_otp()
         await create_otp(user.email, otp, user.password)
@@ -67,6 +71,9 @@ async def sign_up(data: SignUpBody):
 @auth_bp.post("/otp")
 @validate_request(OTPBody)
 async def OTP(data: OTPBody):
+    if otp_session.get("email") is None or otp_session.get("username") is None:
+        return {"message": "Invalid request"}, 401
+
     email = otp_session.get("email")
 
     # Grab OTP and password from database
@@ -74,7 +81,7 @@ async def OTP(data: OTPBody):
 
     # Check if OTP is correct
     if otp.otp != data.otp:
-        return {"message": "invalid OTP"}, 401
+        return {"message": "Invalid OTP"}, 401
 
     # Delete OTP from database
     # Create user
@@ -164,7 +171,7 @@ async def two_fa():
 
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
-async def forgot_password(data : ForgotPasswordBody):
+async def forgot_password(data: ForgotPasswordBody):
     url_serialiser = current_app.config["url_serialiser"]
     email = data.email
     token = url_serialiser.dumps(email, FORGET_PASSWORD_SALT)
@@ -174,10 +181,10 @@ async def forgot_password(data : ForgotPasswordBody):
 
 @auth_bp.post("/reset-password")
 @validate_request(ResetPasswordBody)
-async def reset_password(data : ResetPasswordBody):
-    url_serialiser = current_app.config["url_serialiser"]
+async def reset_password(data: ResetPasswordBody):
+    url_serialiser: URLSafeTimedSerializer = current_app.config["url_serialiser"]
     try:
-        email = url_serialiser.loads(data.token, FORGET_PASSWORD_SALT, max_age=3600)
+        email = url_serialiser.loads(data.token, 3600, salt=FORGET_PASSWORD_SALT)
     except SignatureExpired:
         return {"message": "Token has expired"}, 401
 
@@ -190,13 +197,14 @@ async def login_callback(data: LoginCallBackBody):
         return {"message": "No CSRF token in Cookie"}, 401
     csrf_token_body = request.get('g_csrf_token')
     if not csrf_token_body:
-        return {"message": "No CSRF roken in post body"}, 401
+        return {"message": "No CSRF token in post body"}, 401
     if csrf_token_cookie != csrf_token_body:
         return {"message": "Failed to verify double submit cookie"}, 401
 
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
-        idinfo = id_token.verify_oauth2_token(data.token, requests.Request(), "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com")
+        id_info = id_token.verify_oauth2_token(data.token, requests.Request(),
+                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com")
 
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
@@ -208,11 +216,12 @@ async def login_callback(data: LoginCallBackBody):
         #     raise ValueError('Wrong hosted domain.')
 
         # ID token is valid. Get the user's Google Account ID from the decoded token.
-        userid = idinfo['sub']
-        email = idinfo['email']
-        name = idinfo['name']
-        picture = idinfo['picture']
-        #Check if user exists in the database
+        user_id = id_info['sub']
+        email = id_info['email']
+        name = id_info['name']
+        picture = id_info['picture']
+
+        # Check if user exists in the database
         async with async_session() as session:
             statement = sa.select(User).where(User.email == email)
             result = await session.execute(statement)
@@ -222,14 +231,12 @@ async def login_callback(data: LoginCallBackBody):
                 statement = sa.select(User).where(User.email == email)
                 result = await session.execute(statement)
                 existing_user = result.scalars().first()
-
-
-        
     except ValueError:
         # Invalid token
         return {"message": "Invalid token or something went wrong with the process"}, 401
 
     return {"message": "login success"}, 200
+
 
 @auth_bp.post("/logout")
 @login_required
