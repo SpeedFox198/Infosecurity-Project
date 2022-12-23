@@ -7,12 +7,12 @@
 
   async function handleCredentialResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
-    await fetch("https://https://127.0.0.1:8443/api/auth/login-callback)", {
+    await fetch("https://127.0.0.1:8443/api/auth/login-callback)", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Accept": "application/json",
-      "Content-Type": "application/json",
-      "User-Agent": request.headers.get("User-Agent")
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({"token": response.credential})
   });
@@ -91,7 +91,7 @@
     <div id="buttonDiv"></div> 
     <div id="g_id_onload"
     data-client_id="758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com"
-    data-login_uri="https://your.domain/your_login_endpoint"
+    data-login_uri="https://localhost:8443"
     data-auto_prompt="false">
     </div>
     <div class="g_id_signin"

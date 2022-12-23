@@ -23,7 +23,7 @@ from utils.logging import log_warning
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 scheduler = AsyncIOScheduler()
 app = Quart(__name__)
-app = cors(app, allow_credentials=True, allow_origin=["https://localhost"])
+app = cors(app, allow_credentials=True, allow_origin=["https://localhost", "https://127.0.0.1"])
 QuartSchema(app)
 
 rate_limiter = quart_rate_limiter.RateLimiter(
