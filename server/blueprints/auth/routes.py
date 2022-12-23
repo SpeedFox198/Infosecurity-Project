@@ -27,7 +27,7 @@ from quart_schema import validate_request, validate_response
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.user import get_user_details, insert_user_by_google
 from db_access.user import insert_user_by_google
-from utils.logging import log_info, log_warning
+from utils.logging import log_info, log_warning, log_exception
 
 from .functions import (generate_otp, get_location_from_ip,
                         get_user_agent_data, send_lockout_alert_email,
@@ -242,8 +242,9 @@ async def login_callback(data: LoginCallBackBody):
             login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
             await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
             return {"message": "login success"}, 200
-    except ValueError:
+    except ValueError as err:
         # Invalid token
+        print(err)
         return {"message": "Invalid token or something went wrong with the process"}, 401
 
 
