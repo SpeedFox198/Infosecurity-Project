@@ -27,7 +27,7 @@ from quart_schema import validate_request, validate_response
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.user import get_user_details, insert_user_by_google
 from db_access.user import insert_user_by_google
-from utils.logging import log_info, log_warning, log_exception
+from utils.logging import log_info, log_warning
 
 from .functions import (generate_otp, get_location_from_ip,
                         get_user_agent_data, send_lockout_alert_email,
