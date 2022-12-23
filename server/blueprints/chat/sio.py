@@ -54,7 +54,7 @@ async def connect(sid, environ, auth):
     # Save user session
     await save_user(sid, current_user)
 
-    rooms = await get_room(current_user.user_id)
+    rooms = await get_room(await current_user.user_id)
     print(rooms)
 
     # Do authentication
@@ -222,7 +222,7 @@ async def get_user(sid:str) -> AuthedUser | None:
 
 
 async def get_room(user_id:str):
-    rooms = []
+    rooms = []  # List of rooms user belongs to
 
     async with async_session() as session:
 
@@ -234,6 +234,7 @@ async def get_room(user_id:str):
         )
         result = (await session.execute(statement)).all()
 
+        # Unpack retrieved values
         rooms = [{
             "room_id": row[0],
             "disappearing": row[1],
