@@ -1,7 +1,7 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, Group, Membership, Message, Room
+from models import AuthedUser, Group, Membership, Message, Room, User
 from socketio.exceptions import ConnectionRefusedError
 from utils import to_unix
 
@@ -55,7 +55,7 @@ async def connect(sid, environ, auth):
     await save_user(sid, current_user)
 
     rooms = await get_room(await current_user.user_id)
-    print(rooms)
+    print(rooms)  # TODO(SpeedFox198): temp lmao
 
     # Do authentication
     for room in temp_rooms1:
@@ -226,6 +226,7 @@ async def get_room(user_id:str):
 
     async with async_session() as session:
 
+        # Get room and membership info of user
         statement = sa.select(
             Room.room_id, Room.disappearing, Room.type, Membership.is_admin
         ).join_from(Room, Membership
@@ -243,12 +244,14 @@ async def get_room(user_id:str):
         } for row in result]
 
         for room in rooms:
-            if room["type"] != "group":
-                continue
-            statement = sa.select(Group.name, Group.icon).where(Group.room_id == room["room_id"])
-            result = (await session.execute(statement)).one()
-            room["name"] = result[0]
-            room["icon"] = result[1]
+            if room["type"] == "direct":
+                statement = sa.select(Membership.user_id)
+                statement = sa.select(User.username, User.avatar).where(User.user_id)
+            else:
+                statement = sa.select(Group.name, Group.icon).where(Group.room_id == room["room_id"])
+                result = (await session.execute(statement)).one()
+                room["name"] = result[0]
+                room["icon"] = result[1]
 
     return rooms
 
