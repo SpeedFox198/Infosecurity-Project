@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.exc import SQLAlchemyError
 
 from db_access.globals import async_session
 from models.User import User
@@ -17,3 +18,13 @@ async def get_user_details(user_id: str) -> tuple:
         ).where(User.user_id == user_id)
         result = await session.execute(statement)
         return result.first()
+
+async def insert_user_by_google(user_id: str, username: str, email: str, avatar: str) -> None:
+    async with async_session() as session:
+        statement = sa.insert(User).values(user_id=user_id, username=username, email=email, avatar=avatar)
+        try:
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await session.rollback()
+            raise err
