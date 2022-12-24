@@ -14,6 +14,10 @@
     errors = form.cfError
   }
 
+  if (form?.signupError) {
+    errors = form.signupError
+  }
+
   const toggleSignupOn = () => {
     signupDisplay = !signupDisplay
   }
