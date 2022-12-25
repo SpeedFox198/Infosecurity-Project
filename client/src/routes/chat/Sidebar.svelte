@@ -12,7 +12,14 @@ import Settings from '$lib/settings/Settings.svelte';
 export let getRoomMsgs;
 
 let displaySettings = false;
-let roomSearchInput = "" // Possible TODO(cw)? Implement room filter
+let roomSearchInput = "" 
+$: sanitizedRoomInput = roomSearchInput
+                        .toLowerCase()
+                        .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
+$: roomSearchRegex = new RegExp(`.*${sanitizedRoomInput}.*`, "g")
+$: currentRooms = $allRooms.filter(room => room.name
+                                          .toLowerCase()
+                                          .match(roomSearchRegex))
 
 async function selectGrp(new_room) {
   // Set selected room_id
@@ -31,6 +38,7 @@ async function selectGrp(new_room) {
 async function toggleSettings() {
   displaySettings = !displaySettings;
 }
+
 </script>
 
 <!-- Left Sidebar -->
@@ -44,7 +52,7 @@ async function toggleSettings() {
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
-    {#each $allRooms as grp}
+    {#each currentRooms as grp} 
       <Group {grp} {selectGrp}/>
     {/each}
   </div>

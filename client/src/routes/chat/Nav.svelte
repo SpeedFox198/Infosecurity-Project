@@ -7,7 +7,6 @@
     displayOptionsMenu = !displayOptionsMenu
   }
 
-
 </script>
 
 <div class="d-flex top-left align-items-center">
@@ -15,7 +14,12 @@
     <span class="input-group-text search-icon">
       <i class="fa-solid fa-magnifying-glass"></i>
     </span>
-		<input class="form-control no-border search-form" type="search" placeholder="Search" aria-label="Search" bind:value={roomSearchInput} />
+		<input class="form-control no-border search-form"
+      type="search"
+      placeholder="Search" 
+      aria-label="Search" 
+      maxlength="20"
+      bind:value={roomSearchInput} />
 	</div>
 	<button class="options-btn" title="Options" on:click={toggleOptionsMenu} type="button">
 		<i class="fa-solid fa-ellipsis-vertical" />
@@ -52,6 +56,10 @@
   
   .search-form:focus {
     box-shadow: none;
+  }
+
+  input[type="search"]::-webkit-search-cancel-button {
+    cursor: pointer;
   }
 
   .no-border {
