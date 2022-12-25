@@ -12,6 +12,7 @@ import Settings from '$lib/settings/Settings.svelte';
 export let getRoomMsgs;
 
 let displaySettings = false;
+let roomSearchInput = "" // Possible TODO(cw)? Implement room filter
 
 async function selectGrp(new_room) {
   // Set selected room_id
@@ -39,9 +40,7 @@ async function toggleSettings() {
   <Settings {displaySettings} {toggleSettings}/>
 
   <!-- Profile & Settings Section -->
-  <div class="d-flex top-left">
-    <Nav/>
-  </div>
+  <Nav bind:roomSearchInput={roomSearchInput}/>
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
@@ -59,14 +58,6 @@ async function toggleSettings() {
   width: var(--left-bar-length);
   background-color: var(--primary-light);
   overflow-x: hidden;
-}
-
-.top-left {
-  /* position: absolute;
-  top: 0; */
-  height: 4rem;
-  width: var(--left-bar-length);
-  background-color: var(--primary);
 }
 
 .bottom-left {

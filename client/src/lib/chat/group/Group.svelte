@@ -9,7 +9,7 @@ export let selectGrp;
   on:keydown>
   <div class="icon p-2">
     <div class="img-wrapper img-1-1">
-      <img class="rounded-circle" src={grp.icon} alt="Grop Icon">
+      <img class="rounded-circle" src={grp.icon} alt="Group Icon">
     </div>
   </div>
   <div class="d-flex align-items-center">
