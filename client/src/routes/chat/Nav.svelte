@@ -19,7 +19,8 @@
       placeholder="Search" 
       aria-label="Search" 
       maxlength="20"
-      bind:value={roomSearchInput} />
+      bind:value={roomSearchInput}
+     />
 	</div>
 	<button class="options-btn" title="Options" on:click={toggleOptionsMenu} type="button">
 		<i class="fa-solid fa-ellipsis-vertical" />
