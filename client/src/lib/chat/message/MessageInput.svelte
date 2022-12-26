@@ -3,13 +3,19 @@ import { createEventDispatcher } from "svelte";
 import FilePond, { registerPlugin } from 'svelte-filepond';
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import 'filepond/dist/filepond.css';
 
 const dispatch = createEventDispatcher();
 
 // Register the plugins
-registerPlugin(FilePondPluginImageExifOrientation, 
-FilePondPluginImagePreview);
+registerPlugin(
+  FilePondPluginImageExifOrientation
+, FilePondPluginImagePreview
+, FilePondPluginFileValidateSize
+, FilePondPluginFileValidateType
+);
 
 let filePondDisplay = false;
 
@@ -49,12 +55,34 @@ async function onSend(event) {
 
 <!-- Texting Input Section -->
 {#if (filePondDisplay)}
-<div class="container">
-  <FilePond bind:this={pond} {name}
+<div class="card">
+  <div class="filePond">
+  <FilePond 
+        bind:this={pond} {name}
         server="/upload"
-        allowMultiple={true}
+        allowMultiple={false}
         oninit={handleinit}
-        onaddfile={handleAddfile}/>
+        onaddfile={handleAddfile}
+        
+        allowFileSizeValidation={true}
+        maxFileSize="5MB"
+        maxTotalFileSize="10MB"
+        labelMaxFileSizeExceeded="File is too large"
+        labelMaxTotalFileSizeExceeded="Total file size is too large"
+
+        allowFileTypeValidation={true}
+        acceptedFileTypes={['image/*', 'video/*', 'audio/*', 'application/pdf', 'text/*']}
+        labelFileTypeNotAllowed="File type is not allowed"
+        fileValidateTypeLabelExpectedTypes="Expects image/*, video/*, audio/* files"
+        fileValidateTypeLabelExpectedTypesMap={null}
+
+        allowImagePreview={true}
+        imagePreviewMinHeight={50}
+        imagePreviewMaxHeight={120}
+
+        allowImageExifOrientation={true}
+        />
+  </div>
 </div>
 {/if}
 <div class="container input-area">
@@ -102,26 +130,25 @@ async function onSend(event) {
 /**
  * FilePond Custom Styles
  */
-.filepond--drop-label {
-	color: #4c4e53;
+
+.card {
+  width: 20em;
+  bottom: 4em;
+  z-index: 20;
+
+  animation-name: slidein;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+
 }
 
-.filepond--label-action {
-	text-decoration-color: #babdc0;
-}
+@keyframes slidein {
+  from {
+    transform: translateX(100%);
+  }
 
-.filepond--panel-root {
-	border-radius: 2em;
-	background-color: #edf0f4;
-	height: 1em;
+  to {
+    transform: translateX(0%);
+  }
 }
-
-.filepond--item-panel {
-	background-color: #595e68;
-}
-
-.filepond--drip-blob {
-	background-color: #7f8a9a;
-}
-
 </style>
