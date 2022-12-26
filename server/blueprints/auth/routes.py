@@ -181,29 +181,29 @@ async def forgot_password(data: ForgotPasswordBody):
     return {"message": "Email Sent"}, 200
 
 
-@auth_bp.post("/reset-password?token=<token>")
+@auth_bp.post("/reset-password")
 @validate_request(ResetPasswordBody)
-async def reset_password(data: ResetPasswordBody, token: str):
+async def reset_password(data: ResetPasswordBody):
     url_serialiser: URLSafeTimedSerializer = current_app.config["url_serialiser"]
     try:
-        email = url_serialiser.loads(token, 3600, salt=FORGET_PASSWORD_SALT)
+        email = url_serialiser.loads(data.token, 3600, salt=FORGET_PASSWORD_SALT)
     except BadData:
         return {"message": "Invalid token"}, 401
-    
+
     password_pattern = r'^(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])(?=\D*\d)[\w\W]{8,}$'
     if not re.fullmatch(password_pattern, data.password):
         return {"message": "Invalid password"}, 400
 
-    #Password Hash
+    # Password Hash
     hashed_password = pw_hash(data.password)
 
-    #Replace password
+    # Replace password
     async with async_session() as session:
         update_statement = sa.update(User).where(User.email == email).values(password=hashed_password)
         await session.execute(update_statement)
-        #Get user_id from email
+        # Get user_id from email
         user_id = sa.select(User.user_id).where(User.email == email)
-        #Remove any lockouts and failed attempts
+        # Remove any lockouts and failed attempts
         await delete_lockout(user_id)
         await delete_failed_attempt(user_id)
         await session.commit()

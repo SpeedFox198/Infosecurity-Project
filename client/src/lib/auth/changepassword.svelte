@@ -8,7 +8,7 @@
     </div>
   
     <div class="card-body p-5 pt-0">
-      <form method="POST" action="?/changepassword">
+      <form method="POST">
         <div class="form-floating mb-3">
           <input
             type="password"
@@ -23,7 +23,7 @@
         <div class="form-floating mb-3">
           <input
             type="password"
-            name="change_password"
+            name="confirm-password"
             class="form-control rounded-3"
             id="floatingPassword"
             placeholder="Confirm Password"

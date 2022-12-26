@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-@dataclass
 
+@dataclass
 class ResetPasswordBody:
     token: str
     password: str

@@ -1,28 +1,32 @@
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-    changepassword: async ({request, cookies}) => {
+    default: async ({request, url}) => {
         const data = await request.formData()
-        const changepassword = data.get("password")
-        const changepasswordconfirm = data.get("password_confirm")
-        const response = await fetch("https://127.0.0.1:8443/api/auth/reset-password?token=<token>", {   
+        const changePassword = data.get("password")
+        const changePasswordConfirm = data.get("confirm-password")
+        const changePasswordToken = url.searchParams.get("token")
+
+        const response = await fetch("https://127.0.0.1:8443/api/auth/reset-password", {   
             method: "POST",
-            credentials: "include",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Cookie": request.headers.get("cookie")
             },
-            body: JSON.stringify({"password": changepassword, "password_confirm": changepasswordconfirm})
+            body: JSON.stringify({
+              "token": changePasswordToken,
+              "password": changePassword,
+              "confirm_password": changePasswordConfirm
+            })
         });  
+
         const result = await response.json();
         if (!response.ok) {
             return {
-              otpError: result.message
+              error: result.message
             }
         }
       
-        cookies.delete("session")
         throw redirect(302, "/")
     }
 }

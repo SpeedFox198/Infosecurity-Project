@@ -1,11 +1,11 @@
 <script>
-    import Changepassword from "../../lib/auth/changepassword.svelte";
+    import ChangePassword from "$lib/auth/changepassword.svelte";
     export let form
     
     let errors
 
-    if (form?.otpError) {
-      errors = form.otpError
+    if (form?.error) {
+      errors = form.error
     }
   </script>
   
@@ -22,7 +22,7 @@
           <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
         </div>
         <div class="col-md-6">
-          <Changepassword errors={errors}/>
+          <ChangePassword errors={errors}/>
         </div>
       </div>
     </div>
