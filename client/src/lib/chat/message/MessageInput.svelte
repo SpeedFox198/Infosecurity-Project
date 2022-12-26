@@ -55,7 +55,7 @@ async function onSend(event) {
 
 <!-- Texting Input Section -->
 {#if (filePondDisplay)}
-<div class="card">
+<div class="card filepond-card">
   <div class="filePond">
   <FilePond 
         bind:this={pond} {name}
@@ -131,7 +131,7 @@ async function onSend(event) {
  * FilePond Custom Styles
  */
 
-.card {
+.filepond-card {
   width: 20em;
   bottom: 4em;
   z-index: 20;
@@ -144,7 +144,7 @@ async function onSend(event) {
 
 @keyframes slidein {
   from {
-    transform: translateX(100%);
+    transform: translateX(-30%);
   }
 
   to {

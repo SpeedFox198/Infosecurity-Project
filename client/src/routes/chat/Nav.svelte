@@ -49,6 +49,8 @@
   
   .search-icon {
     padding-right: 0.3rem;
+    background-color: #ffffff;
+    border-color: #ffffff;
   }
   
   .search-form {
