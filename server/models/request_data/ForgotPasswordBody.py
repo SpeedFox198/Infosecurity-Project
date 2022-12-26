@@ -4,3 +4,4 @@ from dataclasses import dataclass
 
 class ForgotPasswordBody:
     email: str
+    

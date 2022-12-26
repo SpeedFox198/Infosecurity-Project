@@ -1,8 +1,9 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from models import *
 from db_access.globals import *
+from models import *
+from security_functions.cryptography import pw_hash
 
 
 ROOM_GROUP_NUM = 4  # Number of groups group chats
@@ -67,8 +68,8 @@ async def add_memberships(session, room_ids, alice, bob):
 
 async def add_users(session):
     async with session.begin():
-        bob = User("bob", "bob@gmail.com", "bob123")
-        alice = User("alice", "alice@yahoo.com", "alice456")
+        bob = User("bob", "bob@gmail.com", pw_hash("bob123"))
+        alice = User("alice", "alice@yahoo.com", pw_hash("alice456"))
         bob.avatar = "/galaxy.jpg"
         alice.avatar = "/default.png"
         session.add(bob)

@@ -8,7 +8,7 @@ from models import User
 
 
 class FriendRequest(Base):
-    __tablename__ = "Friend_Request"
+    __tablename__ = "friend_request"
 
     user1_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)
     user2_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)

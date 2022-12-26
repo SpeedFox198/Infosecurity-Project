@@ -16,7 +16,7 @@ export const allUsers = (() => {
    * When user_id is specified, assume adding of single user
    * When user_id is unspecified, assume adding of multiple users
    * Good luck using this function (Sorry for making it complicated)
-   * TODO(SpeedFox198): if possible in future, simplify this proccess
+   * TODO(low)(SpeedFox198): if possible in future, simplify this proccess
    */
   async function addUser(user, user_id) {
     update(storage => {

@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import tough from "tough-cookie"
 
 
@@ -23,7 +23,7 @@ export const actions = {
 
     if (!cfSuccess) {
       return {
-        cfError: "Invalid CAPTCHA"
+        loginCfError: "Invalid CAPTCHA"
       }
     }
     
@@ -66,15 +66,15 @@ export const actions = {
     const { cfSuccess } = await validateCfToken(cfToken, "0x4AAAAAAABjATgnTcCbttib5rnrNUIazOg")
   
     if (!cfSuccess) {
-      return {
-        cfError: "Invalid CAPTCHA"
-      }
+      return fail(400, {
+        signupCfError: "Invalid CAPTCHA"
+      })
     }
 
     if (password !== confirmPassword) {
-      return {
+      return fail(400, {
         signupError: "Passwords do not match"
-      }
+      })
     }
 
     const response = await fetch("https://127.0.0.1:8443/api/auth/sign-up", {
@@ -88,9 +88,9 @@ export const actions = {
     });
     const result = await response.json();
     if (!response.ok) {
-      return {
+      return fail(400, {
         signupError: result.message
-      }
+      })
     }
 
     const otpCookie = Cookie.parse(response.headers.get("set-cookie"))

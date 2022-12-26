@@ -12,7 +12,7 @@ from models import User
 
 
 class Device(Base):
-    __tablename__ = "Device"
+    __tablename__ = "device"
 
     device_id = Column(CHAR(36), primary_key=True)
     user_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)

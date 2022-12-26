@@ -12,6 +12,15 @@ import Settings from '$lib/settings/Settings.svelte';
 export let getRoomMsgs;
 
 let displaySettings = false;
+let roomSearchInput = "" 
+// Escape special characters to prevent evil regex DOS attacks
+$: sanitizedRoomInput = roomSearchInput
+                        .toLowerCase()
+                        .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
+$: roomSearchRegex = new RegExp(`.*${sanitizedRoomInput}.*`, "g")
+$: currentRooms = $allRooms.filter(room => room.name
+                                          .toLowerCase()
+                                          .match(roomSearchRegex))
 
 async function selectGrp(new_room) {
   // Set selected room_id
@@ -30,6 +39,7 @@ async function selectGrp(new_room) {
 async function toggleSettings() {
   displaySettings = !displaySettings;
 }
+
 </script>
 
 <!-- Left Sidebar -->
@@ -39,13 +49,11 @@ async function toggleSettings() {
   <Settings {displaySettings} {toggleSettings}/>
 
   <!-- Profile & Settings Section -->
-  <div class="d-flex top-left">
-    <Nav/>
-  </div>
+  <Nav bind:roomSearchInput={roomSearchInput}/>
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
-    {#each $allRooms as grp}
+    {#each currentRooms as grp} 
       <Group {grp} {selectGrp}/>
     {/each}
   </div>
@@ -59,14 +67,6 @@ async function toggleSettings() {
   width: var(--left-bar-length);
   background-color: var(--primary-light);
   overflow-x: hidden;
-}
-
-.top-left {
-  /* position: absolute;
-  top: 0; */
-  height: 4rem;
-  width: var(--left-bar-length);
-  background-color: var(--primary);
 }
 
 .bottom-left {

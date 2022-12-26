@@ -7,8 +7,10 @@ export let selectGrp;
 <div class="group d-flex py-2 user-select-none"
   on:click={() => selectGrp(grp.room_id)}
   on:keydown>
-  <div class="icon">
-    <img class="rounded-circle px-2" src={grp.icon} alt="Grop Icon">
+  <div class="icon p-2">
+    <div class="img-wrapper img-1-1">
+      <img class="rounded-circle" src={grp.icon} alt="Group Icon">
+    </div>
   </div>
   <div class="d-flex align-items-center">
     <span>{grp.name}</span>
@@ -27,6 +29,7 @@ export let selectGrp;
 }
 
 .icon {
+  height: 4.5rem;
   width: 4.5rem;
 }
 </style>

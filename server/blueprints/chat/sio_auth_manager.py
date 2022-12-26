@@ -1,4 +1,4 @@
-from quart_auth import BadSignature, Quart, _AuthSerializer, _get_config_or_default
+from quart_auth import BadSignature, _AuthSerializer, _get_config_or_default
 from werkzeug.sansio.http import parse_cookie
 from models import AuthedUser
 from utils.app_context import AppContext
@@ -22,7 +22,7 @@ class SioAuthManager(AppContext):
 
     def load_cookie(self, cookie: str) -> str | None:
         try:
-            # TODO(SpeedFox198): Consider catching possible error when parsing error
+            # TODO(low)(SpeedFox198): Consider catching possible error when parsing error
             cookie = parse_cookie(cookie) 
             token = cookie[_get_config_or_default("QUART_AUTH_COOKIE_NAME", self.app)]
         except KeyError:

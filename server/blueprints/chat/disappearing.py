@@ -6,7 +6,7 @@ from models import Disappearing
 
 from .peek_queue import PeekQueue
 
-# TODO(SpeedFox198):
+# TODO(high)(SpeedFox198):
 # For now, only implement disappearing messages in 15 seconds
 # Make it check every 3 seconds
 # And also for now load all message from db without care for the freaking universe
@@ -38,7 +38,7 @@ class DisappearingQueue(PeekQueue):
     async def get_disappearing_messages() -> list[Disappearing]:
         """ Retrieves and returns records of disappearing messages from database """
         async with async_session() as session:
-            # TODO(SpeedFox198): need to add limit
+            # TODO(medium)(SpeedFox198): need to add limit
             statement = sa.select(Disappearing).order_by(Disappearing.time)
             result = (await session.execute(statement)).all()
 
@@ -55,7 +55,7 @@ class DisappearingQueue(PeekQueue):
         return deleted
 
 
-    # TODO(SpeedFox198): Add time paramater?
+    # TODO(medium)(SpeedFox198): Add time paramater?
     async def add_disappearing_messages(self, message_id:str, **kwargs):
 
         # Create new record of message to disappear

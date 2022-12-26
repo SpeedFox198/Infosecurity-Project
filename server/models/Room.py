@@ -5,10 +5,10 @@ from sqlalchemy import CHAR, Boolean, Column
 from sqlalchemy.dialects.mysql import ENUM
 
 
-class Room(Base):  # TODO(SpeedFox198): change disappearing to 3 options (change docs too)
-    __tablename__ = "Room"
+class Room(Base):  # TODO(high)(SpeedFox198): change disappearing to 3 options (change docs too)
+    __tablename__ = "room"
 
-    def __init__(self, disappearing:bool=False, type_:str="direct"):
+    def __init__(self, disappearing: bool = False, type_: str = "direct"):
         """
         Creates a room object
 

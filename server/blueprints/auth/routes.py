@@ -25,6 +25,8 @@ from quart import session as otp_session
 from quart_auth import current_user, login_required, login_user, logout_user
 from quart_schema import validate_request, validate_response
 from security_functions.cryptography import pw_hash, pw_verify
+from db_access.user import get_user_details, insert_user_by_google
+from db_access.user import insert_user_by_google
 from utils.logging import log_info, log_warning
 
 from .functions import (generate_otp, get_location_from_ip,
@@ -185,6 +187,12 @@ async def reset_password(data: ResetPasswordBody):
     url_serialiser: URLSafeTimedSerializer = current_app.config["url_serialiser"]
     try:
         email = url_serialiser.loads(data.token, 3600, salt=FORGET_PASSWORD_SALT)
+        password_pattern = r'^(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])(?=\D*\d)[\w\W]{8,}$'
+        if not re.fullmatch(password_pattern, data.password):
+            return {"message": "Invalid password"}, 400
+        
+
+        return {"message": "Password reset"}, 200
     except SignatureExpired:
         return {"message": "Token has expired"}, 401
 
@@ -192,19 +200,15 @@ async def reset_password(data: ResetPasswordBody):
 @auth_bp.post("/login-callback")
 @validate_request(LoginCallBackBody)
 async def login_callback(data: LoginCallBackBody):
-    csrf_token_cookie = request.cookies.get('g_csrf_token')
-    if not csrf_token_cookie:
-        return {"message": "No CSRF token in Cookie"}, 401
-    csrf_token_body = request.get('g_csrf_token')
-    if not csrf_token_body:
-        return {"message": "No CSRF token in post body"}, 401
-    if csrf_token_cookie != csrf_token_body:
-        return {"message": "Failed to verify double submit cookie"}, 401
-
+    device_id = str(uuid4())
+    browser, os = await get_user_agent_data(request.user_agent.string)
+    location = await get_location_from_ip(request.remote_addr)
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
-        id_info = id_token.verify_oauth2_token(data.token, requests.Request(),
-                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com")
+        id_info = id_token.verify_oauth2_token(data.token,
+                                               requests.Request(),
+                                               "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com",
+                                               15)
 
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
@@ -221,21 +225,29 @@ async def login_callback(data: LoginCallBackBody):
         name = id_info['name']
         picture = id_info['picture']
 
-        # Check if user exists in the database
+        # Check if user exists in the database with the user_id provided
         async with async_session() as session:
-            statement = sa.select(User).where(User.email == email)
-            result = await session.execute(statement)
-            existing_user = result.scalars().first()
-            if existing_user is None:
-                await create_user(session, email, name, picture)
-                statement = sa.select(User).where(User.email == email)
-                result = await session.execute(statement)
-                existing_user = result.scalars().first()
-    except ValueError:
-        # Invalid token
-        return {"message": "Invalid token or something went wrong with the process"}, 401
+            existing_user = await get_user_details(user_id)
 
-    return {"message": "login success"}, 200
+            if existing_user is None:
+                # Create a new user
+                new_user = await insert_user_by_google(user_id, email, name, picture)
+                await add_logged_in_device(session, device_id, new_user.user_id, browser, os,
+                                           location)
+                login_user(AuthedUser(f"{new_user.user_id}.{device_id}"))
+                await log_info(f"User {new_user.name} has logged in using {browser}, {os} from {location}")
+                return {"message": "login success"}, 200
+
+            logged_in_user = existing_user
+            await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os,
+                                       location)
+            login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+            await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
+            return {"message": "login success"}, 200
+    except ValueError as err:
+        # Invalid token
+        print(err)
+        return {"message": "Invalid token or something went wrong with the process"}, 401
 
 
 @auth_bp.post("/logout")

@@ -78,7 +78,7 @@ async function sendMsg(event) {
     user_id: $user_id,
     time: Math.floor(Date.now()/1000),
     content,
-    // TODO(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
+    // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
     reply_to: null,
     type: "text" // <type> ENUM(image, document, video, text)
   };
@@ -106,7 +106,7 @@ async function getUser(user_id) {
 
   } catch (error) {
     console.error(error);
-    // TODO(SpeedFox198): if default not there anymore change the default pic to something else
+    // TODO(low)(SpeedFox198): if default not there anymore change the default pic to something else
     user = { username:"<error>", avatar:"/default.png" };
   }
 
@@ -290,14 +290,14 @@ async function removeMsg(message_id, room_id) {
     {/if}
   {:else}
     <div class="">
-      <!-- TODO(SpeedFox198): add welcome page? lol -->
+      <!-- TODO(UI)(SpeedFox198): add welcome page? lol -->
     </div>
   {/if}
 </div>
 
 
 <style>
-.temp {  /*TODO(SpeedFox198): remove this extra temp style when not needed */
+.temp {  /*TODO(UI)(SpeedFox198): remove this extra temp style when not needed */
   height: 4rem;
 }
 
