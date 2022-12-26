@@ -1,5 +1,5 @@
 <script>
-    import OTP from '$lib/auth/otp.svelte'
+    import Changepassword from "../../lib/auth/changepassword.svelte";
     export let form
     
     let errors
@@ -22,7 +22,7 @@
           <img class="logo-with-text" src="/with-text.svg" alt="Bubbles">
         </div>
         <div class="col-md-6">
-          <OTP errors={errors}/>
+          <Changepassword errors={errors}/>
         </div>
       </div>
     </div>

@@ -47,8 +47,10 @@ def send_otp_email(email: str, otp: str):
 
 
 def send_password_recovery_email(email: str, token: str):
-    subject = "OTP for password recovery"
-    message = f"Do not reply to this email.\nPlease click on this link to reset your password." + token
+
+    link = f"https://localhost/reset-password?token={token}"
+    subject = "Link for password recovery"
+    message = f"Do not reply to this email.\nPlease click on this link to reset your password." + link
     gmail_send(email, subject, message)
 
 

@@ -25,6 +25,7 @@ async def insert_user_by_google(user_id: str, username: str, email: str, avatar:
         try:
             await session.execute(statement)
             await session.commit()
+            print("success")
         except SQLAlchemyError as err:
             await session.rollback()
             raise err
