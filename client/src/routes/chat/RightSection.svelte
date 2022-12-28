@@ -7,7 +7,7 @@ import { room_id, roomStorage, roomList } from "$lib/stores/room";
 import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
-import { selectMode } from "$lib/stores/select";
+import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
 
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
@@ -75,7 +75,7 @@ onMount(async () => {
     let countRemoved = 0;
     for (let i=0; i < data.messages.length; i++) {
       message_id = data.messages[i];
-      
+
       // Remove message from storage
       countRemoved += await removeMsg(message_id, room_id);
     }
@@ -241,11 +241,13 @@ async function removeMsg(message_id, room_id) {
     if (!msg) return 0;
 
     // Delete and retrieve message index in list
-    const { index, user_id } = await allMsgs.deleteMsg(room_id, message_id);
+    const { index, user_id: user_id_ } = await allMsgs.deleteMsg(room_id, message_id);
 
     // Only continue deletion if message was found (a check just in case)
     if (index <= -1) return 0;
 
+    // Remove message from selected messages if message is selected
+    selectedMsgs.remove(message_id, user_id_ === $user_id);
 
     // Get info of previous and next messages
     const roomMsgs = $allMsgs[room_id];
@@ -256,7 +258,7 @@ async function removeMsg(message_id, room_id) {
     if (msg.avatar) {
 
       // If next message is sent by same user
-      if (nextInfo && nextInfo.user_id == user_id) {
+      if (nextInfo && nextInfo.user_id == user_id_) {
         let nextMsg = $msgStorage[nextInfo.message_id];
         nextMsg.username = msg.username;
         nextMsg.avatar = msg.avatar;
@@ -268,7 +270,7 @@ async function removeMsg(message_id, room_id) {
     if (msg.corner) {
 
       // If previous message is sent by same user
-      if (prevInfo && prevInfo.user_id == user_id) {
+      if (prevInfo && prevInfo.user_id == user_id_) {
         let prevMsg = $msgStorage[prevInfo.message_id];
         prevMsg.corner = true;
         msgStorage.updateMsg(prevMsg, prevInfo.message_id);
@@ -326,6 +328,7 @@ async function removeMsg(message_id, room_id) {
 
 <style>
 .right-section {
+  position: relative;
   overflow-y: hidden;
 }
 

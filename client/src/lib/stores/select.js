@@ -35,6 +35,16 @@ export const selectedMsgs = (() => {
     });
   }
 
+  async function remove(message_id, sent) {
+    update(storage => {
+      if (storage.has(message_id)) {
+        storage.delete(message_id);
+        counterNotSent.addCount(-!sent);
+      }
+      return storage;
+    });
+  }
+
   async function clear() {
     counterNotSent.clear();
     update(storage => {
@@ -43,7 +53,7 @@ export const selectedMsgs = (() => {
     });
   }
 
-  return { subscribe, toggle, clear };
+  return { subscribe, toggle, remove, clear };
 })();
 
 

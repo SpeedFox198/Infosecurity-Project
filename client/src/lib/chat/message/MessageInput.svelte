@@ -115,6 +115,7 @@ async function onSend(event) {
 <style>
 .input-area {
   position: absolute;
+  z-index: 30;
   bottom: 0;
   height: 4rem;
   max-width: calc(100vw - var(--left-bar-length));

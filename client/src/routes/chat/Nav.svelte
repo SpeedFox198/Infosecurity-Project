@@ -14,61 +14,66 @@
   }
 </script>
 
-<div class="d-flex top-left align-items-center">
-	<div class="p-2 input-group w-75">
-    <span class="input-group-text search-icon">
-      <i class="fa-solid fa-magnifying-glass"></i>
-    </span>
-		<input class="form-control no-border search-form"
-      type="search"
-      placeholder="Search" 
-      aria-label="Search" 
-      maxlength="20"
-      bind:value={roomSearchInput}
-     />
-	</div>
-
-  <div class="dropdown flex-grow-1 pe-3 text-end">
-    <button
-     class="options-btn dropdown-toggle"
-     title="Options"
-     type="button"
-     id="navOptionsDropdown"
-     data-bs-toggle="dropdown"
-     aria-expanded="false"
-    >
-      <i class="fa-solid fa-ellipsis-vertical" />
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="navOptionsDropdown">
-      <li>
-        <button class="dropdown-item" type="button">
-          <i class="fa-solid fa-plus"></i>
-          New Chat
-        </button>
-      </li>
-      <li>
-        <button class="dropdown-item" type="button">
-          <i class="fa-solid fa-user-group"></i>
-          Friends
-        </button>
-      </li>
-      <li>
-        <button class="dropdown-item" type="button">
-          <i class="fa-regular fa-circle-xmark"></i>
-          Blocked Users
-        </button>
-      </li>
-      <li>
-        <button class="dropdown-item" type="button" on:click={logoutUser}>
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          Logout
-        </button>
-      </li>
-    </ul>
+<div class="d-flex top-left">
+  <div class="height d-flex flex-row align-items-center w-100">
+    <div class="p-2 input-group w-75">
+      <span class="input-group-text search-icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </span>
+      <input class="form-control no-border search-form"
+        type="search"
+        placeholder="Search" 
+        aria-label="Search" 
+        maxlength="20"
+        bind:value={roomSearchInput}
+       />
+    </div>
+  
+    <div class="dropdown flex-grow-1 pe-3 text-end">
+      <button
+       class="options-btn dropdown-toggle"
+       title="Options"
+       type="button"
+       id="navOptionsDropdown"
+       data-bs-toggle="dropdown"
+       aria-expanded="false"
+      >
+        <i class="fa-solid fa-ellipsis-vertical" />
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="navOptionsDropdown">
+        <li>
+          <button class="dropdown-item" type="button">
+            <i class="fa-solid fa-plus"></i>
+            New Chat
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" type="button">
+            <i class="fa-solid fa-user-group"></i>
+            Friends
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" type="button">
+            <i class="fa-regular fa-circle-xmark"></i>
+            Blocked Users
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item" type="button" on:click={logoutUser}>
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            Logout
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 
 <style>
+  .height {
+    height: 4rem;
+  }
 	.top-left {
 		/* position: absolute;
   top: 0; */
