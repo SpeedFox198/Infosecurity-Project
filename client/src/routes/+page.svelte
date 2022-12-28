@@ -6,18 +6,27 @@
   let signupDisplay = false
   let errors
   
-  if (form?.loginError) {
-    errors = form.loginError
-  }
-  
-  if (form?.cfError) {
-    errors = form.cfError
-  }
-
   const toggleSignupOn = () => {
     signupDisplay = !signupDisplay
   }
 
+  if (form?.loginError) {
+    errors = form.loginError
+  }
+  
+  if (form?.signupError) {
+    errors = form.signupError
+    toggleSignupOn()
+  }
+  
+  if (form?.loginCfError) {
+    errors = form.loginCfError
+  }
+  
+  if (form?.signupCfError) {
+    errors = form.signupCfError
+    toggleSignupOn()
+  }
 </script>
 
 
@@ -35,7 +44,7 @@
       <div class="col-md-6">
         {#if (signupDisplay)}
         <!-- Sign up -->
-        <Signup toggleSignupOn={toggleSignupOn}/>
+        <Signup toggleSignupOn={toggleSignupOn} errors={errors}/>
         {:else}
         <!-- Login -->
         <Login toggleSignupOn={toggleSignupOn} errors={errors} />

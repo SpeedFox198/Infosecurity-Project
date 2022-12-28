@@ -4,36 +4,37 @@
     export let toggleSignupOn
     export let errors
 
-    let password
-    let confirmPassword
-    let requirementsDisplay
-    let lowerCaseFulfill
-    let upperCaseFulfill
-    let numberFulfill
-    let specialCharFulfill
-    let lengthFulfill
+    let password = ""
+    let confirmPassword = ""
+
+    let requirementsDisplay = false
+    let passwordMatchDisplay = false
+
+    let lowerCaseFulfill, upperCaseFulfill, numberFulfill, specialCharFulfill, lengthFulfill
     $: requirementsFulfill = lowerCaseFulfill && upperCaseFulfill && numberFulfill && lengthFulfill && specialCharFulfill
+    $: passwordsMatch = password === confirmPassword
 
 
-    const showRequirements = () => {
-        requirementsDisplay = true
-    }
-  
-    const hideRequirements = () => {
-        requirementsDisplay = false
+    const toggleRequirements = () => {
+      requirementsDisplay = !requirementsDisplay
     }
     
+    const togglePasswordMatch = () => {
+      passwordMatchDisplay = !passwordMatchDisplay
+    }
+
     const checkPasswordRequirements = () => {
-        const lowerCaseRegex = /[a-z]/g
-        const upperCaseRegex = /[A-Z]/g
-        const numberRegex = /[0-9]/g
-        const specialCharRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?~]/g
-        
-        lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
-        upperCaseFulfill = Boolean(password.match(upperCaseRegex))
-        numberFulfill = Boolean(password.match(numberRegex))
-        specialCharFulfill = Boolean(password.match(specialCharRegex))
-        lengthFulfill = password.length >= 8
+      const lowerCaseRegex = /[a-z]/g
+      const upperCaseRegex = /[A-Z]/g
+      const numberRegex = /[0-9]/g
+      //const specialCharRegex = /[`!@#$%^&*()_+\-=\[\]{};':"\|,.<>\/?~]/g
+      const specialCharRegex = /[\W_]/g
+      
+      lowerCaseFulfill = Boolean(password.match(lowerCaseRegex))
+      upperCaseFulfill = Boolean(password.match(upperCaseRegex))
+      numberFulfill = Boolean(password.match(numberRegex))
+      specialCharFulfill = Boolean(password.match(specialCharRegex))
+      lengthFulfill = password.length >= 8
     }
 </script>
 
@@ -67,9 +68,9 @@
               <input name="password" type="password"
                class="form-control rounded-3"
                bind:value={password}
-               on:focus={showRequirements}
+               on:focus={toggleRequirements}
                on:keyup={checkPasswordRequirements}
-               on:blur={hideRequirements}
+               on:blur={toggleRequirements}
                title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 or more characters" 
                placeholder="Password" 
                required>
@@ -80,28 +81,36 @@
             {#if requirementsDisplay}
               <div id="message">
                 <h4 class="{(requirementsFulfill) ? "d-none" : ''}">Password must contain the following:</h4>
-                <p class="{lowerCaseFulfill === true ? "d-none" : ''}">A <b>lowercase</b> letter</p>
-                <p class="{upperCaseFulfill === true ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
-                <p class="{numberFulfill === true ? "d-none" : ''}">1 <b>number (0-9)</b></p>
-                <p class="{specialCharFulfill === true ? "d-none" : ''}">1 <b> Special Character (`!@#$%^&*()_+-=[]|&#123;&#125;;':"\|,.&lt;&gt;\/?~)</b></p>
-                <p class="{lengthFulfill === true ? "d-none" : ''}">At least <b>8 characters</b></p>
+                <p class="{lowerCaseFulfill ? "d-none" : ''}">A <b>lowercase</b> letter</p>
+                <p class="{upperCaseFulfill ? "d-none" : ''}">A <b>capital (uppercase)</b> letter</p>
+                <p class="{numberFulfill ? "d-none" : ''}">1 <b>number (0-9)</b></p>
+                <p class="{specialCharFulfill ? "d-none" : ''}">1 <b> Special Character (`!@#$%^&*()_+-=[]|&#123;&#125;;':"\|,.&lt;&gt;\/?~)</b></p>
+                <p class="{lengthFulfill ? "d-none" : ''}">At least <b>8 characters</b></p>
               </div>
             {/if}
 
             <!-- confirm password -->
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-3 ">
               <input name="confirmpassword" type="password"
-              class="form-control rounded-3" 
+              class="form-control rounded-3 {(!passwordsMatch) && passwordMatchDisplay ? "is-invalid" : ''}" 
               bind:value={confirmPassword}
+              on:focus={togglePasswordMatch}
+              on:blur={togglePasswordMatch}
               id="floatingPassword" 
               placeholder="Password" 
               required>
               <label for="floatingPassword">Confirm password</label>
             </div>
+
+            {#if (!passwordsMatch) && passwordMatchDisplay}
+              <p class="text-danger">Password and Confirm Password must be the same.</p>
+            {/if}
             <Turnstile siteKey="0x4AAAAAAABjATniBKt9vZiC"/>
+
             {#if errors}
               <p class="text-danger">{errors}</p>
             {/if}
+
             <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Sign up</button>
             <small class="text-muted">By clicking Sign up, you agree to our <a href="https://discord.com/terms">terms of service</a>.</small>
               

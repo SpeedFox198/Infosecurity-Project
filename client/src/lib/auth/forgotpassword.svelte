@@ -1,6 +1,6 @@
 <script>
     export let errors
-  </script>
+</script>
   <div class="login card rounded-4 shadow">
       <div class=" p-5 pb-4 border-bottom-0">
         <h1 class="card-title fw-bold mb-0 fs-2">Enter your registered email.</h1>

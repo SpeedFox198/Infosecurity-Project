@@ -24,7 +24,13 @@
 	"type": "module",
 	"dependencies": {
 		"dropzone": "^6.0.0-beta.2",
+		"filepond": "^4.30.4",
+		"filepond-plugin-file-validate-size": "^2.2.8",
+		"filepond-plugin-file-validate-type": "^1.2.8",
+		"filepond-plugin-image-exif-orientation": "^1.0.11",
+		"filepond-plugin-image-preview": "^4.6.11",
 		"socket.io-client": "^4.5.3",
+		"svelte-filepond": "^0.2.0",
 		"svelte-turnstile": "^0.3.1",
 		"tough-cookie": "^4.1.2",
 		"ws": "^8.11.0"

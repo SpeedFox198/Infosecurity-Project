@@ -1,10 +1,10 @@
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-    otp: async ({request, cookies}) => {
+    forgotpassword: async ({request, cookies}) => {
         const data = await request.formData()
-        const otp = data.get("otp")
-        const response = await fetch("https://127.0.0.1:8443/api/auth/changepassword", {   
+        const email = data.get("email")
+        const response = await fetch("https://127.0.0.1:8443/api/auth/forgot-password", {   
             method: "POST",
             credentials: "include",
             headers: {
@@ -12,7 +12,7 @@ export const actions = {
                 "Content-Type": "application/json",
                 "Cookie": request.headers.get("cookie")
             },
-            body: JSON.stringify({"otp": otp})
+            body: JSON.stringify({"email": email})
         });  
         const result = await response.json();
         if (!response.ok) {

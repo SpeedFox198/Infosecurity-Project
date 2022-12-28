@@ -1,5 +1,6 @@
 <script>
 import { onMount } from "svelte";
+import { page } from "$app/stores"
 
 import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
 import { room_id, allRooms } from "$lib/stores/room";
@@ -7,6 +8,7 @@ import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectMode } from "$lib/stores/select";
+import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
 
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
@@ -17,6 +19,7 @@ import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 export let socket;
 export let getRoomMsgs;
 
+let currentUser = $page.data.user
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -70,7 +73,13 @@ onMount(async () => {
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
-  const content = event.detail;
+  let content = event.detail;
+  let messageChanged = false
+  
+  if (currentUser.censor) {
+    ({ content, messageChanged } = await cleanSensitiveMessage(content))
+  }
+   
   const message_id = getTempId();  // Temporary id for referencing message
   const msg = {
     message_id,
@@ -81,6 +90,10 @@ async function sendMsg(event) {
     reply_to: null,
     type: "text" // <type> ENUM(image, document, video, text)
   };
+  
+  if (messageChanged) {
+    console.log("YOUR SENSITIVE DATA HAS BEEN LEAKED BOZO")    
+  }
 
   // Emit message to server and add message to client stores
   await addMsg(msg);
@@ -181,7 +194,7 @@ async function formatMsg(data, prev_id) {
     
     // Continuous messages have no avatar
     msg = { sent, time, content, reply_to, type, corner };
-    
+
   } else {
     
     // New message from user has avatar and username

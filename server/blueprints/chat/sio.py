@@ -9,12 +9,10 @@ from utils import to_unix
 from .disappearing import DisappearingQueue
 from .sio_auth_manager import SioAuthManager
 
-
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
-
 
 sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
 
@@ -28,6 +26,8 @@ sio_auth_manager = SioAuthManager()  # Authentication Manager
 class C:  # Temp class lmao
     def __init__(self, disappearing):
         self.disappearing = disappearing
+
+
 temp_rooms = {
     "room_1": C(False),
     "room_2": C(False),
@@ -102,7 +102,6 @@ async def send_message(sid, data):
     if room.disappearing:
         await messages_queue.add_disappearing_messages(message.message_id, seconds=15)
 
-
     # Forward messages to other clients in same room
     await sio.emit("receive_message", {
         "message_id": message.message_id,
@@ -128,12 +127,10 @@ async def get_room_messages(sid, data):
     room_id = data["room_id"]
     n = data["n"]
     extra = data["extra"]
-    limit  = MESSAGE_LOAD_NUMBER
+    limit = MESSAGE_LOAD_NUMBER
     offset = MESSAGE_LOAD_NUMBER * n + extra
 
-    room_messages = ()  # Default room messages to empty tuple
-
-    # Get room messsages from database
+    # Get room messages from database
     async with async_session() as session:
         statement = sa.select(
             Message.message_id,
@@ -152,7 +149,7 @@ async def get_room_messages(sid, data):
             "time": to_unix(results[i].time),
             "content": results[i].content,
             "type": results[i].type
-        } for i in range(len(results)-1, -1, -1)]
+        } for i in range(len(results) - 1, -1, -1)]
 
     await sio.emit("receive_room_messages", {
         "room_id": room_id,
@@ -190,7 +187,6 @@ async def delete_messages(sid, data):
 
         # statement = sa.select(Message.message_id).where(condition)
 
-
         statement = sa.select(Message.message_id).where(
             (Message.message_id.in_(messages))
             & (Message.room_id == room_id)
@@ -208,25 +204,24 @@ async def delete_messages(sid, data):
     # TODO(UI)(SpeedFox198): skip_sid=sid (client side must del 1st)
 
 
-async def save_user(sid:str, user:AuthedUser):
+async def save_user(sid: str, user: AuthedUser):
     """ Save user object to sio session """
     await sio.save_session(sid, {SIO_SESSION_USER_KEY: user})
 
 
-async def get_user(sid:str) -> AuthedUser | None:
+async def get_user(sid: str) -> AuthedUser | None:
     """ Returns user object from sio session """
     return (await sio.get_session(sid)).get(SIO_SESSION_USER_KEY, None)
 
 
-async def get_room(user_id:str):
-    rooms = []  # List of rooms user belongs to
-
+async def get_room(user_id: str):
     async with async_session() as session:
 
         # Retrieve room and membership info of user
         statement = sa.select(
             Room.room_id, Room.disappearing, Room.type, Membership.is_admin
-        ).join_from(Room, Membership
+        ).join_from(
+            Room, Membership
         ).where(
             Membership.user_id == user_id
         )
