@@ -266,9 +266,12 @@ async def login_callback(data: LoginCallBackBody):
 @auth_bp.post("/logout")
 @login_required
 async def logout():
-    await remove_logged_in_device(current_user.device_id, current_user.user_id)
-    logout_user()
-    return {"message": "successful logout"}, 200
+    try:
+        await remove_logged_in_device(await current_user.device_id, await current_user.user_id)
+        logout_user()
+    except RuntimeError:
+        return {"message": "Failed to logout"}, 500
+    return {"message": "Successful logout"}, 200
 
 
 @auth_bp.get("/is-logged-in")
