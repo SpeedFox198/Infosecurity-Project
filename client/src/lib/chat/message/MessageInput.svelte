@@ -132,6 +132,7 @@ async function onSend(event) {
  */
 
 .filepond-card {
+  position: absolute;
   width: 20em;
   bottom: 4em;
   z-index: 20;
@@ -144,11 +145,11 @@ async function onSend(event) {
 
 @keyframes slidein {
   from {
-    transform: translateX(-30%);
+    transform: translateY(100%);
   }
 
   to {
-    transform: translateX(0%);
+    transform: translateY(0%);
   }
 }
 </style>

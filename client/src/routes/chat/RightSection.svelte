@@ -325,6 +325,10 @@ async function removeMsg(message_id, room_id) {
 
 
 <style>
+.right-section {
+  overflow-y: hidden;
+}
+
 .temp {  /*TODO(UI)(SpeedFox198): remove this extra temp style when not needed */
   height: 4rem;
 }
