@@ -83,6 +83,7 @@ async function sendMsg(event) {
   const message_id = getTempId();  // Temporary id for referencing message
   const msg = {
     message_id,
+    user_id: $user_id,
     room_id: $room_id,
     time: Math.floor(Date.now()/1000),
     content,

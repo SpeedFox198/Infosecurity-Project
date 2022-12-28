@@ -81,9 +81,12 @@ async def send_message(sid, data):
         statement = sa.select(Room).where(Room.room_id == data["room_id"])
 
         try:
-            room: Room = (await session.execute(statement)).scalar().one()
+            async with session.begin():
+                result = (await session.execute(statement)).one()
         except NoResultFound:
             return  # If room not found, abort adding of message
+        else:
+            room = result[0]
 
         # Create message object
         message = Message(
@@ -242,7 +245,7 @@ async def get_room(user_id: str):
                     User.user_id == sa.select(Membership.user_id).where(
                         (Membership.room_id == room["room_id"]) &
                         (Membership.user_id != user_id)
-                    ).subquery()
+                    ).scalar_subquery()
                 )
                 result = (await session.execute(statement)).one()
             elif room["type"] == "group":
