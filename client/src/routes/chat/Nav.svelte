@@ -1,12 +1,17 @@
 <script>
   export let roomSearchInput
 
-  let displayOptionsMenu = false
-  
-  const toggleOptionsMenu = () => {
-    displayOptionsMenu = !displayOptionsMenu
+  const logoutUser = async () => {
+    await fetch("https://localhost:8443/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+    
+    location.replace("/")
   }
-
 </script>
 
 <div class="d-flex top-left align-items-center">
@@ -22,9 +27,45 @@
       bind:value={roomSearchInput}
      />
 	</div>
-	<button class="options-btn" title="Options" on:click={toggleOptionsMenu} type="button">
-		<i class="fa-solid fa-ellipsis-vertical" />
-	</button>
+
+  <div class="dropdown flex-grow-1 pe-3 text-end">
+    <button
+     class="options-btn dropdown-toggle"
+     title="Options"
+     type="button"
+     id="navOptionsDropdown"
+     data-bs-toggle="dropdown"
+     aria-expanded="false"
+    >
+      <i class="fa-solid fa-ellipsis-vertical" />
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="navOptionsDropdown">
+      <li>
+        <button class="dropdown-item" type="button">
+          <i class="fa-solid fa-plus"></i>
+          New Chat
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item" type="button">
+          <i class="fa-solid fa-user-group"></i>
+          Friends
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item" type="button">
+          <i class="fa-regular fa-circle-xmark"></i>
+          Blocked Users
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item" type="button" on:click={logoutUser}>
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Logout
+        </button>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <style>
@@ -41,6 +82,7 @@
     text-decoration: none;
     border: none;
     background-color: var(--primary);
+    color: #ffffff;
   }
 
   .options-btn:hover {
@@ -67,5 +109,9 @@
 
   .no-border {
     border: 0;
+  }
+  
+  .dropdown-toggle::after {
+    content: none;
   }
 </style>
