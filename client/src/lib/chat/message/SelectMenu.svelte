@@ -1,16 +1,13 @@
 <script>
 import { createEventDispatcher } from "svelte";
-import { room_id, roomList } from "$lib/stores/room";
+import { room_id, roomStorage } from "$lib/stores/room";
 import { selectedMsgs, counterNotSent } from "$lib/stores/select";
-
-import { afterUpdate } from "svelte";
-afterUpdate(() => console.log("hmm", $counterNotSent, invisible, $roomList, $room_id));
 
 const dispatch = createEventDispatcher();
 
 $: num = $selectedMsgs.size;
 $: singular = num === 1;
-$: currentRoom = ($roomList || {})[$room_id] || {};
+$: currentRoom = ($roomStorage || {})[$room_id] || {};
 
 $: invisible = $counterNotSent &&
   (
