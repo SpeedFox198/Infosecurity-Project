@@ -1,5 +1,6 @@
 import socketio
 import sqlalchemy as sa
+from sqlalchemy.orm.exc import NoResultFound
 from db_access.globals import async_session
 from models import AuthedUser, Group, Membership, Message, Room, User
 from socketio.exceptions import ConnectionRefusedError
@@ -70,26 +71,30 @@ async def disconnect(sid):
 async def send_message(sid, data):
     print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
 
-    room_id = data["room_id"]
-
-    # Verify room
-    # TODO(medium)(SpeedFox198): change when room is made
-    if room_id not in temp_rooms:
-        return  # TODO(medium)(SpeedFox198): consider if want log error message
-
-    room = temp_rooms[room_id]
-
-    # Create message object
-    message = Message(
-        data["user_id"],
-        room_id,
-        data["content"],
-        data["reply_to"],
-        data["type"]
-    )
+    # Get user from session
+    user = await get_user(sid)
+    user_id = await user.user_id
 
     # Insert object into database
     async with async_session() as session:
+        # Get room
+        statement = sa.select(Room).where(Room.room_id == data["room_id"])
+
+        try:
+            room: Room = (await session.execute(statement)).scalar().one()
+        except NoResultFound:
+            return  # If room not found, abort adding of message
+
+        # Create message object
+        message = Message(
+            user_id,
+            room.room_id,
+            data["content"],
+            data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
+            data["type"]
+        )
+
+        # Add message to database
         async with session.begin():
             session.add(message)
 

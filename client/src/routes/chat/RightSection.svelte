@@ -75,7 +75,6 @@ async function sendMsg(event) {
   const msg = {
     message_id,
     room_id: $room_id,
-    user_id: $user_id,
     time: Math.floor(Date.now()/1000),
     content,
     // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
