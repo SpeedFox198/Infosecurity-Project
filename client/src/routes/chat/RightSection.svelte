@@ -3,7 +3,7 @@ import { onMount } from "svelte";
 import { page } from "$app/stores"
 
 import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
-import { room_id, allRooms } from "$lib/stores/room";
+import { room_id, roomStorage, roomList } from "$lib/stores/room";
 import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
@@ -24,8 +24,22 @@ let currentUser = $page.data.user
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
-    allRooms.set(data);  // Set list of rooms
-    allMsgs.initRooms(data)  // Initialise empty arrays for rooms
+
+    let room, room_id;
+    let newRoomList = [];
+    let newroomStorage = {};
+
+    for (let i=0; i < data.length; i++) {
+      room = data[i];
+      room_id = room.room_id;
+      newRoomList.push(room_id);
+      newroomStorage[room_id] = room;
+    }
+
+    // Initialise rooms
+    roomList.set(newRoomList);           // Set list of room_id
+    roomStorage.set(newroomStorage);     // Set collection of rooms
+    allMsgs.initRooms(newRoomList)       // Initialise empty arrays for rooms
   });
 
 
@@ -74,12 +88,12 @@ onMount(async () => {
 // Send message to room via SocketIO
 async function sendMsg(event) {
   let content = event.detail;
-  let messageChanged = false
-  
+  let messageChanged = false;
+
   if (currentUser.censor) {
-    ({ content, messageChanged } = await cleanSensitiveMessage(content))
+    ({ content, messageChanged } = await cleanSensitiveMessage(content));
   }
-   
+
   const message_id = getTempId();  // Temporary id for referencing message
   const msg = {
     message_id,
@@ -91,9 +105,10 @@ async function sendMsg(event) {
     reply_to: null,
     type: "text" // <type> ENUM(image, document, video, text)
   };
-  
+
+  // TODO(high)(SpeedFox198): implement ui for message is masked
   if (messageChanged) {
-    console.log("YOUR SENSITIVE DATA HAS BEEN LEAKED BOZO")    
+    console.log("YOUR SENSITIVE DATA HAS BEEN LEAKED BOZO");
   }
 
   // Emit message to server and add message to client stores

@@ -1,13 +1,22 @@
 <script>
 import { createEventDispatcher } from "svelte";
-import { room_id } from "$lib/stores/room";
-import { selectedMsgs } from "$lib/stores/select";
+import { room_id, roomList } from "$lib/stores/room";
+import { selectedMsgs, counterNotSent } from "$lib/stores/select";
+
+import { afterUpdate } from "svelte";
+afterUpdate(() => console.log("hmm", $counterNotSent, invisible, $roomList, $room_id));
 
 const dispatch = createEventDispatcher();
 
 $: num = $selectedMsgs.size;
 $: singular = num === 1;
-let invisible = false;
+$: currentRoom = ($roomList || {})[$room_id] || {};
+
+$: invisible = $counterNotSent &&
+  (
+    (currentRoom.type === "direct") ||
+    (currentRoom.type === "group" && !currentRoom.is_admin)
+  );
 
 
 async function deleteMsgs(event) {

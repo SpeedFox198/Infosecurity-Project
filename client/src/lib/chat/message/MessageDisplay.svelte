@@ -3,6 +3,7 @@ import { beforeUpdate, afterUpdate, onMount } from "svelte";
 
 import { msgStorage, allMsgs } from "$lib/stores/message";
 import { room_id } from "$lib/stores/room";
+import { user_id } from "$lib/stores/user"
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs } from "$lib/stores/select";
@@ -54,8 +55,8 @@ function loadOldMsgs() {
 }
 
 
-function selectMsg(message_id) {
-  selectedMsgs.toggle(message_id);
+function selectMsg(message_id, user_id_) {
+  selectedMsgs.toggle(message_id, user_id_ === $user_id);
 }
 </script>
 
@@ -69,7 +70,7 @@ function selectMsg(message_id) {
     <Message
       msg={$msgStorage[messageInfo.message_id]}
       selected={$selectedMsgs.has(messageInfo.message_id)}
-      select={() => selectMsg(messageInfo.message_id)}/>
+      select={() => selectMsg(messageInfo.message_id, messageInfo.user_id)}/>
   {/each}
 
   <!-- Anchor page to bottom when at bottom -->

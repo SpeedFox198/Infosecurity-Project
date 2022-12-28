@@ -176,27 +176,34 @@ async def delete_messages(sid, data):
 
     # Delete messages from database (ensures that room_id is correct)
     async with async_session() as session:
-        # statement = sa.select(Membership.is_admin).where(
-        #     (Membership.user_id == user_id)
-        #     & (Membership.room_id == room_id)
-        # )
-        # result = (await session.execute(statement)).one()
-        # is_admin = result[0]
 
-        # condition = (Message.message_id.in_(messages)) & (Message.room_id == room_id)
+        # Get room type details
+        statement = sa.select(Room.type).where(Room.room_id == room_id)
+        room_type = (await session.execute(statement)).one()[0]
 
-        # if not is_admin:
-        #     condition &= (Message.user_id == user_id)
+        if room_type == "direct":  # User's can't delete other's messages in direct chats
+            is_admin = False
+        else:
+            # Check if user is group admin
+            statement = sa.select(Membership.is_admin).where(
+                (Membership.user_id == user_id)
+                & (Membership.room_id == room_id)
+            )
+            is_admin = (await session.execute(statement)).one()[0]
 
-        # statement = sa.select(Message.message_id).where(condition)
+        condition = (Message.message_id.in_(messages)) & (Message.room_id == room_id)
 
-        statement = sa.select(Message.message_id).where(
-            (Message.message_id.in_(messages))
-            & (Message.room_id == room_id)
-        )
+        # If user is not admin of group chat, only allow deletion of own messages
+        if not is_admin:
+            condition &= (Message.user_id == user_id)
+
+        # Get messages to delete
+        statement = sa.select(Message.message_id).where(condition)
+
         result = (await session.execute(statement)).all()
         messages = [row[0] for row in result]
 
+        # Delete messages from database
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
 
@@ -205,6 +212,7 @@ async def delete_messages(sid, data):
     # Tell other clients in same room to delete the same messages
     await delete_client_messages(messages, room_id)
     # TODO(UI)(SpeedFox198): skip_sid=sid (client side must del 1st)
+    # ^ maybe not? (im lazy)
 
 
 async def save_user(sid: str, user: AuthedUser):

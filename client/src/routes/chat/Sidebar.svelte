@@ -1,5 +1,5 @@
 <script>
-import { room_id, allRooms } from '$lib/stores/room';
+import { room_id, roomStorage, roomList } from '$lib/stores/room';
 import { count } from '$lib/stores/count';
 import { selectedMsgs } from '$lib/stores/select';
 
@@ -18,9 +18,12 @@ $: sanitizedRoomInput = roomSearchInput
                         .toLowerCase()
                         .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
 $: roomSearchRegex = new RegExp(`.*${sanitizedRoomInput}.*`, "g")
-$: currentRooms = $allRooms.filter(room => room.name
+
+$: unfilteredRooms = $roomList.map(room_id => $roomStorage[room_id]);
+$: currentRooms = unfilteredRooms.filter(room => room.name
                                           .toLowerCase()
                                           .match(roomSearchRegex))
+
 
 async function selectGrp(new_room) {
   // Set selected room_id

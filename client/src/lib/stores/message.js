@@ -22,14 +22,14 @@ export const getTempId = (() => {
  * Structure:
  * {
  *   <message_id>: {
- *     sent: boolean;     - True if message was sent by current user
- *     time: int;         - Timestamp in unix time format
- *     content: str;      - Content of message
- *     reply_to: str;     - message_id of message being replied to TODO(low)(SpeedFox198): remove when unsused
- *     type: str;         - Type of message
- *     corner?: boolean;  - True if message is last of consecutive messages sent by same user
- *     username?: str;    - Username of user that sent the message
- *     avatar?: str;      - Path to image of avatar of user
+ *     sent: boolean;      - True if message was sent by current user
+ *     time: int;          - Timestamp in unix time format
+ *     content: string;    - Content of message
+ *     reply_to: string;   - message_id of message being replied to TODO(low)(SpeedFox198): remove when unsused
+ *     type: string;       - Type of message
+ *     corner?: boolean;   - True if message is last of consecutive messages sent by same user
+ *     username?: string;  - Username of user that sent the message
+ *     avatar?: string;    - Path to image of avatar of user
  *   },
  *   ...
  * }
@@ -84,8 +84,8 @@ export const msgStorage = (() => {
  * Structure:
  * {
  *   <room_id>: [{
- *     message_id: <message_id>,
- *     user_id: <user_id>
+ *     message_id: <message_id>;
+ *     user_id: <user_id>;
  *   }, ...],
  *   ...
  * }
@@ -121,7 +121,7 @@ export const allMsgs = (() => {
   async function initRooms(rooms) {
     update(storage => {
       for (let i=0; i < rooms.length; i++) {
-        storage[rooms[i].room_id] = [];
+        storage[rooms[i]] = [];
       }
       return storage;
     });
