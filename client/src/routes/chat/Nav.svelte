@@ -15,7 +15,7 @@
 </script>
 
 <div class="d-flex top-left">
-  <div class="height d-flex flex-row align-items-center w-100">
+  <div class="nav-height d-flex flex-row align-items-center w-100">
     <div class="p-2 input-group w-75">
       <span class="input-group-text search-icon">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -71,13 +71,13 @@
 </div>
 
 <style>
-  .height {
+  .nav-height {
     height: 4rem;
   }
+
 	.top-left {
 		/* position: absolute;
   top: 0; */
-		height: 4.6rem;
 		width: var(--left-bar-length);
 		background-color: var(--primary);
 	}
