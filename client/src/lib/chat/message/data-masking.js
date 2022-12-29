@@ -13,13 +13,14 @@ const maskSensitiveWord = async (word) => {
 
 export const cleanSensitiveMessage = async (message) => {
   const words = message.split(" ")
-  const cleanedMessageArray = []
-  for (const word of words) {
-    cleanedMessageArray.push(await maskSensitiveWord(word))
-  }
-  
+
+  const cleanedMessageArray = await Promise.all(
+    words.map(async word => {
+      return await maskSensitiveWord(word)
+    })
+  )
+
   const cleanedMessage = cleanedMessageArray.join(" ")
-  
   const messageChanged = cleanedMessage === message
 
   return {content: cleanedMessage, messageChanged}
