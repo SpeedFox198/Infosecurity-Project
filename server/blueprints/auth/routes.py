@@ -244,18 +244,17 @@ async def login_callback(data: LoginCallBackBody):
 
             if existing_user is None:
                 # Create a new user
-                new_user = await insert_user_by_google(user_id, email, name, picture)
-                await add_logged_in_device(session, device_id, new_user.user_id, browser, os,
+                await insert_user_by_google(user_id, name, email, picture)
+                await add_logged_in_device(session, device_id, user_id, browser, os,
                                            location)
-                login_user(AuthedUser(f"{new_user.user_id}.{device_id}"))
-                await log_info(f"User {new_user.name} has logged in using {browser}, {os} from {location}")
+                login_user(AuthedUser(f"{user_id}.{device_id}"))
+                await log_info(f"User {name} has logged in using {browser}, {os} from {location}")
                 return {"message": "login success"}, 200
 
-            logged_in_user = existing_user
-            await add_logged_in_device(session, device_id, logged_in_user.user_id, browser, os,
+            await add_logged_in_device(session, device_id, user_id, browser, os,
                                        location)
-            login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-            await log_info(f"User {logged_in_user.username} has logged in using {browser}, {os} from {location}")
+            login_user(AuthedUser(f"{user_id}.{device_id}"))
+            await log_info(f"User {name} has logged in using {browser}, {os} from {location}")
             return {"message": "login success"}, 200
     except ValueError as err:
         # Invalid token
