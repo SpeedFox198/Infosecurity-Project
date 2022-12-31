@@ -78,7 +78,7 @@
       <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
       Log in
       </button>
-      <a class="forgot-pw card-link text-center" href="/forgotpassword">Forgotten password?</a>
+      <a class="forgot-pw card-link text-center" href="/forgot-password">Forgotten password?</a>
 
       <hr class="my-4" />
     </form>

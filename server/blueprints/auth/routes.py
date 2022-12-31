@@ -26,7 +26,6 @@ from quart_auth import current_user, login_required, login_user, logout_user
 from quart_schema import validate_request, validate_response
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.user import get_user_details, insert_user_by_google
-from db_access.user import insert_user_by_google
 from utils.logging import log_info, log_warning
 
 from .functions import (generate_otp, get_location_from_ip,
@@ -189,6 +188,8 @@ async def reset_password(data: ResetPasswordBody):
         email = url_serialiser.loads(data.token, 3600, salt=FORGET_PASSWORD_SALT)
     except BadData:
         return {"message": "Invalid token"}, 401
+    except SignatureExpired:
+        return {"message": "Token expired"}, 401
 
     password_pattern = r'^(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])(?=\D*\d)[\w\W]{8,}$'
     if not re.fullmatch(password_pattern, data.password):
@@ -222,15 +223,6 @@ async def login_callback(data: LoginCallBackBody):
                                                requests.Request(),
                                                "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com",
                                                15)
-
-        # Or, if multiple clients access the backend server:
-        # idinfo = id_token.verify_oauth2_token(token, requests.Request())
-        # if idinfo['aud'] not in [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]:
-        #     raise ValueError('Could not verify audience.')
-
-        # If auth request is from a G Suite domain:
-        # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
-        #     raise ValueError('Wrong hosted domain.')
 
         # ID token is valid. Get the user's Google Account ID from the decoded token.
         user_id = id_info['sub']

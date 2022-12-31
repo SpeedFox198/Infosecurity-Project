@@ -6,11 +6,9 @@ export const actions = {
         const email = data.get("email")
         const response = await fetch("https://127.0.0.1:8443/api/auth/forgot-password", {   
             method: "POST",
-            credentials: "include",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Cookie": request.headers.get("cookie")
             },
             body: JSON.stringify({"email": email})
         });  
