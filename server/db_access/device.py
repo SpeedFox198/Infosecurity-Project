@@ -6,21 +6,20 @@ from db_access.globals import async_session
 import sqlalchemy as sa
 
 from models import Device
+from models.general.BrowsingData import BrowsingData
 from utils.logging import log_exception
 
 
 async def add_logged_in_device(sql_session,
                                device_id: str,
                                user_id: str,
-                               browser: str,
-                               os: str,
-                               location: str) -> None:
+                               browsing_data: BrowsingData) -> None:
     statement = sa.insert(Device).values(device_id=device_id,
                                          user_id=user_id,
                                          time=datetime.now(),
-                                         location=location,
-                                         os=os,
-                                         browser=browser)
+                                         location=browsing_data.location,
+                                         os=browsing_data.os,
+                                         browser=browsing_data.browser)
     try:
         await sql_session.execute(statement)
         await sql_session.commit()
