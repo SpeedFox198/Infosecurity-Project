@@ -72,13 +72,14 @@
 
 <style>
   .nav-height {
-    height: 4rem;
+    height: var(--top-bar-height);
   }
 
 	.top-left {
 		/* position: absolute;
   top: 0; */
-		width: var(--left-bar-length);
+		height: var(--top-bar-height);
+		width: var(--side-bar-length);
 		background-color: var(--primary);
 	}
   
