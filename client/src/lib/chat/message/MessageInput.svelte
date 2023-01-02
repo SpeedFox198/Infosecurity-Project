@@ -59,10 +59,11 @@ async function onSend(event) {
   <div class="filePond">
   <FilePond 
         bind:this={pond} {name}
-        server="/upload"
+        server="https://localhost:8443/api/chat/file_upload_and_scan"
         allowMultiple={false}
         oninit={handleinit}
         onaddfile={handleAddfile}
+        instantUpload={false}
         
         allowFileSizeValidation={true}
         maxFileSize="5MB"
