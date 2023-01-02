@@ -16,7 +16,6 @@ export async function load({ url, cookies, request }) {
     body: JSON.stringify({"parameters": url.search}),
   })
   
-  console.log(await response.json())
   if (!response.ok) {
     throw redirect(302, "/")
   }
@@ -28,6 +27,6 @@ export async function load({ url, cookies, request }) {
     sameSite: quartCookie.sameSite,
     maxAge: 60 * 24 * 60 * 60, // formatted as (days * hours * minutes * seconds)
   })
-  throw redirect(302, "/chat")
 
+  throw redirect(302, "/chat")
 };
