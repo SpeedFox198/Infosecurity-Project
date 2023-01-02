@@ -67,7 +67,7 @@ async function toggleSettings() {
 <style>
 .sidebar {
   position: relative;
-  width: var(--left-bar-length);
+  width: var(--side-bar-length);
   background-color: var(--primary-light);
   overflow-x: hidden;
 }

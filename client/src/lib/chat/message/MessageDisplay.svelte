@@ -80,7 +80,7 @@ function selectMsg(message_id, user_id_) {
 
 <style>
 .chat {
-  height: calc(100vh - 8rem);
+  height: calc(100vh - var(--top-bar-height) - var(--bottom-bar-height));
   overflow-y: scroll;
   border-top: 0.1rem solid var(--grey-shadow);
   border-left: 0.1rem solid var(--grey-shadow);

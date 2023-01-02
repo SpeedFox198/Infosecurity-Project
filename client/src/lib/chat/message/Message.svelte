@@ -129,11 +129,11 @@ function selectMsg() {
   background-color: var(--grey);
   text-align: left;
   padding: 0.5rem 0.6rem 0.65rem 0.8rem;
-  border-radius: 0 1.1rem 1.1rem 0.7rem;
+  border-radius: 0 1.3rem 1.3rem 0.7rem;
 }
 
 .sent .bubble {
-  border-radius: 1.1rem 0 0.7rem 1.1rem;
+  border-radius: 1.3rem 0 0.7rem 1.3rem;
   background-color: var(--primary);
   padding: 0.5rem 0.8rem 0.65rem 0.6rem;
   color: var(--white);
@@ -144,16 +144,16 @@ function selectMsg() {
 }
 
 .sent.consecutive .bubble {
-  border-top-left-radius: 1.1rem;
+  border-top-left-radius: 1.3rem;
   border-top-right-radius: 0.7rem;
 }
 
 .corner .bubble {
-  border-bottom-left-radius: 1.1rem;
+  border-bottom-left-radius: 1.3rem;
 }
 
 .sent.corner .bubble {
-  border-bottom-right-radius: 1.1rem;
+  border-bottom-right-radius: 1.3rem;
 }
 
 .tail {

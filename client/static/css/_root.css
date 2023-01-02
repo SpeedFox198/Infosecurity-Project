@@ -23,7 +23,9 @@
     --highlight-primary: #1f7a8c2e;
 
     /* Misc */
-    --left-bar-length: 25rem;
+    --side-bar-length: 25rem;
+    --top-bar-height: 3.5rem;
+    --bottom-bar-height: 3.5rem;
 
     /* Scrollbar */
     --scrollbar-color: #54585b49;

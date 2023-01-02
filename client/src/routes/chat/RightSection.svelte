@@ -333,12 +333,12 @@ async function removeMsg(message_id, room_id) {
 }
 
 .temp {  /*TODO(UI)(SpeedFox198): remove this extra temp style when not needed */
-  height: 4rem;
+  height: var(--top-bar-height);
 }
 
 .top-right {
-  height: 4rem;
-  width: calc(100vw - var(--left-bar-length));
+  height: var(--top-bar-height);
+  width: calc(100vw - var(--side-bar-length));
   background-color: var(--primary);
   border-left: 0.1rem solid var(--primary-shadow);
 }

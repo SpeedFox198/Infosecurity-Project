@@ -59,7 +59,7 @@ export let title;
 }
 
 .section-title {
-  height: 4rem;
+  height: var(--top-bar-height);
   background-color: var(--primary);
   color: var(--white);
 }
@@ -71,7 +71,7 @@ export let title;
 }
 
 .content {
-  height: calc(100vh - 4rem);
+  height: calc(100vh - var(--top-bar-height));
   overflow-y: auto;
 }
 </style>

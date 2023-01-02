@@ -3,13 +3,12 @@ import { page } from "$app/stores"
 let currentUser = $page.data.user
 
 export let toggleSettings;
-
 </script>
 
 
 <div class="flex-column d-flex profile">
-  <div class="profile-height d-flex align-items-center p-2">
-    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle">
+  <div class="profile-height d-flex align-items-center p-2 h-100">
+    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle h-100">
     <span class="px-2 fw-bolder">{ currentUser.username }</span>
     <button on:click={toggleSettings} type="button" title="Show settings" class="btn" >
       <i class="fa-solid fa-cog fs-4"></i>
@@ -22,8 +21,6 @@ export let toggleSettings;
 .profile {
   background-color: var(--primary-shadow);
   color: var(--white);
-}
-.profile-height {
-  width: 4rem;
+  height: var(--bottom-bar-height);
 }
 </style>
