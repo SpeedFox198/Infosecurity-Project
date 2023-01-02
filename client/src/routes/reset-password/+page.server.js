@@ -1,5 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 
+/** @type {import(./$types).PageServerLoad} */
+export async function load({ url }) {
+  if (!url.searchParams.has("token")) {
+    throw redirect(302, "/")
+  }
+}
+
 export const actions = {
     default: async ({request, url}) => {
         const data = await request.formData()

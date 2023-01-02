@@ -1,4 +1,10 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit'
+
+export async function load({ cookies }) {
+  if (!cookies.get("session")) {
+    throw redirect(302, "/")
+  }
+}
 
 export const actions = {
     otp: async ({request, cookies}) => {

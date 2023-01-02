@@ -1,22 +1,24 @@
 <script>
   import { Turnstile } from "svelte-turnstile"
-
+  import { redirect } from '@sveltejs/kit';
   import { browser } from "$app/environment"
   export let toggleSignupOn
   export let errors
 
-  async function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
-    await fetch("https://127.0.0.1:8443/api/auth/login-callback", {
+  async function handleCredentialResponse(googleResponse) {
+    console.log("Encoded JWT ID token: " + googleResponse.credential);
+    const response = await fetch("https://127.0.0.1:8443/api/auth/login-callback", {
     method: "POST",
     credentials: "include",
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({"token": response.credential})
+    body: JSON.stringify({"token": googleResponse.credential})
   });
-
+    if (response.ok) {
+      throw redirect(302, "/chat")
+    }
   }
 
   if (browser) {
@@ -31,7 +33,7 @@
       );
       google.accounts.id.prompt(); // also display the One Tap dialog
     }
-  }
+  } 
 
 </script>
 
@@ -76,7 +78,7 @@
       <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
       Log in
       </button>
-      <a class="forgot-pw card-link text-center" href="/forgotpassword">Forgotten password?</a>
+      <a class="forgot-pw card-link text-center" href="/forgot-password">Forgotten password?</a>
 
       <hr class="my-4" />
     </form>

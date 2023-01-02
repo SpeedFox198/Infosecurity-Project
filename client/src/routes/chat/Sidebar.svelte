@@ -13,16 +13,11 @@ export let getRoomMsgs;
 
 let displaySettings = false;
 let roomSearchInput = "" 
-// Escape special characters to prevent evil regex DOS attacks
-$: sanitizedRoomInput = roomSearchInput
-                        .toLowerCase()
-                        .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-$: roomSearchRegex = new RegExp(`.*${sanitizedRoomInput}.*`, "g")
 
 $: unfilteredRooms = $roomList.map(room_id => $roomStorage[room_id]);
 $: currentRooms = unfilteredRooms.filter(room => room.name
                                           .toLowerCase()
-                                          .match(roomSearchRegex))
+                                          .includes(roomSearchInput))
 
 
 async function selectGrp(new_room) {

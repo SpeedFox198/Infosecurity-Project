@@ -6,8 +6,13 @@ import aiohttp
 import secrets
 import string
 
+from db_access.account_lockout import create_lockout, get_email
+from db_access.failed_attempt import create_failed_attempt, update_failed_attempt, get_failed_attempt, \
+    delete_failed_attempt
 from google_authenticator.google_email_send import gmail_send
 from models import User
+from models.general.BrowsingData import BrowsingData
+from utils.logging import log_info, log_warning
 
 
 async def get_user_agent_data(user_agent: str) -> tuple[str, str]:
@@ -35,7 +40,35 @@ async def get_location_from_ip(ip_address: str) -> str:
             return f"{data['regionName']}, {data['country']}"
 
 
-def generate_otp() -> str:
+async def evaluate_failed_attempts(existing_user: User,
+                                   invalid_cred_response: tuple[dict[str, str], int],
+                                   browsing_data: BrowsingData) -> tuple[dict[str, str], int]:
+
+    failed_attempt = (await get_failed_attempt(existing_user.user_id))
+
+    # Check if a failed attempt exists
+    if failed_attempt is None:
+        await create_failed_attempt(existing_user.user_id)
+        await log_info(f"User {existing_user.username} has failed to log in using {browsing_data.browser}, {browsing_data.os} from {browsing_data.location}")
+        return invalid_cred_response
+
+    if 5 > failed_attempt.attempts > 0:
+        await update_failed_attempt(failed_attempt.user_id, (failed_attempt.attempts + 1))
+        await log_info(f"User {existing_user.username} has failed to log in using {browsing_data.browser}, {browsing_data.os} from {browsing_data.location}")
+        return invalid_cred_response
+
+    if failed_attempt.attempts == 5:
+        await create_lockout(failed_attempt.user_id)
+        await delete_failed_attempt(failed_attempt.user_id)
+
+        lockout_user_email = await get_email(failed_attempt.user_id)
+        send_lockout_alert_email(lockout_user_email)
+
+        await log_warning(f"User {existing_user.username} has been locked out for 5 minutes.")
+        return invalid_cred_response
+
+
+async def generate_otp() -> str:
     # Generate a 6 digit OTP
     return "".join(secrets.choice(string.digits) for _ in range(6))
 
@@ -47,7 +80,6 @@ def send_otp_email(email: str, otp: str):
 
 
 def send_password_recovery_email(email: str, token: str):
-
     link = f"https://localhost/reset-password?token={token}"
     subject = "Link for password recovery"
     message = f"Do not reply to this email.\nPlease click on this link to reset your password." + link
