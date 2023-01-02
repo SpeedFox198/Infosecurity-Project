@@ -19,7 +19,6 @@ from quart_cors import cors
 from quart_schema import QuartSchema, RequestSchemaValidationError
 from utils.logging import log_warning
 
-
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 scheduler = AsyncIOScheduler()
 app = Quart(__name__)
@@ -36,7 +35,6 @@ auth_manager.user_class = AuthedUser
 auth_manager.init_app(app)
 
 sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
-
 
 api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)

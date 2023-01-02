@@ -1,5 +1,6 @@
 import datetime
 import re
+from urllib.parse import urlparse, parse_qs
 from uuid import uuid4
 
 import sqlalchemy as sa
@@ -7,7 +8,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from itsdangerous import BadData, SignatureExpired, URLSafeTimedSerializer
 from quart import Blueprint, current_app, request
-from quart import session as otp_session
+from quart import session as auth_session
 from quart_auth import current_user, login_required, login_user, logout_user
 from quart_schema import validate_request, validate_response
 
@@ -17,19 +18,20 @@ from db_access.failed_attempt import delete_failed_attempt
 from db_access.globals import async_session
 from db_access.otp import create_otp, delete_otp, get_otp
 from db_access.user import get_user_details, insert_user_by_google
+from google_authenticator import get_google_oauth_flow
 from models import AuthedUser, User
 from models.general.BrowsingData import BrowsingData
 from models.request_data import (
     ForgotPasswordBody,
     LoginBody,
-    LoginCallBackBody,
     OTPBody,
     ResetPasswordBody,
-    SignUpBody
+    SignUpBody,
+    GoogleCallBackBody
 )
 from models.response_data import UserData
 from security_functions.cryptography import pw_hash, pw_verify
-from utils.logging import log_info, log_warning
+from utils.logging import log_info, log_warning, log_exception
 from .functions import (
     generate_otp,
     get_location_from_ip,
@@ -70,18 +72,18 @@ async def sign_up(data: SignUpBody):
         await create_otp(user.email, otp, user.password)
         send_otp_email(user.email, otp)
 
-        otp_session["username"] = user.username
-        otp_session["email"] = user.email
+        auth_session["otp_username"] = user.username
+        auth_session["otp_email"] = user.email
         return {"message": "Sign up completed, move to OTP"}, 200
 
 
 @auth_bp.post("/otp")
 @validate_request(OTPBody)
 async def OTP(data: OTPBody):
-    if otp_session.get("email") is None or otp_session.get("username") is None:
+    if auth_session.get("otp_email") is None or auth_session.get("otp_username") is None:
         return {"message": "Invalid request"}, 401
 
-    email = otp_session.get("email")
+    email = auth_session.get("otp_email")
 
     # Grab OTP and password from database
     otp = await get_otp(email)
@@ -92,7 +94,7 @@ async def OTP(data: OTPBody):
 
     # Delete OTP from database
     # Create user
-    username = otp_session.get("username")
+    username = auth_session.get("otp_username")
     password = otp.password
     user = User(username, email, password)
     async with async_session() as session:
@@ -144,7 +146,8 @@ async def login(data: LoginBody):
         # TODO(br1ght) re-enable when needed
         # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
         login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-        await log_info(f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+        await log_info(
+            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
         return {"message": "login success"}, 200
 
     return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
@@ -195,46 +198,74 @@ async def reset_password(data: ResetPasswordBody):
         return {"message": "Password reset"}, 200
 
 
-@auth_bp.post("/login-callback")
-@validate_request(LoginCallBackBody)
-async def login_callback(data: LoginCallBackBody):
+@auth_bp.post("/google-callback")
+@validate_request(GoogleCallBackBody)
+async def google_callback(data: GoogleCallBackBody):
     device_id = str(uuid4())
     browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
                                 await get_location_from_ip(request.remote_addr))
 
+    google_flow = get_google_oauth_flow()
+    google_state = auth_session.get("google_state")
+    authorization_response = request.url + data.parameters
+
+    state_from_parameters = parse_qs(urlparse(authorization_response).query)["state"][0]
+
     try:
-        # Specify the CLIENT_ID of the app that accesses the backend:
-        id_info = id_token.verify_oauth2_token(data.token,
+        google_flow.fetch_token(authorization_response=authorization_response)
+    except Exception as err:
+        await log_exception(err)
+        return {"message": "Error occurred while login with Google"}
+
+    if google_state != state_from_parameters:
+        return {"message": "Not allowed"}, 401
+
+    credentials = google_flow.credentials
+
+    try:
+        id_info = id_token.verify_oauth2_token(credentials.id_token,
                                                requests.Request(),
                                                "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com",
                                                15)
+    except ValueError as err:
+        await log_exception(err)
+        return {"message": "Invalid token or something went wrong with the process"}, 401
 
-        # ID token is valid. Get the user's Google Account ID from the decoded token.
-        user_id = id_info['sub']
-        email = id_info['email']
-        name = id_info['name']
-        picture = id_info['picture']
+    # ID token is valid. Get the user's Google Account ID from the decoded token.
+    user_id = id_info['sub']
+    email = id_info['email']
+    name = id_info['name']
+    picture = id_info['picture']
 
-        # Check if user exists in the database with the user_id provided
-        async with async_session() as session:
-            existing_user = await get_user_details(user_id)
+    # Check if user exists in the database with the user_id provided
+    async with async_session() as session:
+        existing_user = await get_user_details(user_id)
 
-            if existing_user is None:
-                # Create a new user
-                await insert_user_by_google(user_id, name, email, picture)
-                await add_logged_in_device(session, device_id, user_id, browser_data)
-                login_user(AuthedUser(f"{user_id}.{device_id}"))
-                await log_info(f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-                return {"message": "login success"}, 200
-
+        if existing_user is None:
+            # Create a new user
+            await insert_user_by_google(user_id, name, email, picture)
             await add_logged_in_device(session, device_id, user_id, browser_data)
             login_user(AuthedUser(f"{user_id}.{device_id}"))
-            await log_info(f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+            await log_info(
+                f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
             return {"message": "login success"}, 200
-    except ValueError as err:
-        # Invalid token
-        print(err)
-        return {"message": "Invalid token or something went wrong with the process"}, 401
+
+        await add_logged_in_device(session, device_id, user_id, browser_data)
+        login_user(AuthedUser(f"{user_id}.{device_id}"))
+        await log_info(
+            f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+        return {"message": "login success"}, 200
+
+
+@auth_bp.get("/google-login")
+async def google_login():
+    authorisation_url, state = get_google_oauth_flow().authorization_url(
+        access_type="offline",
+        include_granted_scopes="true"
+    )
+
+    auth_session["google_state"] = state
+    return {"google_auth_url": authorisation_url}, 200
 
 
 @auth_bp.post("/logout")
