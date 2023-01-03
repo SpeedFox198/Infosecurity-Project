@@ -1,5 +1,6 @@
-from dataclasses import dataclasses
+from dataclasses import dataclass
 
-@dataclasses
+
+@dataclass
 class RequestFile:
     file: str
