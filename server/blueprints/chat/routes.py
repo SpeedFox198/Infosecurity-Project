@@ -17,8 +17,9 @@ chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 
 @chat_bp.post("/file_upload_and_scan")
 @login_required
-async def upload_and_scan_file(data: RequestFile):
-    file_id = await upload_file(data.file)
-    file_hash = await get_file_analysis(file_id)
-    score = await scan_file_hash(file_hash)
+@validate_request(RequestFile)
+async def upload_and_scan_file(file: RequestFile):
+    file_id = upload_file(file)
+    file_hash = get_file_analysis(file_id)
+    score = scan_file_hash(file_hash)
     return {"Score": score}

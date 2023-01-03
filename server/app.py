@@ -8,7 +8,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
 from blueprints.chat import messages_queue, sio, sio_auth_manager, task_disappear_messages
-from blueprints.chat import chat_bp
 from blueprints.device import device_bp
 from blueprints.user import user_bp
 from db_access.device import get_device
@@ -40,7 +39,6 @@ sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
 api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(device_bp)
-api_bp.register_blueprint(chat_bp)
 app.register_blueprint(api_bp)
 
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"
