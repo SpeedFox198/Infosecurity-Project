@@ -244,11 +244,6 @@ async def google_callback(data: GoogleCallBackBody):
         if existing_user is None:
             # Create a new user
             await insert_user_by_google(user_id, name, email, picture)
-            await add_logged_in_device(session, device_id, user_id, browser_data)
-            login_user(AuthedUser(f"{user_id}.{device_id}"))
-            await log_info(
-                f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-            return {"message": "login success"}, 200
 
         await add_logged_in_device(session, device_id, user_id, browser_data)
         login_user(AuthedUser(f"{user_id}.{device_id}"))
