@@ -215,7 +215,7 @@ async def google_callback(data: GoogleCallBackBody):
         google_flow.fetch_token(authorization_response=authorization_response)
     except Exception as err:
         await log_exception(err)
-        return {"message": "Error occurred while login with Google"}
+        return {"message": "Error occurred while login with Google"}, 404
 
     if google_state != state_from_parameters:
         return {"message": "Not allowed"}, 401

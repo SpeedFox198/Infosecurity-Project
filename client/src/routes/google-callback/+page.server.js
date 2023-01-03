@@ -10,7 +10,8 @@ export async function load({ url, cookies, request }) {
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "Cookie": request.headers.get("cookie")
+      "Cookie": request.headers.get("cookie"),
+      "User-Agent": request.headers.get("User-Agent")
     },
     credentials: "include",
     body: JSON.stringify({"parameters": url.search}),

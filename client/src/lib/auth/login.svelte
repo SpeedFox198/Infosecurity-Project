@@ -53,7 +53,12 @@
         Create new account
       </button>
     <h2 class="fs-5 fw-bold mb-3">Or you can login with these</h2>
-    <a href={googleLogin.url} class="btn btn-primary" role="button">
+    <a href={ googleLogin.url }
+      class="btn btn-primary { googleLogin.errors ? 'disabled' : '' }"
+      role="button"
+      aria-disabled="{ googleLogin.errors ? 'true' : '' }"
+      tabindex="{ googleLogin.errors ? '-1' : '0' }"
+      title="{ googleLogin.errors || 'Sign in with Google' }">
       Sign in with Google
     </a>
   </div>
