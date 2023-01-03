@@ -218,7 +218,7 @@ async def google_callback(data: GoogleCallBackBody):
         return {"message": "Error occurred while login with Google"}, 404
 
     if google_state != state_from_parameters:
-        return {"message": "Not allowed"}, 401
+        return {"message": "Invalid Google Login"}, 401
 
     credentials = google_flow.credentials
 
@@ -271,6 +271,7 @@ async def logout():
         logout_user()
     except RuntimeError:
         return {"message": "Failed to logout"}, 500
+    
     return {"message": "Successful logout"}, 200
 
 
