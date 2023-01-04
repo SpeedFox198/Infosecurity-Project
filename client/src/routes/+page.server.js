@@ -5,9 +5,41 @@ import tough from "tough-cookie"
 const Cookie = tough.Cookie
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({locals}) {
+export async function load({locals, cookies}) {
     if (locals.user) {
         throw redirect(302, "/chat")
+    }
+    
+    const getGoogleLogin = async () => {
+      const response = await fetch("https://127.0.0.1:8443/api/auth/google-login", {
+        headers: {
+          "Accept": "application/json"
+        }
+      })
+      const result = await response.json()
+      
+      if (!response.ok) {
+        return {
+          errors: "Error while contacting google servers",
+          url: "",
+        }
+      }
+      const authCookie = Cookie.parse(response.headers.get("set-cookie"))
+      cookies.set(authCookie.key, authCookie.value, {
+        path: authCookie.path,
+        httpOnly: authCookie.httpOnly,
+        sameSite: authCookie.sameSite,
+        maxAge: authCookie.maxAge,
+      })
+      
+      return {
+        errors: null,
+        url: result.google_auth_url,
+      }
+    }
+  
+    return {
+      googleLogin: getGoogleLogin(),
     }
 };
 

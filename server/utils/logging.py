@@ -40,4 +40,4 @@ async def log_critical(message: str) -> None:
 
 
 async def log_exception(error: Exception) -> None:
-    await log_error(f"Exception {type(error).__name__} happened at {request.path}")
+    await log_error(f"Exception {type(error).__name__} happened at {request.path}, Description: {error}")

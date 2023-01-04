@@ -37,7 +37,6 @@ auth_manager.init_app(app)
 
 sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
 
-
 api_bp.register_blueprint(auth_bp)
 api_bp.register_blueprint(chat_bp)
 api_bp.register_blueprint(media_bp)

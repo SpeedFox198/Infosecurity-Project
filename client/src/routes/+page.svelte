@@ -2,6 +2,7 @@
   import Login from "$lib/auth/login.svelte"
   import Signup from "$lib/auth/signup.svelte"
   export let form
+  export let data
 
   let signupDisplay = false
   let errors
@@ -27,6 +28,7 @@
     errors = form.signupCfError
     toggleSignupOn()
   }
+  
 </script>
 
 
@@ -47,7 +49,7 @@
         <Signup toggleSignupOn={toggleSignupOn} errors={errors}/>
         {:else}
         <!-- Login -->
-        <Login toggleSignupOn={toggleSignupOn} errors={errors} />
+        <Login toggleSignupOn={toggleSignupOn} errors={errors} googleLogin={data.googleLogin}/>
         {/if}
       </div>
     </div>

@@ -9,12 +9,12 @@ from security_functions.cryptography import pw_hash
 ROOM_GROUP_NUM = 4  # Number of groups group chats
 ROOM_DIRECT_NUM = 4  # Number of direct group chats
 
-# PATH_MESSAGES = r"./_init_db/messages.txt"
-# PATH_GROUPS = r"./_init_db/groups.txt"
-# PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
-PATH_MESSAGES = r"server/_init_db/messages.txt"
-PATH_GROUPS = r"server/_init_db/groups.txt"
-PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
+PATH_MESSAGES = r"./_init_db/messages.txt"
+PATH_GROUPS = r"./_init_db/groups.txt"
+PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
+# PATH_MESSAGES = r"server/_init_db/messages.txt"
+# PATH_GROUPS = r"server/_init_db/groups.txt"
+# PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
 
 
 # Windows specific issue https://stackoverflow.com/questions/61543406/asyncio-run-runtimeerror-event-loop-is-closed
