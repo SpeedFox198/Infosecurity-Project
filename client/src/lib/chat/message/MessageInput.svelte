@@ -1,11 +1,12 @@
 <script>
-import { createEventDispatcher } from "svelte";
+import { onMount, createEventDispatcher } from "svelte";
 import FilePond, { registerPlugin } from 'svelte-filepond';
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import 'filepond/dist/filepond.css';
+	import { redirect } from "@sveltejs/kit";
 
 const dispatch = createEventDispatcher();
 
@@ -19,19 +20,16 @@ registerPlugin(
 
 let filePondDisplay = false;
 
-// get a file input reference
-const input = document.querySelector('import[type="file"]');
-
 const toggleFilePondOn = () => {
   filePondDisplay = !filePondDisplay;
 }
 
 // a reference to the component, used to call FilePond methods
 let pond;
+
 // name to use for the internal file input
 let name = 'filepond';
 
-let attachmentInput;
 let content = "";
 
 // handling filepond events
@@ -41,15 +39,46 @@ function handleinit() {
 
 function handleAddfile(err, fileItem) {
   console.log('A file has been added', fileItem);
+  console.log('A file has been added', fileItem.file);
+}
+
+function getFileType(file) {
+  if (file.type.match("image.*"))
+    return "image";
+
+  if (file.type.match("video.*"))
+    return "video";
+
+  return "document";
 }
 
 async function onSend(event) {
-  if (content) {
-    dispatch("message", content);
+  let file;
+
+  // If file pond is opened, check for file to upload
+  if (pond) {
+    const fileItem = pond.getFile();
+    if (fileItem) {
+      ({ file } = fileItem);
+      pond.removeFile();
+      toggleFilePondOn();
+    }
+  }
+
+  // Get the message type
+  let type;
+  if (file) {
+    type = getFileType(file);
+  } else {
+    type = "text";
+  }
+
+  // Dispatch message if there is something to send
+  if (content || file) {
+    dispatch("message", { content, file, type });
     content = "";
   }
 }
-
 </script>
 
 
@@ -57,9 +86,8 @@ async function onSend(event) {
 {#if (filePondDisplay)}
 <div class="card filepond-card">
   <div class="filePond">
-  <FilePond 
+  <FilePond
         bind:this={pond} {name}
-        server="https://localhost:8443/api/chat/file_upload_and_scan"
         allowMultiple={false}
         oninit={handleinit}
         onaddfile={handleAddfile}
@@ -90,12 +118,12 @@ async function onSend(event) {
   <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onSend}>
 
     <!-- Attachments Input -->
-    
+
     <div class="col-1" >
       <button class="btn" type="button" on:click={toggleFilePondOn}>
         <img class="icon" src="/icons/paperclip.svg" alt="AttachFile">
       </button>
-      
+
     </div>
 
     <!-- Text Input -->

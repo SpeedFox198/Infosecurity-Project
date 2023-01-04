@@ -1,6 +1,6 @@
 <script>
-import SlidingMenu from "$lib/settings/SlidingMenu.svelte";
-import Option from "$lib/settings/Option.svelte";
+import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
+import Option from "$lib/settings/templates/Option.svelte";
 import DevicesMenu from "$lib/devices/DevicesMenu.svelte";
 import { invalidate } from "$app/navigation";
 
@@ -14,13 +14,13 @@ let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑
 let displayData = false;
 let displayDevices = false;
 
-const toggleGeneral = () => displayGeneral = !displayGeneral;
-const toggleSecurity = () => displaySecurity = !displaySecurity;
-const toggleSusFiles = () => displaySusFiles = !displaySusFiles;
-const toggleMagic = () => displayMagic = !displayMagic;
-const toggleData = () => displayData = !displayData;
+const toggleGeneral = async () => displayGeneral = !displayGeneral;
+const toggleSecurity = async () => displaySecurity = !displaySecurity;
+const toggleSusFiles = async () => displaySusFiles = !displaySusFiles;
+const toggleMagic = async () => displayMagic = !displayMagic;
+const toggleData = async () => displayData = !displayData;
 
-function toggleDevices() {
+async function toggleDevices () {
   displayDevices = !displayDevices;
   invalidate("app:devices");
 }

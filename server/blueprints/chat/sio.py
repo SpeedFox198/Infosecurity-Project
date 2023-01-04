@@ -1,10 +1,12 @@
+import os
+
 import socketio
 import sqlalchemy as sa
-from sqlalchemy.orm.exc import NoResultFound
 from db_access.globals import async_session
-from models import AuthedUser, Group, Membership, Message, Room, User
+from models import AuthedUser, Group, Media, Membership, Message, Room, User
 from socketio.exceptions import ConnectionRefusedError
-from utils import to_unix
+from sqlalchemy.orm.exc import NoResultFound
+from utils import secure_save_file, to_unix
 
 from .disappearing import DisappearingQueue
 from .sio_auth_manager import SioAuthManager
@@ -13,6 +15,7 @@ ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
+
 
 sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
 
@@ -68,8 +71,13 @@ async def disconnect(sid):
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
 @sio.event
-async def send_message(sid, data):
-    print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
+async def send_message(sid, data: dict):
+    # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
+    print("here"*12)
+
+    message_data = data["message"]
+    file = data.get("file", None)
+    filename = data.get("filename", None)
 
     # Get user from session
     user = await get_user(sid)
@@ -78,7 +86,7 @@ async def send_message(sid, data):
     # Insert object into database
     async with async_session() as session:
         # Get room
-        statement = sa.select(Room).where(Room.room_id == data["room_id"])
+        statement = sa.select(Room).where(Room.room_id == message_data["room_id"])
 
         try:
             async with session.begin():
@@ -92,14 +100,29 @@ async def send_message(sid, data):
         message = Message(
             user_id,
             room.room_id,
-            data["content"],
-            data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
-            data["type"]
+            message_data["content"],
+            message_data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
+            message_data["type"]
         )
 
         # Add message to database
         async with session.begin():
             session.add(message)
+
+        # Save file if message type is not text, and file exists
+        # TODO(high)(SpeedFox198): test what happens when upload file of size 0 bytes lmao
+        if message.type != "text" and file:
+            destination_directory = os.path.join(
+                sio_auth_manager.app.config["ATTACHMENTS_PATH"],
+                message.room_id,
+                message.message_id
+            )
+            os.makedirs(destination_directory)
+            filename = await secure_save_file(destination_directory, filename, file)
+
+            media = Media(message.message_id, path=filename)
+            async with session.begin():
+                session.add(media)
 
     # If room has disappearing messages enabled
     if room.disappearing:
@@ -112,15 +135,17 @@ async def send_message(sid, data):
         "user_id": message.user_id,
         "time": to_unix(message.time),
         "content": message.content,
-    }, room=data["room_id"], skip_sid=sid)
+    }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
     await sio.emit("sent_success", {
         "message_id": message.message_id,
         "room_id": message.room_id,
-        "temp_id": data["message_id"],
-        "time": to_unix(message.time)
+        "temp_id": message_data["message_id"],
+        "time": to_unix(message.time),
+        "filename": filename
     }, to=sid)
+    print("here", filename)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -145,14 +170,14 @@ async def get_room_messages(sid, data):
             Message.room_id == room_id
         ).order_by(Message.time.desc()).limit(limit).offset(offset)
 
-        results = (await session.execute(statement)).all()
+        result = (await session.execute(statement)).all()
         room_messages = [{
-            "message_id": results[i].message_id,
-            "user_id": results[i].user_id,
-            "time": to_unix(results[i].time),
-            "content": results[i].content,
-            "type": results[i].type
-        } for i in range(len(results) - 1, -1, -1)]
+            "message_id": result[i].message_id,
+            "user_id": result[i].user_id,
+            "time": to_unix(result[i].time),
+            "content": result[i].content,
+            "type": result[i].type
+        } for i in range(len(result) - 1, -1, -1)]
 
     await sio.emit("receive_room_messages", {
         "room_id": room_id,

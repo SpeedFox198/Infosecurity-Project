@@ -50,12 +50,12 @@ onMount(async () => {
 
 
   socket.on("sent_success", async data => {
-    const { message_id, temp_id, time, room_id } = data;  // Unpack data
+    const { message_id, temp_id, time, room_id, filename } = data;  // Unpack data
 
     count.nextExtra(room_id);  // Increase count of sent messages
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
-    await msgStorage.changeId(temp_id, message_id, time);
+    await msgStorage.changeId(temp_id, message_id, time, filename);
     await allMsgs.changeId(temp_id, message_id, room_id);
   });
 
@@ -87,7 +87,7 @@ onMount(async () => {
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
-  let content = event.detail;
+  let { content, file, type } = event.detail;
   let messageChanged = false;
 
   if (currentUser.censor) {
@@ -103,7 +103,7 @@ async function sendMsg(event) {
     content,
     // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
     reply_to: null,
-    type: "text" // <type> ENUM(image, document, video, text)
+    type: type // <type> ENUM(image, document, video, text)
   };
 
   // TODO(high)(SpeedFox198): implement ui for message is masked
@@ -112,13 +112,14 @@ async function sendMsg(event) {
   }
 
   // Emit message to server and add message to client stores
-  await addMsg(msg);
-  socket.emit("send_message", msg);
+  let filename = (file || {}).name
+  await addMsg(msg, filename);
+  socket.emit("send_message", { message: msg, file, filename });
 }
 
 
 async function getUser(user_id) {
-  const url = `https://localhost:8443/api/user/${user_id}`;
+  const url = `https://localhost:8443/api/user/details/${user_id}`;
   let user;
 
   try {
@@ -142,13 +143,54 @@ async function getUser(user_id) {
 }
 
 
-async function addMsg(data) {
+async function formatMediaPath(room_id, message_id, filename) {
+  return `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`;
+}
+
+
+async function getMediaPath(room_id, message_id, filename) {
+  if (filename) {
+    return await formatMediaPath(room_id, message_id, filename);
+  }
+
+  const url = `https://localhost:8443/api/media/filename/${message_id}`;
+  const init = {
+    method: "GET",
+    credentials: "include",
+  }
+  let path;
+
+  try {
+    const response = await fetch(url, init);
+    let message;
+    ({ filename, message } = await response.json());
+
+    if (!response.ok) {
+      path = ""
+      throw new Error(message);
+    }
+
+    path = await formatMediaPath(room_id, message_id, filename);
+
+  } catch (error) {
+    console.error(error);
+    // TODO(low)(SpeedFox198): if default not there anymore change the default pic to something else
+    path = "";  // TODO(medium)(SpeedFox198): display default image if image not found
+  }
+
+  return path;
+}
+
+
+async function addMsg(data, filename) {
   const roomMsgs = $allMsgs[data.room_id] || [];
   let prevInfo, prev_id;
   if (roomMsgs.length) {
     prevInfo = roomMsgs[roomMsgs.length - 1];
     prev_id = prevInfo.user_id;
   }
+
+  if (filename) data.filename = filename;
 
   const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
 
@@ -171,11 +213,11 @@ async function addMsgBatch(data) {
   // Go through messages and format them for display in JavaScript
   for (let i=0; i < data.room_messages.length; i++) {
     // Get message and message_id
-    ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id));
-    messageInfoList.push({user_id: user_id_, message_id});   // Add message_id to list
-    delete msg.message_id;                          // Remove message_id property from message
-    room_messages[message_id] = msg;                // Add message to object
-    if (prev_id === user_id_) delete prevMsg.corner;// Delete corner if not consecutive message 
+    ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id, data.room_id));
+    messageInfoList.push({ user_id: user_id_, message_id });   // Add message_id to list
+    delete msg.message_id;                            // Remove message_id property from message
+    room_messages[message_id] = msg;                  // Add message to object
+    if (prev_id === user_id_) delete prevMsg.corner;  // Delete corner if not consecutive message 
     prevMsg = msg;
     prev_id = user_id_;
   }
@@ -198,8 +240,9 @@ async function addMsgBatch(data) {
 }
 
 
-async function formatMsg(data, prev_id) {
-  const { message_id, room_id, time, content, reply_to, type } = data;
+async function formatMsg(data, prev_id, room_id_) {
+  // parameter `room_id_` is optional, used when room_id is not in data
+  const { message_id, room_id, time, content, reply_to, type, filename } = data;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
@@ -221,6 +264,13 @@ async function formatMsg(data, prev_id) {
  
     msg = { sent, username, avatar, time, content, reply_to, type, corner };
 
+  }
+
+  // If message contains media, get media path
+  if (type !== "text") {
+    let path = await getMediaPath(room_id || room_id_, message_id, filename);
+    msg.path = path;
+    console.log(path);
   }
 
   return { user_id_, message_id, msg, room_id };

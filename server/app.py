@@ -7,8 +7,9 @@ import socketio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
-from blueprints.chat import messages_queue, sio, sio_auth_manager, task_disappear_messages
+from blueprints.chat import chat_bp, messages_queue, sio, sio_auth_manager, task_disappear_messages
 from blueprints.device import device_bp
+from blueprints.media import media_bp
 from blueprints.user import user_bp
 from db_access.device import get_device
 from itsdangerous import URLSafeTimedSerializer
@@ -18,7 +19,6 @@ from quart_auth import AuthManager, current_user, logout_user
 from quart_cors import cors
 from quart_schema import QuartSchema, RequestSchemaValidationError
 from utils.logging import log_warning
-
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 scheduler = AsyncIOScheduler()
@@ -39,13 +39,16 @@ sio_auth_manager.register_app(app)  # Registers app to SocketIO Auth Manager
 
 
 api_bp.register_blueprint(auth_bp)
-api_bp.register_blueprint(user_bp)
+api_bp.register_blueprint(chat_bp)
+api_bp.register_blueprint(media_bp)
 api_bp.register_blueprint(device_bp)
+api_bp.register_blueprint(user_bp)
 app.register_blueprint(api_bp)
 
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"
 app.config["QUART_AUTH_SALT"] = "IwPsU_TTTM_kKqr_nQglx7qUKwW1lLpZqtoHN9sWTpc"
 app.config["QUART_AUTH_DURATION"] = 60 * 24 * 60 * 60  # formatted as (days * hours * minutes * seconds)
+app.config["ATTACHMENTS_PATH"] = "media/attachments"
 
 app.config["url_serialiser"] = URLSafeTimedSerializer(app.secret_key)
 

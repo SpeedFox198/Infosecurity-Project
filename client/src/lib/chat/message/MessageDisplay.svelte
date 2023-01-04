@@ -88,6 +88,6 @@ function selectMsg(message_id, user_id_) {
 
 #anchor {
   overflow-anchor: auto;
-  height: 1rem;
+  height: 1px;
 }
 </style>

@@ -51,7 +51,7 @@ export const msgStorage = (() => {
   }
 
   // Change message_id from temp_id to new id received from server
-  async function changeId(temp_id, message_id, time) {
+  async function changeId(temp_id, message_id, time, filename) {
     update(storage => {
       // Change temp_id to message_id
       storage[message_id] = storage[temp_id];
@@ -59,6 +59,12 @@ export const msgStorage = (() => {
 
       // Add time attribute
       storage[message_id].time = time;
+
+      let path = storage[message_id].path;
+      if (path && filename) {
+        storage[message_id].path = _changeMediaPath(path, message_id, filename);
+        console.log("changed:", storage[message_id].path)
+      }
 
       return storage;
     });
@@ -72,6 +78,13 @@ export const msgStorage = (() => {
       return storage;
     });
     return msg;
+  }
+
+  function _changeMediaPath(path, message_id, filename) {
+    let parts = path.split("/");
+    parts[parts.length-2] = message_id;
+    parts[parts.length-1] = filename;
+    return parts.join("/");
   }
 
   return { subscribe, updateMsg, changeId, deleteMsg };

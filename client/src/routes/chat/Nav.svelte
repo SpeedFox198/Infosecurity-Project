@@ -1,26 +1,33 @@
 <script>
-  export let roomSearchInput
+import { page } from "$app/stores"
 
-  const logoutUser = async () => {
-    await fetch("https://localhost:8443/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Accept": "application/json"
-      }
-    })
-    
-    location.replace("/")
-  }
+let currentUser = $page.data.user
+
+export let toggleSettings;
+export let toggleNewGroup;
+export let roomSearchInput
+
+const logoutUser = async () => {
+  await fetch("https://localhost:8443/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Accept": "application/json"
+    }
+  })
+  
+  location.replace("/")
+}
 </script>
 
 <div class="d-flex top-left">
   <div class="nav-height d-flex flex-row align-items-center w-100">
-    <div class="p-2 input-group w-75">
-      <span class="input-group-text search-icon">
+    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle h-100 p-2">
+    <div class="input-group flex-grow p-2 h-100">
+      <span class="input-group-text search-icon h-100">
         <i class="fa-solid fa-magnifying-glass"></i>
       </span>
-      <input class="form-control no-border search-form"
+      <input class="form-control no-border search-form h-100"
         type="search"
         placeholder="Search" 
         aria-label="Search" 
@@ -28,7 +35,7 @@
         bind:value={roomSearchInput}
        />
     </div>
-  
+
     <div class="dropdown flex-grow-1 pe-3 text-end">
       <button
        class="options-btn dropdown-toggle"
@@ -42,9 +49,15 @@
       </button>
       <ul class="dropdown-menu" aria-labelledby="navOptionsDropdown">
         <li>
-          <button class="dropdown-item" type="button">
+          <button on:click={toggleSettings} class="dropdown-item" type="button">
+            <i class="fa-solid fa-cog"></i>
+            Settings
+          </button>
+        </li>
+        <li>
+          <button on:click={toggleNewGroup} class="dropdown-item" type="button">
             <i class="fa-solid fa-plus"></i>
-            New Chat
+            New Group
           </button>
         </li>
         <li>
@@ -55,7 +68,7 @@
         </li>
         <li>
           <button class="dropdown-item" type="button">
-            <i class="fa-regular fa-circle-xmark"></i>
+            <i class="fa-solid fa-user-slash"></i>
             Blocked Users
           </button>
         </li>

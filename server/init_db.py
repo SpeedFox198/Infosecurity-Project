@@ -51,6 +51,10 @@ async def add_groups(session, room_ids):
         for grp in groups:
             session.add(grp)
 
+async def add_friends(session, alice, bob):
+    async with session.begin():
+        session.add(Friend(alice, bob))
+
 async def add_memberships(session, room_ids, alice, bob):
     read = read_from_file(PATH_MEMBERSHIPS)
     mnm = []  # forgive me for the name im dyin
@@ -107,6 +111,7 @@ async def main():
         room_ids = [i.room_id for i in rooms]
         await add_groups(session, room_ids)
         alice, bob = await add_users(session)
+        await add_friends(session, alice.user_id, bob.user_id)
         await add_memberships(session, room_ids, alice.user_id, bob.user_id)
         await get_messages(session, room_ids, alice.user_id, bob.user_id)
 
