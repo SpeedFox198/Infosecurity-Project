@@ -271,7 +271,7 @@ async def logout():
         logout_user()
     except RuntimeError:
         return {"message": "Failed to logout"}, 500
-    
+
     return {"message": "Successful logout"}, 200
 
 
