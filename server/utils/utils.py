@@ -20,7 +20,6 @@ def to_unix(timestamp:datetime) -> int:
     return int(time.mktime(timestamp.timetuple()))
 
 
-
 async def secure_save_file(directory: str, filename: str, data: bytes) -> str:
     """
     Santises and returns secure filename before saving data in specified directory
