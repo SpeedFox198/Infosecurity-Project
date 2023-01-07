@@ -140,17 +140,17 @@ async def login(data: LoginBody):
 
         await delete_lockout(locked_out_user.user_id)
 
-    if pw_verify(existing_user.password, data.password):
-        logged_in_user = existing_user
-        await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-        # TODO(br1ght) re-enable when needed
-        # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
-        login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-        await log_info(
-            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-        return {"message": "login success"}, 200
+    if not pw_verify(existing_user.password, data.password):
+        return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
 
-    return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
+    logged_in_user = existing_user
+    await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
+    # TODO(br1ght) re-enable when needed
+    # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
+    login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+    await log_info(
+        f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+    return {"message": "login success"}, 200
 
 
 @auth_bp.post("/2fa")
