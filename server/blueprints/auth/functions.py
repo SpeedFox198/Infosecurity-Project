@@ -94,17 +94,15 @@ def send_lockout_alert_email(email: str):
 
 
 async def send_login_alert_email(user: User,
-                                 browser: str,
-                                 os: str,
-                                 location: str,
+                                 browsing_data: BrowsingData,
                                  ip_addr: str) -> None:
     current_date = datetime.utcnow().strftime("%d %B %Y, %H:%M:%S UTC")
     subject = "Your Bubbles Account - Successful Log-in"
     message = await render_template("login_alert.html",
                                     user=user,
-                                    browser=browser,
-                                    os=os,
-                                    location=location,
+                                    browser=browsing_data.browser,
+                                    os=browsing_data.os,
+                                    location=browsing_data.location,
                                     date=current_date,
                                     ip_addr=ip_addr
                                     )

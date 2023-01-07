@@ -146,7 +146,7 @@ async def login(data: LoginBody):
     logged_in_user = existing_user
     await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
     # TODO(br1ght) re-enable when needed
-    # await send_login_alert_email(logged_in_user, browser, os, location, request.remote_addr)
+    # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
     login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
     await log_info(
         f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
@@ -241,15 +241,18 @@ async def google_callback(data: GoogleCallBackBody):
     async with async_session() as session:
         existing_user = await get_user_details(user_id)
 
-        if existing_user is None:
-            # Create a new user
-            await insert_user_by_google(user_id, name, email, picture)
+    if existing_user is None:
+        # Create a new user
+        await insert_user_by_google(user_id, name, email, picture)
 
-        await add_logged_in_device(session, device_id, user_id, browser_data)
-        login_user(AuthedUser(f"{user_id}.{device_id}"))
-        await log_info(
-            f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-        return {"message": "login success"}, 200
+    await add_logged_in_device(session, device_id, user_id, browser_data)
+    login_user(AuthedUser(f"{user_id}.{device_id}"))
+    # TODO(br1ght) re-enable when needed
+    # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+    await log_info(
+        f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+    )
+    return {"message": "login success"}, 200
 
 
 @auth_bp.get("/google-login")
