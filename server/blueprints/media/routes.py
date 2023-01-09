@@ -4,6 +4,7 @@ from db_access.globals import async_session
 from models import Membership, Media
 from quart import Blueprint, abort, current_app, send_from_directory
 from quart_auth import current_user, login_required
+from werkzeug.utils import secure_filename
 from sqlalchemy.orm.exc import NoResultFound
 
 media_bp = Blueprint("media", __name__, url_prefix="/media")
@@ -27,8 +28,20 @@ async def attachments(room_id: str, message_id: str, filename: str):
         except NoResultFound:
             abort(404)  # If not a member of room, do not let user know file exist
 
+        statement = sa.select(Media.path).where(Media.message_id == message_id)
+
+        try:
+            result = (await session.execute(statement)).one()
+        except NoResultFound:
+            abort(404)  # If message_id invalid, do not let user know file exist
+
+        if filename != result[0]:
+            abort(404)  # If not a filename not in results, do not let user know file exist
+
     directory = os.path.join(current_app.config["ATTACHMENTS_PATH"], room_id, message_id)
-    return await send_from_directory(directory, filename)
+
+    # Secure filename just in case
+    return await send_from_directory(directory, secure_filename(filename))
 
 
 # TODO(medium)(SpeedFox198): validate_request, and also verify user is logged in
@@ -45,4 +58,4 @@ async def filename(message_id: str):
         except NoResultFound:
             abort(404)
 
-    return {"filename": filename}
+    return {"filename": secure_filename(filename)}

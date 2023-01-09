@@ -30,6 +30,7 @@ export const getTempId = (() => {
  *     corner?: boolean;   - True if message is last of consecutive messages sent by same user
  *     username?: string;  - Username of user that sent the message
  *     avatar?: string;    - Path to image of avatar of user
+ *     path?: string;      - Path to attached media
  *   },
  *   ...
  * }
@@ -51,7 +52,7 @@ export const msgStorage = (() => {
   }
 
   // Change message_id from temp_id to new id received from server
-  async function changeId(temp_id, message_id, time, filename) {
+  async function changeId(temp_id, message_id, room_id, time, filename) {
     update(storage => {
       // Change temp_id to message_id
       storage[message_id] = storage[temp_id];
@@ -60,10 +61,8 @@ export const msgStorage = (() => {
       // Add time attribute
       storage[message_id].time = time;
 
-      let path = storage[message_id].path;
-      if (path && filename) {
-        storage[message_id].path = _changeMediaPath(path, message_id, filename);
-        console.log("changed:", storage[message_id].path)
+      if (filename) {
+        storage[message_id].path = `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`;
       }
 
       return storage;
@@ -78,13 +77,6 @@ export const msgStorage = (() => {
       return storage;
     });
     return msg;
-  }
-
-  function _changeMediaPath(path, message_id, filename) {
-    let parts = path.split("/");
-    parts[parts.length-2] = message_id;
-    parts[parts.length-1] = filename;
-    return parts.join("/");
   }
 
   return { subscribe, updateMsg, changeId, deleteMsg };

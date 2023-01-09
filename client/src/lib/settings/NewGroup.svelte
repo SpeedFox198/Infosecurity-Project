@@ -18,4 +18,3 @@ const toggleMagic = async () => displayMagic = !displayMagic;
     {/each} -->
   </ul>
 </SlidingMenu>
-

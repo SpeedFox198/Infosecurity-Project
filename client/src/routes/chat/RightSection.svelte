@@ -55,7 +55,7 @@ onMount(async () => {
     count.nextExtra(room_id);  // Increase count of sent messages
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
-    await msgStorage.changeId(temp_id, message_id, time, filename);
+    await msgStorage.changeId(temp_id, message_id, room_id, time, filename);
     await allMsgs.changeId(temp_id, message_id, room_id);
   });
 
@@ -143,15 +143,7 @@ async function getUser(user_id) {
 }
 
 
-async function formatMediaPath(room_id, message_id, filename) {
-  return `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`;
-}
-
-
-async function getMediaPath(room_id, message_id, filename) {
-  if (filename) {
-    return await formatMediaPath(room_id, message_id, filename);
-  }
+async function getMediaPath(room_id, message_id) {
 
   const url = `https://localhost:8443/api/media/filename/${message_id}`;
   const init = {
@@ -162,15 +154,14 @@ async function getMediaPath(room_id, message_id, filename) {
 
   try {
     const response = await fetch(url, init);
-    let message;
-    ({ filename, message } = await response.json());
+    const { filename, message } = await response.json();
 
     if (!response.ok) {
       path = ""
       throw new Error(message);
     }
 
-    path = await formatMediaPath(room_id, message_id, filename);
+    path = `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`
 
   } catch (error) {
     console.error(error);
@@ -268,9 +259,11 @@ async function formatMsg(data, prev_id, room_id_) {
 
   // If message contains media, get media path
   if (type !== "text") {
-    let path = await getMediaPath(room_id || room_id_, message_id, filename);
-    msg.path = path;
-    console.log(path);
+    if (filename) {
+      msg.path = "/loading.gif";
+    } else {
+      msg.path = await getMediaPath(room_id || room_id_, message_id);
+    }
   }
 
   return { user_id_, message_id, msg, room_id };

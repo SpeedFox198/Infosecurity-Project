@@ -12,10 +12,10 @@ const dispatch = createEventDispatcher();
 
 // Register the plugins
 registerPlugin(
-  FilePondPluginImageExifOrientation
-, FilePondPluginImagePreview
-, FilePondPluginFileValidateSize
-, FilePondPluginFileValidateType
+  FilePondPluginImageExifOrientation,
+  FilePondPluginImagePreview,
+  FilePondPluginFileValidateSize,
+  FilePondPluginFileValidateType
 );
 
 let filePondDisplay = false;
@@ -28,7 +28,7 @@ const toggleFilePondOn = () => {
 let pond;
 
 // name to use for the internal file input
-let name = 'filepond';
+const name = "filepond";
 
 let content = "";
 
