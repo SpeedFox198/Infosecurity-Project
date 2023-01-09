@@ -10,34 +10,25 @@ from utils import secure_save_file, to_unix
 
 from .disappearing import DisappearingQueue
 from .sio_auth_manager import SioAuthManager
+from .functions import get_display_dimensions
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
+MAX_HTTP_BUFFER_SIZE = 5000000
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
 
-sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
+sio = socketio.AsyncServer(
+    async_mode=ASYNC_MODE,
+    cors_allowed_origins=CORS_ALLOWED_ORIGINS,
+    max_http_buffer_size=MAX_HTTP_BUFFER_SIZE
+)
 
 # Create and get a queue disappearing messages
 messages_queue = DisappearingQueue()
 
 sio_auth_manager = SioAuthManager()  # Authentication Manager
-
-
-# TODO(low)(SpeedFox198): remove temp values
-class C:  # Temp class lmao
-    def __init__(self, disappearing):
-        self.disappearing = disappearing
-
-
-temp_rooms = {
-    "room_1": C(False),
-    "room_2": C(False),
-    "room_3": C(False),
-    "room_4": C(True)
-}
-
 
 # TODO(medium)(SpeedFox198): logging
 @sio.event
@@ -73,11 +64,11 @@ async def disconnect(sid):
 @sio.event
 async def send_message(sid, data: dict):
     # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
-    print("here"*12)
 
     message_data = data["message"]
     file = data.get("file", None)
     filename = data.get("filename", None)
+    height = width = None  # Initialise height and width values
 
     # Get user from session
     user = await get_user(sid)
@@ -120,7 +111,10 @@ async def send_message(sid, data: dict):
             os.makedirs(destination_directory)
             filename = await secure_save_file(destination_directory, filename, file)
 
-            media = Media(message.message_id, path=filename)
+            # TODO(high)(SpeedFox198): Check if file is image (check what kind of file)
+            height, width = get_display_dimensions(file)
+
+            media = Media(message.message_id, path=filename, height=height, width=width)
             async with session.begin():
                 session.add(media)
 
@@ -138,14 +132,19 @@ async def send_message(sid, data: dict):
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
-    await sio.emit("sent_success", {
+    data = {
         "message_id": message.message_id,
         "room_id": message.room_id,
         "temp_id": message_data["message_id"],
         "time": to_unix(message.time),
         "filename": filename
-    }, to=sid)
-    print("here", filename)
+    }
+    if filename:
+        data["filename"] = filename
+    if height and width:
+        data["height"] = height
+        data["width"] = width
+    await sio.emit("sent_success", data, to=sid)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -185,6 +184,7 @@ async def get_room_messages(sid, data):
     }, to=sid)
 
 
+# TODO(medium)(SpeedFox198): delete media if exists
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
 # ensure user is part of room and is admin
 # ensure data in correct format, (length of data also?)
@@ -240,7 +240,7 @@ async def delete_messages(sid, data):
     # ^ maybe not? (im lazy)
 
 
-async def save_user(sid: str, user: AuthedUser):
+async def save_user(sid: str, user: AuthedUser) -> None:
     """ Save user object to sio session """
     await sio.save_session(sid, {SIO_SESSION_USER_KEY: user})
 

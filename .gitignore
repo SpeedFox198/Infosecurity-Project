@@ -7,6 +7,9 @@ __pycache__/
 # Logs
 server/logs/
 
+# Media
+media/
+
 # Development
 mkcert.exe
 cert.pem

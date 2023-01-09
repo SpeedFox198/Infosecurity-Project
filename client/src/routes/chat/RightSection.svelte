@@ -50,12 +50,12 @@ onMount(async () => {
 
 
   socket.on("sent_success", async data => {
-    const { message_id, temp_id, time, room_id, filename } = data;  // Unpack data
+    const { message_id, temp_id, time, room_id, filename, height, width } = data;  // Unpack data
 
     count.nextExtra(room_id);  // Increase count of sent messages
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
-    await msgStorage.changeId(temp_id, message_id, time, filename);
+    await msgStorage.changeId(temp_id, message_id, room_id, time, filename, height, width);
     await allMsgs.changeId(temp_id, message_id, room_id);
   });
 
@@ -143,34 +143,25 @@ async function getUser(user_id) {
 }
 
 
-async function formatMediaPath(room_id, message_id, filename) {
-  return `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`;
-}
-
-
-async function getMediaPath(room_id, message_id, filename) {
-  if (filename) {
-    return await formatMediaPath(room_id, message_id, filename);
-  }
+async function getMediaPath(room_id, message_id) {
 
   const url = `https://localhost:8443/api/media/filename/${message_id}`;
   const init = {
     method: "GET",
     credentials: "include",
   }
-  let path;
+  let path, filename, height, width, message;
 
   try {
     const response = await fetch(url, init);
-    let message;
-    ({ filename, message } = await response.json());
+    ({ filename, height, width, message } = await response.json());
 
     if (!response.ok) {
       path = ""
       throw new Error(message);
     }
 
-    path = await formatMediaPath(room_id, message_id, filename);
+    path = `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`
 
   } catch (error) {
     console.error(error);
@@ -178,7 +169,7 @@ async function getMediaPath(room_id, message_id, filename) {
     path = "";  // TODO(medium)(SpeedFox198): display default image if image not found
   }
 
-  return path;
+  return { path, height, width };
 }
 
 
@@ -268,9 +259,11 @@ async function formatMsg(data, prev_id, room_id_) {
 
   // If message contains media, get media path
   if (type !== "text") {
-    let path = await getMediaPath(room_id || room_id_, message_id, filename);
-    msg.path = path;
-    console.log(path);
+    if (filename) {
+      msg.path = "/loading.gif";
+    } else {
+      ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id || room_id_, message_id));
+    }
   }
 
   return { user_id_, message_id, msg, room_id };

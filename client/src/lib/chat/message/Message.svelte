@@ -53,7 +53,7 @@ function selectMsg() {
 
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
     {#if msg.avatar}
-      <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
+      <img class="rounded-circle" src={msg.avatar} alt={msg.username}>
     {/if}
   </div>
 
@@ -70,11 +70,22 @@ function selectMsg() {
       {#if !msg.sent && msg.avatar}
         <div class="username">{msg.username}</div>
       {/if}
-      <span class="text-wrap text-break">
-        {msg.content}
-      </span>
-      <span class="hidden" aria-hidden="true">{time}</span>
-      <span class="time d-block">{time}</span>
+
+      {#if msg.type === "image"}
+        <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
+          <img src={msg.path} alt="">
+        </div>
+      {/if}
+
+      <div class="content-container d-flex">
+        <div class="flex-grow-1">
+          <span class="text-wrap text-break">
+            {msg.content}
+          </span>
+          <span class="hidden" aria-hidden="true">{time}</span>
+          <span class="time d-block">{time}</span>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -112,7 +123,7 @@ function selectMsg() {
 }
 
 .bubble-container {
-  max-width: 75%;
+  max-width: 65%;
   margin-top: 0.4rem;
   margin-bottom: 0.07rem;
 }
@@ -222,5 +233,23 @@ span {
 
 .check {
   color: var(--primary);
+}
+
+.image-container ~ .content-container > div {
+  width: 0;
+}
+
+.image-container {
+  border-radius: 1rem;
+  margin: -0.2rem -0.3rem 0 -0.5rem;
+}
+
+.sent .image-container {
+  margin: -0.2rem -0.5rem 0 -0.3rem;
+}
+
+img {
+  border-radius: 1rem;
+  background-color: var(--white);
 }
 </style>
