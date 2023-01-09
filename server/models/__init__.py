@@ -13,3 +13,4 @@ from .Lockout import Lockout
 from .FailedAttempt import FailedAttempt
 from .TwoFA import TwoFA
 from .OTP import OTP
+from .BackupCodes import BackupCodes

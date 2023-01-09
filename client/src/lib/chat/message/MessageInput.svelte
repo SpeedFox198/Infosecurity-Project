@@ -102,7 +102,7 @@ async function onSend(event) {
         allowFileTypeValidation={true}
         acceptedFileTypes={['image/*', 'video/*', 'audio/*', 'application/pdf', 'text/*']}
         labelFileTypeNotAllowed="File type is not allowed"
-        fileValidateTypeLabelExpectedTypes="Expects image/*, video/*, audio/* files"
+        fileValidateTypeLabelExpectedTypes="Expects image/*, video/*, audio/*, application/pdf, text/* files"
         fileValidateTypeLabelExpectedTypesMap={null}
 
         allowImagePreview={true}
