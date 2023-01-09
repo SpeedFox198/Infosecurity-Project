@@ -14,11 +14,16 @@ from .functions import get_display_dimensions
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
+MAX_HTTP_BUFFER_SIZE = 5000000
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
 
-sio = socketio.AsyncServer(async_mode=ASYNC_MODE, cors_allowed_origins=CORS_ALLOWED_ORIGINS)
+sio = socketio.AsyncServer(
+    async_mode=ASYNC_MODE,
+    cors_allowed_origins=CORS_ALLOWED_ORIGINS,
+    max_http_buffer_size=MAX_HTTP_BUFFER_SIZE
+)
 
 # Create and get a queue disappearing messages
 messages_queue = DisappearingQueue()
@@ -106,7 +111,7 @@ async def send_message(sid, data: dict):
             os.makedirs(destination_directory)
             filename = await secure_save_file(destination_directory, filename, file)
 
-            media = Media(message.message_id, path=filename)
+            media = Media(message.message_id, path=filename, height=0, width=0)
             async with session.begin():
                 session.add(media)
 
