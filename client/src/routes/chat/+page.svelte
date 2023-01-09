@@ -12,6 +12,7 @@ import RightSection from "./RightSection.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
 import { deviceStore } from "$lib/stores/device"
+import { friends } from "$lib/stores/friend"
 export let data;
 
 const namespace = "https://localhost:8443";
@@ -26,7 +27,8 @@ let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to c
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
-$: deviceStore.set(data.devices)
+friends.set(data.friends.friendsList); // TODO(cw): get a better name for this
+$: deviceStore.set(data.devices);
 
 let socket;  // Forward declare socket :)
 

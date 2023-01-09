@@ -11,6 +11,7 @@ from quart_schema import validate_request
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 
+
 @chat_bp.post("/file_upload_and_scan")
 @login_required
 async def upload_and_scan_file():

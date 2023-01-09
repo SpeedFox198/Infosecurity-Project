@@ -23,14 +23,14 @@
 
 {#if errors}
 	<p class="text-danger">{errors}</p>
+{:else}
+  <div class="mb-4">
+    <span class="fw-bold fs-4 mx-3">Current device</span>
+    <Device device={currentDevice} current={true} />
+  </div>
+  
+  <span class="fw-bold fs-4 mx-3">Other devices</span>
+  {#each otherDevices as device}
+    <Device device={device} />
+  {/each}
 {/if}
-
-<div class="mb-4">
-  <span class="fw-bold fs-4 mx-3">Current device</span>
-  <Device device={currentDevice} current={true} />
-</div>
-
-<span class="fw-bold fs-4 mx-3">Other devices</span>
-{#each otherDevices as device}
-  <Device device={device} />
-{/each}

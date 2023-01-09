@@ -25,7 +25,26 @@ export async function load({locals, fetch, depends}) {
         }
     }
   
+    const getFriends = async () => {
+      const response = await fetch("https://127.0.0.1:8443/api/user/friends", {
+        credentials: "include"
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        return {
+          errors: "Error while retrieving devices",
+          friendsList: []
+        }
+      }
+
+      return {
+        errors: null,
+        friendsList: data.friends
+      }
+    }
+  
     return {
       devices: getDevices(),
+      friends: getFriends()
     }
 };
