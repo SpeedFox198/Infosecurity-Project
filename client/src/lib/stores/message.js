@@ -52,7 +52,7 @@ export const msgStorage = (() => {
   }
 
   // Change message_id from temp_id to new id received from server
-  async function changeId(temp_id, message_id, room_id, time, filename) {
+  async function changeId(temp_id, message_id, room_id, time, filename, height, width) {
     update(storage => {
       // Change temp_id to message_id
       storage[message_id] = storage[temp_id];
@@ -61,8 +61,10 @@ export const msgStorage = (() => {
       // Add time attribute
       storage[message_id].time = time;
 
-      if (filename) {
+      if (filename && height && width) {
         storage[message_id].path = `https://localhost:8443/api/media/attachments/${room_id}/${message_id}/${filename}`;
+        storage[message_id].height = height;
+        storage[message_id].width = width;
       }
 
       return storage;

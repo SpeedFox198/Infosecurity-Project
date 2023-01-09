@@ -50,12 +50,15 @@ async def attachments(room_id: str, message_id: str, filename: str):
 async def filename(message_id: str):
 
     async with async_session() as session:
-        statement = sa.select(Media.path).where(Media.message_id == message_id)
+        statement = sa.select(Media.path, Media.height, Media.width).where(Media.message_id == message_id)
 
         try:
             result = (await session.execute(statement)).one()
-            filename = result[0]
         except NoResultFound:
             abort(404)
 
-    return {"filename": secure_filename(filename)}
+    return {
+        "filename": secure_filename(result[0]),
+        "height": result[1],
+        "width": result[2]
+    }

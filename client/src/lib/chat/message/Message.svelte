@@ -53,7 +53,7 @@ function selectMsg() {
 
   <div class="info-section m{msg.sent ? "s" : "e"}-2">
     {#if msg.avatar}
-      <img class="rounded-circle" src={msg.avatar} alt="{msg.username}">
+      <img class="rounded-circle" src={msg.avatar} alt={msg.username}>
     {/if}
   </div>
 
@@ -72,8 +72,8 @@ function selectMsg() {
       {/if}
 
       {#if msg.type === "image"}
-        <div class="image-container">
-          <img src="{msg.path}" alt="">
+        <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
+          <img src={msg.path} alt="">
         </div>
       {/if}
 
@@ -240,8 +240,6 @@ span {
 }
 
 .image-container {
-  max-width: 25rem;
-  max-height: 35rem;
   border-radius: 1rem;
   margin: -0.2rem -0.3rem 0 -0.5rem;
 }

@@ -64,11 +64,11 @@ async def disconnect(sid):
 @sio.event
 async def send_message(sid, data: dict):
     # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
-    print("here"*12)
 
     message_data = data["message"]
     file = data.get("file", None)
     filename = data.get("filename", None)
+    height = width = None  # Initialise height and width values
 
     # Get user from session
     user = await get_user(sid)
@@ -111,7 +111,10 @@ async def send_message(sid, data: dict):
             os.makedirs(destination_directory)
             filename = await secure_save_file(destination_directory, filename, file)
 
-            media = Media(message.message_id, path=filename, height=0, width=0)
+            # TODO(high)(SpeedFox198): Check if file is image (check what kind of file)
+            height, width = get_display_dimensions(file)
+
+            media = Media(message.message_id, path=filename, height=height, width=width)
             async with session.begin():
                 session.add(media)
 
@@ -129,14 +132,19 @@ async def send_message(sid, data: dict):
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
-    await sio.emit("sent_success", {
+    data = {
         "message_id": message.message_id,
         "room_id": message.room_id,
         "temp_id": message_data["message_id"],
         "time": to_unix(message.time),
         "filename": filename
-    }, to=sid)
-    print("here", filename)
+    }
+    if filename:
+        data["filename"] = filename
+    if height and width:
+        data["height"] = height
+        data["width"] = width
+    await sio.emit("sent_success", data, to=sid)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
