@@ -40,6 +40,40 @@ async function toggleDevices () {
 
 
 <SlidingMenu title="General Settings" display={displayGeneral} on:click={toggleGeneral} right={true}>
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Authenticator">
+    Enable 2-Factor Authentication
+  </button>
+  <!-- Modal -->
+  <div class="modal fade" id="Authenticator" tabindex="-1" aria-labelledby="AuthenticatorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content modalIndex">
+        <div class="modal-header">
+          <h5 class="modal-title" id="AuthenticatorLabel">2-Factor Authentication</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="card">
+              <div class="card-header">
+                Please follow the instructions to enable 2-Factor Authentication.
+              </div>
+              <div class="card-body">
+                <form class="needs-validation" method="POST" action="" novalidate>
+                  <input type="hidden" name="csrf_token" value=""/>
+                  <input type="submit" value="SUBMIT" class="input-group btn"/>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </SlidingMenu>
 
 
@@ -59,3 +93,9 @@ async function toggleDevices () {
 <SlidingMenu title="Devices" display={displayDevices} on:click={toggleDevices} right={true}>
   <DevicesMenu />
 </SlidingMenu>
+
+<style>
+  .modalIndex {
+    z-index: 9999;
+  }
+</style>
