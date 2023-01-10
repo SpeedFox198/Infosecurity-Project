@@ -1,4 +1,3 @@
-
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import Option from "$lib/settings/templates/Option.svelte";

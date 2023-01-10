@@ -47,7 +47,7 @@ async def attachments(room_id: str, message_id: str, filename: str):
 # TODO(medium)(SpeedFox198): validate_request, and also verify user is logged in
 @media_bp.get("/filename/<string:message_id>")
 @login_required
-async def filename(message_id: str):
+async def get_filename(message_id: str):
 
     async with async_session() as session:
         statement = sa.select(Media.path, Media.height, Media.width).where(Media.message_id == message_id)
