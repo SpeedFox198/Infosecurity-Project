@@ -1,28 +1,18 @@
+
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import Option from "$lib/settings/templates/Option.svelte";
 import { friends } from "$lib/stores/friend"
 
-export let displayNewGroup;
-export let toggleNewGroup;
+export let displayFriends;
+export let toggleFriends;
 
-let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑°༥°๑)
-let selectedUserIds = []; // IDs of users to be sent to API
-
-const toggleMagic = async () => displayMagic = !displayMagic;
 </script>
 
 
-<SlidingMenu title="Add Group Members" display={displayNewGroup} on:click={toggleNewGroup} right={false}>
+<SlidingMenu title="Friends" display={displayFriends} on:click={toggleFriends} right={false}>
   {#each $friends as friend}
     <div class="friend d-flex py-2 user-select-none align-items-center">
-      <input type="checkbox"
-      class="form-check-input ms-3 me-1 p-2"
-      name={friend.username}
-      title="Add friend to group" 
-      bind:group={selectedUserIds} 
-      value={friend.user_id}
-      >
       <div class="icon p-2">
         <div class="img-wrapper img-1-1">
           <img class="rounded-circle" src={friend.avatar} alt="{friend.username} avatar">

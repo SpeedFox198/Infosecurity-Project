@@ -5,6 +5,7 @@ let currentUser = $page.data.user
 
 export let toggleSettings;
 export let toggleNewGroup;
+export let toggleFriends;
 export let roomSearchInput
 
 const logoutUser = async () => {
@@ -61,7 +62,7 @@ const logoutUser = async () => {
           </button>
         </li>
         <li>
-          <button class="dropdown-item" type="button">
+          <button on:click={toggleFriends} class="dropdown-item" type="button">
             <i class="fa-solid fa-user-group"></i>
             Friends
           </button>

@@ -7,12 +7,14 @@ import Group from '$lib/chat/group/Group.svelte';
 import Nav from './Nav.svelte';
 import Settings from '$lib/settings/Settings.svelte';
 import NewGroup from '$lib/settings/NewGroup.svelte';
+import Friends from '$lib/settings/Friends.svelte';
 
 // SocketIO instance
 export let getRoomMsgs;
 
 let displaySettings = false;
 let displayNewGroup = false;
+let displayFriends = false;
 let roomSearchInput = "" 
 
 $: unfilteredRooms = $roomList.map(room_id => $roomStorage[room_id]);
@@ -37,6 +39,7 @@ async function selectGrp(new_room) {
 
 const toggleSettings = async () => displaySettings = !displaySettings;
 const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
+const toggleFriends = async () => displayFriends = !displayFriends;
 
 </script>
 
@@ -46,9 +49,9 @@ const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
   <!-- Settings Display Section -->
   <Settings {displaySettings} {toggleSettings}/>
   <NewGroup {displayNewGroup} {toggleNewGroup}/>
-
+  <Friends {displayFriends} {toggleFriends}/>
   <!-- Profile & Settings Section -->
-  <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup}/>
+  <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends}/>
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
