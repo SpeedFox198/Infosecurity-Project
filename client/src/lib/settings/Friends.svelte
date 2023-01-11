@@ -20,6 +20,42 @@ export let toggleFriends;
       <div class="d-flex align-items-center">
         <span>{friend.username}</span>
       </div>
+      
+      <!-- Friend dropdown -->
+      <div class="dropdown flex-grow-1 pe-3 text-end">
+        <button
+         class="options-btn dropdown-toggle"
+         title="Options"
+         type="button"
+         id="{friend.user_id}-dropdown"
+         data-bs-toggle="dropdown"
+         aria-expanded="false"
+        >
+          <i class="fa-solid fa-ellipsis-vertical" />
+        </button>
+
+        <ul class="dropdown-menu" aria-labelledby="{friend.user_id}-dropdown">
+          <li>
+            <button class="dropdown-item">
+              <i class="fa-solid fa-message"></i>
+              Message
+            </button>
+          </li>
+          <li>
+            <button on:click class="dropdown-item" type="button">
+              <i class="fa-solid fa-user-slash"></i>
+              Block
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item" type="button" on:click>
+              <i class="fa-solid fa-xmark"></i>
+              Remove Friend
+            </button>
+          </li>
+        </ul>
+      </div>
+
     </div>
   {/each}
 </SlidingMenu>
@@ -37,5 +73,22 @@ export let toggleFriends;
 .icon {
   height: 4.5rem;
   width: 4.5rem;
+}
+
+.options-btn {
+  display: inline-block;
+  text-decoration: none;
+  border: none;
+  background-color: inherit;
+  color: #000000;
+}
+
+.options-btn:hover {
+  cursor: pointer;
+  background-color: inherit;
+}
+
+.dropdown-toggle::after {
+  content: none;
 }
 </style>
