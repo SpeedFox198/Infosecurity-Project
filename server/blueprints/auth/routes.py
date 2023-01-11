@@ -284,12 +284,14 @@ async def is_logged_in():
     if not await current_user.is_authenticated or not await current_user.user_id:
         return {"message": "Not authenticated"}, 401
 
-    return UserData(await current_user.user_id,
-                    await current_user.device_id,
-                    await current_user.username,
-                    await current_user.email,
-                    await current_user.avatar,
-                    await current_user.dark_mode,
-                    await current_user.malware_scan,
-                    await current_user.friends_only,
-                    await current_user.censor)
+    return UserData(
+        await current_user.user_id,
+        await current_user.device_id,
+        await current_user.username,
+        await current_user.email,
+        await current_user.avatar,
+        await current_user.dark_mode,
+        await current_user.malware_scan,
+        await current_user.friends_only,
+        await current_user.censor
+    )
