@@ -6,7 +6,6 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import 'filepond/dist/filepond.css';
-	import { redirect } from "@sveltejs/kit";
 
 const dispatch = createEventDispatcher();
 

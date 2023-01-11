@@ -7,9 +7,9 @@ const Cookie = tough.Cookie
 /** @type {import('./$types').PageServerLoad} */
 export async function load({locals, cookies}) {
     if (locals.user) {
-        throw redirect(302, "/chat")
+      throw redirect(302, "/chat")
     }
-    
+
     const getGoogleLogin = async () => {
       const response = await fetch("https://127.0.0.1:8443/api/auth/google-login", {
         headers: {
@@ -85,7 +85,7 @@ export const actions = {
       maxAge: 60 * 24 * 60 * 60, // formatted as (days * hours * minutes * seconds)
     })
 
-    throw redirect(301, "/chat")
+    throw redirect(302, "/chat")
   },
   signup: async ({request, cookies}) => {
     const data = await request.formData()
@@ -133,7 +133,7 @@ export const actions = {
       maxAge: otpCookie.maxAge,
     })
 
-    throw redirect(301, "/otp")
+    throw redirect(302, "/otp")
   }
 }
 

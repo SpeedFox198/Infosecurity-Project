@@ -4,7 +4,7 @@ export const handle = async ({event, resolve}) => {
     const session = event.cookies.get("QUART_AUTH")
     
     if (!session) {
-        return await resolve(event)
+      return await resolve(event)
     }
     
     // Check if cookie is valid

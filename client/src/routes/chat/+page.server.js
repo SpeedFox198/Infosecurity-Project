@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 /** @type {import('./$types').PageServerLoad} */
 export async function load({locals, fetch, depends}) {
     if (!(locals.user)) {
-        throw redirect(302, "/")
+      throw redirect(302, "/")
     }
   
     const getDevices = async () => {

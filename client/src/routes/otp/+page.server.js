@@ -1,4 +1,5 @@
-import { redirect } from '@sveltejs/kit'
+//import { redirect } from '@sveltejs/kit'
+import { redirect } from "sveltekit-flash-message/server"
 
 export async function load({ cookies }) {
   if (!cookies.get("session")) {
@@ -7,8 +8,8 @@ export async function load({ cookies }) {
 }
 
 export const actions = {
-    otp: async ({request, cookies}) => {
-        const data = await request.formData()
+    otp: async (event) => {
+        const data = await event.request.formData()
         const otp = data.get("otp")
         const response = await fetch("https://127.0.0.1:8443/api/auth/otp", {   
             method: "POST",
@@ -16,7 +17,7 @@ export const actions = {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Cookie": request.headers.get("cookie")
+                "Cookie": event.request.headers.get("cookie")
             },
             body: JSON.stringify({"otp": otp})
         });  
@@ -27,7 +28,13 @@ export const actions = {
             }
         }
       
-        cookies.delete("session")
-        throw redirect(302, "/")
+        event.cookies.delete("session")
+        //throw redirect(302, "/")
+        throw redirect(
+          302,
+          "/",
+          { type: "success", message: "Sign up completed!" },
+          event
+        )
     }
 }
