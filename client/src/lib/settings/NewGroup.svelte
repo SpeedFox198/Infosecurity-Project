@@ -10,7 +10,7 @@ let displayCustomizeGroup = false;
 let friendSearchInput = "";
 let groupName = "";
 let disappearing;
-let selectedFriends = []; // IDs of users to be sent to API
+let selectedFriends = [];
 
 $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
