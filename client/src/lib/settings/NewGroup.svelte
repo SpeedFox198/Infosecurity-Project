@@ -88,8 +88,7 @@ const createGroup = async () => {
     <div class="friend d-flex py-2 user-select-none align-items-center">
       <input type="checkbox"
       class="form-check-input ms-3 me-1 p-2"
-      name={friend.username}
-      title="Add friend to group" 
+      title="Add { friend.username } to group" 
       bind:group={selectedFriends} 
       value={friend}
       >

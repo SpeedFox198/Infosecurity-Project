@@ -1,4 +1,3 @@
-import asyncio
 from datetime import timedelta
 
 import quart_auth
@@ -22,7 +21,6 @@ from quart_cors import cors
 from quart_schema import QuartSchema, RequestSchemaValidationError
 from utils.logging import log_warning
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 scheduler = AsyncIOScheduler()
 app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost", "https://127.0.0.1"])
