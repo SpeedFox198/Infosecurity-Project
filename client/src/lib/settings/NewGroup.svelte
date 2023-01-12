@@ -49,13 +49,26 @@ const createGroup = async () => {
     photoToSend = null
   }
 
-  const groupData = {
-    group_photo: photoToSend,
+  const req = new FormData()
+  req.append("group_photo", photoToSend)
+  req.append("metadata", JSON.stringify({
     group_name: groupName,
-    disappearing: disappearing, 
-    users: selectedFriends.map(users => users.user_id)
+    disappearing: disappearing,
+    users: selectedFriends.map(user => user.user_id)
+  }))
+
+  const response = await fetch("https://localhost:8443/api/group/new", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Accept": "application/json",
+    },
+    body: req
+  })
+
+  if (!response.ok) {
+    console.error(await response.json())
   }
-  console.log(groupData)
 }
 </script>
 
@@ -157,7 +170,7 @@ const createGroup = async () => {
     </div>
 
     <div class="d-grid">
-      <button type="submit" class="btn btn-primary btn-block" on:click={createGroup}>Create Group</button>
+      <button type="submit" class="btn btn-primary btn-block" on:click={ createGroup }>Create Group</button>
     </div>  
   </div>
 </SlidingMenu>
