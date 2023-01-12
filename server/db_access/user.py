@@ -14,7 +14,8 @@ async def get_user_details(user_id: str) -> tuple:
                 User.dark_mode,
                 User.malware_scan,
                 User.friends_only,
-                User.censor
+                User.censor,
+                User.twofa_status
         ).where(User.user_id == user_id)
         result = await session.execute(statement)
         return result.first()

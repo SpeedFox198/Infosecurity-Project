@@ -29,5 +29,6 @@ class User(Base):
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
     censor = Column(Boolean, default=True)
+    twofa_status = Column(Boolean, default=False)
 
     devices = relationship("Device", back_populates="user")

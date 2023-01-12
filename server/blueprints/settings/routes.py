@@ -37,6 +37,19 @@ async def google_authenticator(data: TwoFABody):
         else:
             return {"message": "Invalid 2FA code"}, 400
 
+@settings_bp.get("/twofa_secretgenerate")
+@login_required
+async def google_secret():
+    #Generate the secret token
+    twoFA_checker = await check_2fa_exists(await current_user.user_id)
+    if twoFA_checker:
+        secret_token = pyotp.random_base32()
+        await create_2fa(await current_user.userid, secret_token)
+        return {"message":"Secret generated"}, 200
+    else:
+        return {"message": "Secret Already Exists"}, 200
+
+
 @settings_bp.get("/twofa_backupcode")
 @login_required
 async def google_authenticator_backupcodes():
