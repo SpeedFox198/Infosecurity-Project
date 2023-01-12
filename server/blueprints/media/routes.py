@@ -62,3 +62,6 @@ async def get_filename(message_id: str):
         "height": result[1],
         "width": result[2]
     }
+
+
+# TODO Add route for showing group icons

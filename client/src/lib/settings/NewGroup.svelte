@@ -1,9 +1,13 @@
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import { friends } from "$lib/stores/friend"
+import { page } from "$app/stores"
+import { getFlash } from "sveltekit-flash-message/client"
 
 export let displayNewGroup;
 export let toggleNewGroup;
+
+const flash = getFlash(page)
 
 let displayCustomizeGroup = false;
 let friendSearchInput = "";
@@ -50,9 +54,9 @@ const createGroup = async () => {
   }
 
   const req = new FormData()
-  req.append("group_photo", photoToSend)
+  req.append("group_icon", photoToSend)
   req.append("metadata", JSON.stringify({
-    group_name: groupName,
+    name: groupName,
     disappearing: disappearing,
     users: selectedFriends.map(user => user.user_id)
   }))
@@ -69,6 +73,10 @@ const createGroup = async () => {
   if (!response.ok) {
     console.error(await response.json())
   }
+
+  $flash = { type: 'success', message: "Group created!"}
+  await toggleCustomizeGroup()
+  await toggleNewGroup()
 }
 </script>
 

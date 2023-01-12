@@ -32,8 +32,8 @@ def read_from_file(file_path):
 
 
 async def add_rooms(session):
-    rooms = [Room(type_="group") for _ in range(ROOM_GROUP_NUM)]
-    rooms.extend([Room() for _ in range(ROOM_DIRECT_NUM)])
+    rooms = [Room("off", type_="group") for _ in range(ROOM_GROUP_NUM)]
+    rooms.extend([Room("off") for _ in range(ROOM_DIRECT_NUM)])
     async with session.begin():
         for room in rooms:
             session.add(room)
