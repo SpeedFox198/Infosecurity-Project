@@ -6,7 +6,6 @@ from quart_auth import current_user, login_required
 from sqlalchemy.orm.exc import NoResultFound
 
 from models.response_data import FriendData
-from utils.logging import log_info
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
@@ -24,7 +23,6 @@ async def user_details(user_id: str):
         except NoResultFound:
             return {"message": "User does not exist."}, 404
 
-    await log_info("details called")
     return {
         "username": user[0],
         "avatar": user[1]
