@@ -16,6 +16,7 @@ class AuthedUser(AuthUser):
         self._malware_scan = None
         self._friends_only = None
         self._censor = None
+        self._twofa_status = None
 
     async def _resolve(self):
         if not self._resolved:
@@ -33,7 +34,8 @@ class AuthedUser(AuthUser):
                 self._dark_mode,
                 self._malware_scan,
                 self._friends_only,
-                self._censor
+                self._censor,
+                self._twofa_status
             ) = user_details
 
             self._resolved = True
@@ -82,3 +84,8 @@ class AuthedUser(AuthUser):
     async def censor(self):
         await self._resolve()
         return self._censor
+
+    @property
+    async def twofa_status(self):
+        await self._resolve()
+        return self._twofa_status

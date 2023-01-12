@@ -12,3 +12,4 @@ class UserData:
     malware_scan: bool
     friends_only: bool
     censor: bool
+    twofa_status: bool
