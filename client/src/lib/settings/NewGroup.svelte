@@ -145,7 +145,11 @@ const createGroup = async () => {
       </span>
 
       <div class="flex-grow-1 align-items-center d-flex">
-        <select bind:value={disappearing} id="disappearingSelect" class="form-select" aria-label="Select the duration of disappearing messages">
+        <select bind:value={disappearing}
+         id="disappearingSelect"
+         class="form-select"
+         aria-label="Select the duration of disappearing messages"
+         >
           <option value="off" selected>Off</option>
           <option value="24h">1 Day</option>
           <option value="7d">1 Week</option>
