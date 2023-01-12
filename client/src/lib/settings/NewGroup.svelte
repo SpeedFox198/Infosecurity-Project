@@ -108,7 +108,7 @@ const createGroup = async () => {
   <div class="m-3">
 
     {#if showPhoto}
-      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto">
+      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto" style="width: 400px; length: 400px;">
     {/if}    
 
 
