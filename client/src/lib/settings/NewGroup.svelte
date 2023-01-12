@@ -5,9 +5,13 @@ import { friends } from "$lib/stores/friend"
 export let displayNewGroup;
 export let toggleNewGroup;
 
-//let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑°༥°๑)
 let displayCustomizeGroup = false;
 let friendSearchInput = "";
+
+let showPhoto;
+let photoUpload;
+let photoPreview;
+
 let groupName = "";
 let disappearing;
 let selectedFriends = [];
@@ -16,12 +20,37 @@ $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
                                                 .includes(friendSearchInput));
 
-//const toggleMagic = async () => displayMagic = !displayMagic;
 const toggleCustomizeGroup = async () => displayCustomizeGroup = !displayCustomizeGroup;
+
+const setGroupPhoto = () => {
+  const photo = photoUpload[0]
+
+  if (photo) {
+    showPhoto = true
+  
+    const reader = new FileReader()
+    reader.addEventListener("load", () => {
+      photoPreview.setAttribute("src", reader.result)
+    })
+    reader.readAsDataURL(photo)
+
+    return
+  }
+  showPhoto = false
+}
 
 const createGroup = async () => {
   // TODO Implement submitting and backend logic
+  let photoToSend
+
+  if (photoUpload) {
+    photoToSend = photoUpload[0]
+  } else {
+    photoToSend = null
+  }
+
   const groupData = {
+    group_photo: photoToSend,
     group_name: groupName,
     disappearing: disappearing, 
     users: selectedFriends.map(users => users.user_id)
@@ -77,8 +106,16 @@ const createGroup = async () => {
 
 <SlidingMenu title="Customize group" display={ displayCustomizeGroup } on:click={ toggleCustomizeGroup } right={false}>
   <div class="m-3">
-    <!--TODO FilePond Here-->
-    <h3>Group Icon</h3>
+
+    {#if showPhoto}
+      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto">
+    {/if}    
+
+
+    <div class="mb-3">
+      <label for="groupPhoto" class="form-label">Group Photo</label>
+      <input class="form-control" type="file" id="groupPhoto" bind:files={photoUpload} on:change={setGroupPhoto}>
+    </div>
 
     <div class="form-floating mb-3">
       <input type="text" class="form-control" bind:value={groupName} id="floatingGroupName" placeholder="Group Name">
