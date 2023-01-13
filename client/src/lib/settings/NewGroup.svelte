@@ -44,14 +44,7 @@ const setGroupPhoto = () => {
 }
 
 const createGroup = async () => {
-  // TODO Implement submitting and backend logic
-  let photoToSend
-
-  if (photoUpload) {
-    photoToSend = photoUpload[0]
-  } else {
-    photoToSend = null
-  }
+  const photoToSend = photoUpload ? photoUpload[0] : null
 
   const req = new FormData()
   req.append("group_icon", photoToSend)

@@ -1,13 +1,11 @@
-import os
-
 from quart import Blueprint, request, json
 from quart.datastructures import FileStorage
 from quart_auth import (
     login_required,
     current_user
 )
-from werkzeug.utils import secure_filename
 
+from blueprints.group.functions import save_group_icon
 from db_access.globals import async_session
 from models import Room, Group, Membership
 
@@ -37,17 +35,13 @@ async def create_group():
 
         if group_icon:
             # Add Group icon if any and the group details
-            icon_base_path = os.path.join("media/icon", new_room.room_id)
-            # TODO Change to uuid4 filename
-            icon_path: os.PathLike | str = os.path.join(icon_base_path, secure_filename(group_icon.filename))
+            icon_path = await save_group_icon(new_room, group_icon)
 
             session.add(
                 Group(new_room.room_id, group_metadata["name"], icon_path)
             )
             await session.flush()
 
-            os.makedirs(icon_base_path)
-            await group_icon.save(icon_path)
         else:
             session.add(
                 Group(new_room.room_id, group_metadata["name"])
@@ -69,4 +63,4 @@ async def create_group():
 
         await session.commit()
 
-    return {"message": "ball"}, 200
+    return {"message": "Group added successfully!"}, 200

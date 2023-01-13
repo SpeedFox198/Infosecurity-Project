@@ -14,7 +14,7 @@ class Room(Base):  # TODO(high)(SpeedFox198): change disappearing to 3 options (
         Creates a room object
 
         Args:
-            disappearing(str): Off (off) / 24 Hours (24h) /7 Days (7d) /30 Days (30d)
+            disappearing(str): Off (off) / 24 Hours (24h) / 7 Days (7d) / 30 Days (30d)
             type_(:obj:`str`, optional): Type of chat room ("direct" or "group")
 
         Raises:

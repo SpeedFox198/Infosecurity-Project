@@ -1,6 +1,9 @@
 <script>
 export let grp;
 export let selectGrp;
+
+// TODO Change to bucket in the future if possible
+const group_icon = `https://localhost:8443/api/${grp.icon}`
 </script>
 
 
@@ -9,7 +12,11 @@ export let selectGrp;
   on:keydown>
   <div class="icon p-2">
     <div class="img-wrapper img-1-1">
-      <img class="rounded-circle" src={grp.icon} alt="Group Icon">
+      {#if !grp.icon.startsWith("media/")}
+        <img class="rounded-circle" src={grp.icon} alt="Group Icon">
+      {:else}
+        <img class="rounded-circle" src={ group_icon } alt="Group Icon">
+      {/if}
     </div>
   </div>
   <div class="d-flex align-items-center">
