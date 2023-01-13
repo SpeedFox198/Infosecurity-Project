@@ -55,7 +55,7 @@ const toggleFriends = async () => displayFriends = !displayFriends;
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">
-    {#each currentRooms as grp} 
+    {#each currentRooms as grp (grp.room_id)} 
       <Group {grp} {selectGrp}/>
     {/each}
   </div>
