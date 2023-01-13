@@ -1,11 +1,11 @@
 <script>
-import { onMount, createEventDispatcher } from "svelte";
-import FilePond, { registerPlugin } from 'svelte-filepond';
+import { createEventDispatcher } from "svelte";
+import FilePond, { registerPlugin } from "svelte-filepond";
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import 'filepond/dist/filepond.css';
+import "filepond/dist/filepond.css";
 
 const dispatch = createEventDispatcher();
 
