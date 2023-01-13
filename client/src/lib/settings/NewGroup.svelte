@@ -46,9 +46,9 @@ const setGroupPhoto = () => {
 const createGroup = async () => {
   const photoToSend = photoUpload ? photoUpload[0] : null
 
-  const req = new FormData()
-  req.append("group_icon", photoToSend)
-  req.append("metadata", JSON.stringify({
+  const request = new FormData()
+  request.append("group_icon", photoToSend)
+  request.append("metadata", JSON.stringify({
     name: groupName,
     disappearing: disappearing,
     users: selectedFriends.map(user => user.user_id)
@@ -60,11 +60,14 @@ const createGroup = async () => {
     headers: {
       "Accept": "application/json",
     },
-    body: req
+    body: request
   })
+  
+  const data = await response.json()
 
   if (!response.ok) {
-    console.error(await response.json())
+    $flash = { type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
+    return
   }
 
   $flash = { type: 'success', message: "Group created!"}
