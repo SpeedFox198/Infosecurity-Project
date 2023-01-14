@@ -1,6 +1,5 @@
 from pydantic import ValidationError
 from quart import Blueprint, request, json
-from quart.datastructures import FileStorage
 from quart_auth import (
     login_required,
     current_user
@@ -9,7 +8,7 @@ from quart_auth import (
 from blueprints.group.functions import save_group_icon
 from db_access.globals import async_session
 from models import Room, Group, Membership
-from models.request_data import GroupMetaDataBody
+from models.request_data import GroupMetadataBody
 
 group_bp = Blueprint("group", __name__, url_prefix="/group")
 
@@ -18,17 +17,16 @@ group_bp = Blueprint("group", __name__, url_prefix="/group")
 @login_required
 async def create_group():
     # TODO Add validation
-    group_icon: FileStorage | None = (await request.files).get("group_icon")
-    
     try:
-        group_metadata = GroupMetaDataBody(
+        group_metadata = GroupMetadataBody(
+            icon=(await request.files).get("group_icon"),
             **json.loads(
                 (await request.form).get("metadata")
             )
         )
     except ValidationError as err:
         error_list = [error["msg"] for error in err.errors()]
-        error_message = ", ".join(error_list)
+        error_message = error_list[0]
         return {"message": error_message}, 400
 
     async with async_session() as session:
@@ -37,9 +35,9 @@ async def create_group():
         session.add(new_room)
         await session.flush()
 
-        if group_icon:
+        if group_metadata.icon:
             # Add Group icon if any and the group details
-            icon_path = await save_group_icon(new_room, group_icon)
+            icon_path = await save_group_icon(new_room, group_metadata.icon)
 
             session.add(
                 Group(new_room.room_id, group_metadata.name, icon_path)
