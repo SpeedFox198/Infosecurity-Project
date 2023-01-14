@@ -1,46 +1,17 @@
 <script>
 import API from "./API.svelte";
 
-const client_id = "758319541478-uflvh47eoagk6hl73ss1m2hnj35vk9bq.apps.googleusercontent.com";
-const scope = "https://www.googleapis.com/auth/drive.appdata";
-const discoveryDocs = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-
 let gapi;
 let google;
 
 let tokenClient;
-let gapiInited = false;
-let gisInited = false;
-let displaySignOut = false;
-$: displayAuthorised = gapiInited && gisInited;
-
-let message = "";
-let content = "";
-let authButtonText = "Authorise";
 
 
 /**
- * Callback after api.js is loaded
+ * Callback after Google API is loaded
  */
-function gapiLoaded(event) {
-  gapi = event.detail;
-  gapi.load("client", async () => {
-    await gapi.client.init({ discoveryDocs });
-    gapiInited = true;
-  });
-}
-
-
-/**
- * Callback after Google Identity Services are loaded
- */
-function gisLoaded(event) {
-  google = event.detail;
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id, scope,
-    callback: "", // defined later
-  });
-  gisInited = true;
+function apiLoaded(event) {
+  ({ gapi, google, tokenClient } = event.detail);
 }
 
 
@@ -180,4 +151,4 @@ async function downloadFile() {
 </script>
 
 
-<API on:loadGapi={gapiLoaded} on:loadGis={gisLoaded}/>
+<API on:load={apiLoaded}/>
