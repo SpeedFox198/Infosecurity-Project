@@ -39,5 +39,5 @@ class GroupMetadataBody(BaseModel):
     def check_users(cls, value):
         if not value:
             raise ValueError("Group should have 1 included participant.")
-        
+
         return value

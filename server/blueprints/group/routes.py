@@ -16,7 +16,6 @@ group_bp = Blueprint("group", __name__, url_prefix="/group")
 @group_bp.post("/new")
 @login_required
 async def create_group():
-    # TODO Add validation
     try:
         group_metadata = GroupMetadataBody(
             icon=(await request.files).get("group_icon"),
