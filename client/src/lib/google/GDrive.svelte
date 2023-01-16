@@ -3,7 +3,6 @@ import GAPI from "./GAPI.svelte";
 
 let gapi;
 let google;
-
 let tokenClient;
 
 
@@ -55,9 +54,11 @@ function handleSignoutClick() {
 
 /**
  * Upload a new file
- * @return{string} file ID
+ * @param {string} filename file name
+ * @param {string} content file contents
+ * @return {Promise<string>} file ID
  */
-async function upload(filename, content) {
+async function uploadFile(filename, content) {
   const type = "application/json";
   const file = new Blob([content], { type });
   const metadata = {
@@ -72,20 +73,21 @@ async function upload(filename, content) {
 
   let id, error;
   try {
-    const url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id"
+    const url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id";
     const response = await fetch(url, {
       method: "POST",
       headers: new Headers({ Authorization: `Bearer ${accessToken}`}),
       body: form
     });
     ({ id, error } = await response.json());
-  
+
     if (error !== undefined) {
       throw new Error(error.message);
     }
 
   } catch (err) {
-    message = err;
+    // TODO(high)(SpeedFox198): handle error message
+    // message = err;
     return;
   }
 
@@ -96,7 +98,43 @@ async function upload(filename, content) {
 
 
 /**
+ * Update aa existing file
+ * @param {string} fileId file ID
+ * @param {string} content file contents
+ * @return {Promise<string>} file ID
+ */
+ async function updateFile(fileId, content) {
+  const file = new Blob([content], { type: "text/plain" });
+  const accessToken = gapi.auth.getToken().access_token;
+
+  let id, name, error;
+  try {
+    const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: new Headers({ Authorization: `Bearer ${accessToken}`}),
+      body: file
+    });
+    ({ id, name, error } = await response.json());
+  
+    if (error !== undefined) {
+      throw new Error(error.message);
+    }
+
+  } catch (err) {
+    // TODO(high)(SpeedFox198): handle error
+    // message = err;
+    return;
+  }
+
+  // TODO(high)(SpeedFox198): handle update success
+  return { id, name };
+}
+
+
+/**
  * List all files inserted in the application data folder
+ * @return {Promise<{ id: string, name: string }[]>} Array of files in appdata folder
  */
 async function listFiles() {
   let response;
@@ -107,44 +145,48 @@ async function listFiles() {
       pageSize: 10,
     });
   } catch (err) {
-    message = err.message;
+    // TODO(high)(SpeedFox198): handle error message
+    // message = err.message;
     return;
   }
   const files = response.result.files;
   if (!files || files.length == 0) {
-    message = "No files found.";
+    // TODO(high)(SpeedFox198): handle error message
+    // message = "No files found.";
     return;
   }
-  // Flatten to string to display
-  const output = files.reduce(
-      (str, file) => `${str}${file.name} (${file.id}\n`,
-      "Files:\n");
-  // TODO(high)(SpeedFox198): handle output listing of files
+  return files;
 }
 
 
 /**
- * Downloads a file
- * @param{string} realFileId file ID
- * @return{obj} file status
+ * Downloads a file by given fileIfilenamed
+ * @param {string} filename filename
+ * @return {Promise<obj>} file object
  */
-async function downloadFile() {
-  let file;
-  try {
-    file = await gapi.client.drive.files.get({
-      fileId: content,
-      alt: "media",
-    });
-    console.log("File:", file);
-  } catch (err) {
-    message = err.result.error.message;
+async function downloadFile(filename) {
+  const files = await listFiles();
+  const file = files.find(file => file.name === filename);
+  if (file === undefined) {
     return;
   }
-  const { body, status } = file;
-  // TODO(high)(SpeedFo198): handle output content of file
-  // perhaps return body instead of status
-  // or maybe just return file lol
-  return status; 
+  return await _downloadFileById(file.id);
+}
+
+
+/**
+ * Downloads a file by given fileId
+ * @param {string} fileId file Id
+ * @return {Promise<obj>} file object
+ */
+async function _downloadFileById(fileId) {
+  try {
+    return await gapi.client.drive.files.get({ fileId, alt: "media"});
+  } catch (err) {
+    // TODO(high)(SpeedFox198): handle error message
+    // message = err.result.error.message;
+    return;
+  }
 }
 </script>
 
