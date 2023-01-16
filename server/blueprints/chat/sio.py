@@ -3,7 +3,7 @@ import os
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, Group, Media, Membership, Message, Room, User
+from models import AuthedUser, Group, Media, Membership, Message, Room, User, Disappearing
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 from utils import secure_save_file, to_unix
@@ -229,6 +229,12 @@ async def delete_messages(sid, data):
         messages = [row[0] for row in result]
 
         # Delete messages from database
+        statement = sa.delete(Media).where(Media.message_id.in_(messages))
+        await session.execute(statement)
+
+        statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(messages))
+        await session.execute(statement)
+
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
 
@@ -298,6 +304,8 @@ async def delete_expired_messages(messages):
         result = (await session.execute(statement)).fetchall()
         filter_ids = [row[0] for row in result]
 
+        statement = sa.delete(Media).where(Media.message_id.in_(filter_ids))
+        await session.execute(statement)
         statement = sa.delete(Message).where(Message.message_id.in_(filter_ids))
         await session.execute(statement)
 
