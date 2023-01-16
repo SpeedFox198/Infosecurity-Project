@@ -16,17 +16,15 @@ function apiLoaded(event) {
 
 
 /**
- *  Sign in the user upon button click.
+ *  Sign in the user.
  */
-function handleAuthClick() {
+function authUser() {
   tokenClient.callback = async resp => {
     if (resp.error !== undefined) {
       message = resp.error;
       throw resp;
     }
-    displaySignOut = true;
-    authButtonText = "Refresh";
-    message = "Authenticated!";
+    // TODO(high)(SpeedFox198): Event - user authenticated!
   };
 
   if (gapi.client.getToken() === null) {
@@ -59,17 +57,17 @@ function handleSignoutClick() {
  * Upload a new file
  * @return{string} file ID
  */
-async function upload() {
-  const filename = "test.txt"
-  const file = new Blob([content], { type: "text/plain" });
+async function upload(filename, content) {
+  const type = "application/json";
+  const file = new Blob([content], { type });
   const metadata = {
     name: filename,
-    mimeType: "text/plain",
+    mimeType: type,
     parents: ["appDataFolder"]
   };
   const accessToken = gapi.auth.getToken().access_token;
   const form = new FormData();
-  form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+  form.append("metadata", new Blob([JSON.stringify(metadata)], { type }));
   form.append("file", file);
 
   let id, error;
@@ -91,9 +89,8 @@ async function upload() {
     return;
   }
 
-  message = `File uploaded!\nFile ID: ${id}\nFilename: ${filename}\nContent: ${content}`;
-  content = "";
-
+  // TODO(high)(SpeedFox198): handle file update success
+  // message = `File uploaded!\nFile ID: ${id}\nFilename: ${filename}\nContent: ${content}`;
   return id;
 }
 
@@ -122,7 +119,7 @@ async function listFiles() {
   const output = files.reduce(
       (str, file) => `${str}${file.name} (${file.id}\n`,
       "Files:\n");
-  message = output;
+  // TODO(high)(SpeedFox198): handle output listing of files
 }
 
 
@@ -144,8 +141,9 @@ async function downloadFile() {
     return;
   }
   const { body, status } = file;
-  message = `File downloaded!\nContent: ${body}`;
-  content = "";
+  // TODO(high)(SpeedFo198): handle output content of file
+  // perhaps return body instead of status
+  // or maybe just return file lol
   return status; 
 }
 </script>
