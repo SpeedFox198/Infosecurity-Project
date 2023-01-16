@@ -147,8 +147,7 @@ async def login(data: LoginBody):
         return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
 
     # Check if user has 2FA enabled
-    twoFA_code = await get_2fa(existing_user.user_id)
-    if twoFA_code:
+    if current_user.twofa_status:
         auth_session["login_existing_user"] = existing_user
         return {"message": "2FA required"}, 200
     else:
