@@ -63,7 +63,7 @@ async def before_request():
 
     if not valid_device:
         await log_warning(
-            f"Access attempt was made with an invalid device by {await current_user.username}"
+            f"Access attempt was made with an invalid device by {await current_user.username or 'Non existing user'}"
         )
         logout_user()
 

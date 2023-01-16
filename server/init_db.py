@@ -5,16 +5,15 @@ from db_access.globals import *
 from models import *
 from security_functions.cryptography import pw_hash
 
-
 ROOM_GROUP_NUM = 4  # Number of groups group chats
 ROOM_DIRECT_NUM = 4  # Number of direct group chats
 
-PATH_MESSAGES = r"./_init_db/messages.txt"
-PATH_GROUPS = r"./_init_db/groups.txt"
-PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
-# PATH_MESSAGES = r"server/_init_db/messages.txt"
-# PATH_GROUPS = r"server/_init_db/groups.txt"
-# PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
+# PATH_MESSAGES = r"./_init_db/messages.txt"
+# PATH_GROUPS = r"./_init_db/groups.txt"
+# PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
+PATH_MESSAGES = r"server/_init_db/messages.txt"
+PATH_GROUPS = r"server/_init_db/groups.txt"
+PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
 
 
 # Windows specific issue https://stackoverflow.com/questions/61543406/asyncio-run-runtimeerror-event-loop-is-closed
@@ -51,16 +50,18 @@ async def add_groups(session, room_ids):
         for grp in groups:
             session.add(grp)
 
+
 async def add_friends(session, alice, bob):
     async with session.begin():
         session.add(Friend(alice, bob))
+
 
 async def add_memberships(session, room_ids, alice, bob):
     read = read_from_file(PATH_MEMBERSHIPS)
     mnm = []  # forgive me for the name im dyin
     for data in read:
         room, user, admin = data.split(",")
-        room_id = room_ids[int(room)-1]
+        room_id = room_ids[int(room) - 1]
         user_id = bob if user == "bob" else alice
         is_admin = admin == "True"
         mnm.append(Membership(room_id, user_id, is_admin))
@@ -82,7 +83,7 @@ async def add_users(session):
     return alice, bob
 
 
-async def get_messages(session, room_ids, alice, bob) -> list[Message]:
+async def get_messages(session, room_ids, alice, bob):
     """" Load pre made messages """
     read = read_from_file(PATH_MESSAGES)
 
@@ -91,9 +92,9 @@ async def get_messages(session, room_ids, alice, bob) -> list[Message]:
     for i, x in enumerate(read):
         room, user, content = x.split(",")
         user_id = bob if user == "bob" else alice
-        room_id = room_ids[int(room)-1]
+        room_id = room_ids[int(room) - 1]
         msg = Message(user_id, room_id, content)
-        msg.time = datetime.now() + timedelta(seconds=17*i - back_to_the_future)
+        msg.time = datetime.now() + timedelta(seconds=17 * i - back_to_the_future)
         messages.append(msg)
 
     async with session.begin():
