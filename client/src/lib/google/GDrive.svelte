@@ -1,5 +1,5 @@
 <script>
-import API from "./API.svelte";
+import GAPI from "./GAPI.svelte";
 
 let gapi;
 let google;
@@ -149,4 +149,4 @@ async function downloadFile() {
 </script>
 
 
-<API on:load={apiLoaded}/>
+<GAPI on:load={apiLoaded}/>
