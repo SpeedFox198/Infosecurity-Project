@@ -25,7 +25,7 @@ class AuthedUser(AuthUser):
             except (ValueError, AttributeError):
                 self._user_id, self._device_id = ("",)*2
 
-            user_details = await get_user_details(self._user_id) or ("",)*7
+            user_details = await get_user_details(self._user_id) or ("",) * 8
 
             (
                 self._username,

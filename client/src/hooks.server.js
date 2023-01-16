@@ -15,7 +15,7 @@ export const handle = async ({event, resolve}) => {
     })
     const userResponse = await response.json()
 
-    if (userResponse.message === "not authenticated") {
+    if (userResponse.message === "Not authenticated") {
       event.cookies.delete("QUART_AUTH")
       return await resolve(event)
     }

@@ -1,19 +1,20 @@
 from uuid import uuid4
 
 from db_access.globals import Base
-from sqlalchemy import CHAR, Boolean, Column
+from sqlalchemy import CHAR, Column, VARCHAR
 from sqlalchemy.dialects.mysql import ENUM
 
 
 class Room(Base):  # TODO(high)(SpeedFox198): change disappearing to 3 options (change docs too)
+    # TODO Change the checking of disappearing logic in sio.py
     __tablename__ = "room"
 
-    def __init__(self, disappearing: bool = False, type_: str = "direct"):
+    def __init__(self, disappearing: str, type_: str = "direct"):
         """
         Creates a room object
 
         Args:
-            disappearing(bool): True when disappearing messages is on for room
+            disappearing(str): Off (off) / 24 Hours (24h) / 7 Days (7d) / 30 Days (30d)
             type_(:obj:`str`, optional): Type of chat room ("direct" or "group")
 
         Raises:
@@ -27,5 +28,5 @@ class Room(Base):  # TODO(high)(SpeedFox198): change disappearing to 3 options (
         self.type = type_
 
     room_id = Column(CHAR(36), primary_key=True)
-    disappearing = Column(Boolean, default=False)
+    disappearing = Column(ENUM("off", "24h", "7d", "30d"))
     type = Column(ENUM("direct", "group"))

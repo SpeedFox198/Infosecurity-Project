@@ -62,3 +62,11 @@ async def get_filename(message_id: str):
         "height": result[1],
         "width": result[2]
     }
+
+
+# TODO Add route for showing group icons
+@media_bp.get("/icon/<string:group_id>/<string:filename>")
+@login_required
+async def get_group_icon(group_id: str, filename: str):
+    return await send_from_directory(os.path.join("media/icon", group_id), filename)
+

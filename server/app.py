@@ -1,4 +1,3 @@
-import asyncio
 from datetime import timedelta
 
 import quart_auth
@@ -9,6 +8,7 @@ from blueprints.api import api_bp
 from blueprints.auth import auth_bp
 from blueprints.chat import chat_bp, messages_queue, sio, sio_auth_manager, task_disappear_messages
 from blueprints.device import device_bp
+from blueprints.group import group_bp
 from blueprints.media import media_bp
 from blueprints.user import user_bp
 from blueprints.settings import settings_bp
@@ -21,7 +21,6 @@ from quart_cors import cors
 from quart_schema import QuartSchema, RequestSchemaValidationError
 from utils.logging import log_warning
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 scheduler = AsyncIOScheduler()
 app = Quart(__name__)
 app = cors(app, allow_credentials=True, allow_origin=["https://localhost", "https://127.0.0.1"])
@@ -44,6 +43,7 @@ api_bp.register_blueprint(media_bp)
 api_bp.register_blueprint(device_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(settings_bp)
+api_bp.register_blueprint(group_bp)
 app.register_blueprint(api_bp)
 
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"
@@ -63,7 +63,7 @@ async def before_request():
 
     if not valid_device:
         await log_warning(
-            f"Access attempt was made with an invalid device by {await current_user.username}"
+            f"Access attempt was made with an invalid device by {await current_user.username or 'Non existing user'}"
         )
         logout_user()
 

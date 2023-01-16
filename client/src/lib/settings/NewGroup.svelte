@@ -1,9 +1,13 @@
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import { friends } from "$lib/stores/friend"
+import { page } from "$app/stores"
+import { getFlash } from "sveltekit-flash-message/client"
 
 export let displayNewGroup;
 export let toggleNewGroup;
+
+const flash = getFlash(page)
 
 let displayCustomizeGroup = false;
 let friendSearchInput = "";
@@ -40,22 +44,35 @@ const setGroupPhoto = () => {
 }
 
 const createGroup = async () => {
-  // TODO Implement submitting and backend logic
-  let photoToSend
+  const photoToSend = photoUpload ? photoUpload[0] : null
 
-  if (photoUpload) {
-    photoToSend = photoUpload[0]
-  } else {
-    photoToSend = null
+  const request = new FormData()
+  request.append("group_icon", photoToSend)
+  request.append("metadata", JSON.stringify({
+    name: groupName,
+    disappearing: disappearing,
+    users: selectedFriends.map(user => user.user_id)
+  }))
+
+  const response = await fetch("https://localhost:8443/api/group/new", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Accept": "application/json",
+    },
+    body: request
+  })
+  
+  const data = await response.json()
+
+  if (!response.ok) {
+    $flash = { type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
+    return
   }
 
-  const groupData = {
-    group_photo: photoToSend,
-    group_name: groupName,
-    disappearing: disappearing, 
-    users: selectedFriends.map(users => users.user_id)
-  }
-  console.log(groupData)
+  $flash = { type: 'success', message: "Group created!"}
+  await toggleCustomizeGroup()
+  await toggleNewGroup()
 }
 </script>
 
@@ -75,8 +92,7 @@ const createGroup = async () => {
     <div class="friend d-flex py-2 user-select-none align-items-center">
       <input type="checkbox"
       class="form-check-input ms-3 me-1 p-2"
-      name={friend.username}
-      title="Add friend to group" 
+      title="Add { friend.username } to group" 
       bind:group={selectedFriends} 
       value={friend}
       >
@@ -108,7 +124,7 @@ const createGroup = async () => {
   <div class="m-3">
 
     {#if showPhoto}
-      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto" style="width: 400px; length: 400px;">
+      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto photo-preview">
     {/if}    
 
 
@@ -132,7 +148,11 @@ const createGroup = async () => {
       </span>
 
       <div class="flex-grow-1 align-items-center d-flex">
-        <select bind:value={disappearing} id="disappearingSelect" class="form-select" aria-label="Select the duration of disappearing messages">
+        <select bind:value={disappearing}
+         id="disappearingSelect"
+         class="form-select"
+         aria-label="Select the duration of disappearing messages"
+         >
           <option value="off" selected>Off</option>
           <option value="24h">1 Day</option>
           <option value="7d">1 Week</option>
@@ -157,7 +177,7 @@ const createGroup = async () => {
     </div>
 
     <div class="d-grid">
-      <button type="submit" class="btn btn-primary btn-block" on:click={createGroup}>Create Group</button>
+      <button type="submit" class="btn btn-primary btn-block" on:click={ createGroup }>Create Group</button>
     </div>  
   </div>
 </SlidingMenu>
@@ -179,5 +199,11 @@ const createGroup = async () => {
 
 .no-border {
   border: 0;
+}
+
+.photo-preview {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
 }
 </style>
