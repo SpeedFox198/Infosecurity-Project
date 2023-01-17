@@ -19,24 +19,40 @@ let photoPreview;
 let groupName = "";
 let disappearing;
 let selectedFriends = [];
+let disappearingOptions = ["off", "24h", "7d", "30d"]
 
 $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
                                                 .includes(friendSearchInput));
 
+$: selectedPhoto = photoUpload ? photoUpload[0] : null
+
+$: haveValidIcon = (() => {
+  const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"]
+  if (!selectedPhoto) {
+    return true
+  }
+  return acceptedFileTypes.includes(selectedPhoto.type)
+}
+)()
+
+$: haveParticipants = selectedFriends.length !== 0;
+$: haveDisappearingOption = disappearingOptions.includes(disappearing);
+$: haveGroupName = groupName.trim().length !== 0;
+$: newGroupRequirementsFulfilled = haveValidIcon && haveParticipants && haveDisappearingOption && haveGroupName;
+
 const toggleCustomizeGroup = async () => displayCustomizeGroup = !displayCustomizeGroup;
 
 const setGroupPhoto = () => {
-  const photo = photoUpload[0]
 
-  if (photo) {
+  if (selectedPhoto) {
     showPhoto = true
   
     const reader = new FileReader()
     reader.addEventListener("load", () => {
       photoPreview.setAttribute("src", reader.result)
     })
-    reader.readAsDataURL(photo)
+    reader.readAsDataURL(selectedPhoto)
 
     return
   }
@@ -44,11 +60,9 @@ const setGroupPhoto = () => {
 }
 
 const createGroup = async () => {
-  const photoToSend = photoUpload ? photoUpload[0] : null
-
-  const req = new FormData()
-  req.append("group_icon", photoToSend)
-  req.append("metadata", JSON.stringify({
+  const request = new FormData()
+  request.append("group_icon", selectedPhoto)
+  request.append("metadata", JSON.stringify({
     name: groupName,
     disappearing: disappearing,
     users: selectedFriends.map(user => user.user_id)
@@ -60,11 +74,14 @@ const createGroup = async () => {
     headers: {
       "Accept": "application/json",
     },
-    body: req
+    body: request
   })
+  
+  const data = await response.json()
 
   if (!response.ok) {
-    console.error(await response.json())
+    $flash = { type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
+    return
   }
 
   $flash = { type: 'success', message: "Group created!"}
@@ -121,7 +138,7 @@ const createGroup = async () => {
   <div class="m-3">
 
     {#if showPhoto}
-      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto" style="width: 400px; length: 400px;">
+      <img bind:this={ photoPreview } src="" alt="Group Preview" class="rounded-circle d-block mx-auto photo-preview">
     {/if}    
 
 
@@ -174,7 +191,12 @@ const createGroup = async () => {
     </div>
 
     <div class="d-grid">
-      <button type="submit" class="btn btn-primary btn-block" on:click={ createGroup }>Create Group</button>
+      <button type="submit"
+        class="btn btn-primary btn-block"
+        on:click={ createGroup } 
+        disabled={ !newGroupRequirementsFulfilled }
+      >
+      Create Group</button>
     </div>  
   </div>
 </SlidingMenu>
@@ -196,5 +218,11 @@ const createGroup = async () => {
 
 .no-border {
   border: 0;
+}
+
+.photo-preview {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
 }
 </style>

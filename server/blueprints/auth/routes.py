@@ -2,6 +2,7 @@ import datetime
 import re
 from urllib.parse import urlparse, parse_qs
 from uuid import uuid4
+import pyotp
 
 import sqlalchemy as sa
 from google.auth.transport import requests
@@ -31,6 +32,8 @@ from models.request_data import (
 )
 from models.response_data import UserData
 from security_functions.cryptography import pw_hash, pw_verify
+from db_access.twoFA import get_2fa
+from models.request_data import TwoFABody
 from utils.logging import log_info, log_warning, log_exception
 from .functions import (
     generate_otp,
@@ -143,6 +146,11 @@ async def login(data: LoginBody):
     if not pw_verify(existing_user.password, data.password):
         return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
 
+    # Check if user has 2FA enabled
+    if await current_user.twofa_status:
+        auth_session["login_existing_user"] = existing_user
+        return {"message": "2FA required"}, 200
+
     logged_in_user = existing_user
     await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
     # TODO(br1ght) re-enable when needed
@@ -154,8 +162,27 @@ async def login(data: LoginBody):
 
 
 @auth_bp.post("/2fa")
-async def two_fa():
-    return {"message": "login success"}, 200
+async def two_fa(data: TwoFABody):
+    session = ""
+    existing_user = auth_session.get("login_existing_user")
+    device_id = str(uuid4())
+    browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
+                                await get_location_from_ip(request.remote_addr))
+    twoFA_code = (await get_2fa(await current_user.user_id))[1]
+    secret_token = twoFA_code
+    OTP_check = data.twofacode
+    verified = pyotp.TOTP(secret_token).verify(OTP_check)
+    if verified:
+        logged_in_user = existing_user
+        await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
+        # TODO(br1ght) re-enable when needed
+        # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+        login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+        await log_info(
+            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+        return {"message": "login success"}, 200
+    else:
+        return {"message": "Invalid 2FA code"}, 400
 
 
 @auth_bp.post("/forgot-password")
