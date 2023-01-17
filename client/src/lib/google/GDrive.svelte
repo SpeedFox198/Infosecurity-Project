@@ -1,9 +1,5 @@
-<script>
-import GAPI from "./GAPI.svelte";
-import { masterKey, roomKeys } from "$lib/stores/key";
+<script context="module">
 import { gToken } from "$lib/stores/token";
-
-const MASTER_KEY_FILE_NAME = "master_key.json";
 
 let gapi;
 let google;
@@ -56,15 +52,25 @@ function handleSignoutClick() {
   }
 }
 
+/**
+ * Upload a new JSON file with JSON content
+ * @param {string} filename file name
+ * @param {obj} jsonObject JSON-like object
+ * @return {Promise<string>} file ID
+ */
+async function uploadJSONFile(filename, jsonObject) {
+  return await _uploadFile(filename, JSON.stringify(jsonObject), "application/json");
+}
+
 
 /**
  * Upload a new file
  * @param {string} filename file name
  * @param {string} content file contents
+ * @param {string} type file mime type
  * @return {Promise<string>} file ID
  */
-async function uploadFile(filename, content) {
-  const type = "application/json";
+async function _uploadFile(filename, content, type) {
   const file = new Blob([content], { type });
   const metadata = {
     name: filename,
@@ -204,25 +210,19 @@ async function _downloadFileById(fileId) {
 }
 
 
-async function initKeys() {
-  let file;
-  if (masterKey.init()) {
-    file = await downloadFile(MASTER_KEY_FILE_NAME, true);
-    if (file === undefined) {
-      // create new keys
-      // upload file to gdrive
-      // save keys to stores & localstorage
-    }
-  }
-  // init roomKeys
-  if (roomKeys.init()) {
-    file = await downloadFile(MASTER_KEY_FILE_NAME);
-    if (file === undefined) {
-      // upload file to gdrive (??? shld i really do this?)
-      // save keys to stores & localstorage
-    }
-  }
-}
+// Export functions for other svelte components to use
+export const service = {
+  authUser,
+  handleSignoutClick,
+  uploadJSONFile,
+  updateFile,
+  downloadFile,
+};
+</script>
+
+
+<script>
+import GAPI from "./GAPI.svelte";
 </script>
 
 

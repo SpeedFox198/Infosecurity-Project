@@ -23,6 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"base64-arraybuffer": "^1.0.2",
 		"filepond": "^4.30.4",
 		"filepond-plugin-file-validate-size": "^2.2.8",
 		"filepond-plugin-file-validate-type": "^1.2.8",

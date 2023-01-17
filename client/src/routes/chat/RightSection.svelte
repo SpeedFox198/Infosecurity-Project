@@ -13,6 +13,7 @@ import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
+import E2EE from "$lib/e2ee/E2EE.svelte";
 
 
 // SocketIO instance
@@ -346,10 +347,11 @@ async function removeMsg(message_id, room_id) {
   <!-- Room Info Section -->
   <div class="top-right">
     <div class="temp">
-
+      <!-- TODO(high)(SpeedFox198): Display Group info -->
     </div>
   </div>
 
+  <E2EE/>
   {#if $room_id}
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs}/>

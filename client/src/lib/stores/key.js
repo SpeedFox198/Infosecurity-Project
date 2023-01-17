@@ -23,7 +23,7 @@ export const masterKey = (() => {
     if (localStorage.masterKey === undefined) {
       return true;
     }
-    initKeysFromJson(localStorage.masterKey);
+    initFromJson(localStorage.masterKey);
     return false;
   }
 
@@ -39,11 +39,14 @@ export const masterKey = (() => {
   }
 
 
-  function initKeysFromJson(data) {
+  function initFromJson(data, store) {
     set(JSON.parse(data));
+    if (store) {
+      localStorage.masterKey = data;
+    }
   }
 
-  return { subscribe, init, saveMasterKey, initKeysFromJson };
+  return { subscribe, init, initFromJson, saveMasterKey };
 })();
 
 
@@ -67,7 +70,7 @@ export const roomKeys = (() => {
     if (localStorage.roomKeys === undefined) {
       return true;
     }
-    initKeysFromJson(localStorage.roomKeys);
+    initFromJson(localStorage.roomKeys);
     return false;
   }
 
@@ -85,10 +88,12 @@ export const roomKeys = (() => {
     localStorage.roomKeys = JSON.stringify(roomKeys);
   }
 
-
-  function initKeysFromJson(data) {
+  function initFromJson(data, store) {
     set(JSON.parse(data));
+    if (store) {
+      localStorage.roomKeys = data;
+    }
   }
 
-  return { subscribe, init, saveNewKey, initKeysFromJson };
+  return { subscribe, init, initFromJson, saveNewKey };
 })();
