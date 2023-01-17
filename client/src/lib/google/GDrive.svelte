@@ -1,9 +1,14 @@
 <script>
 import GAPI from "./GAPI.svelte";
+import { masterKey, roomKeys } from "$lib/stores/key";
+import { gToken } from "$lib/stores/token";
+
+const MASTER_KEY_FILE_NAME = "master_key.json";
 
 let gapi;
 let google;
 let tokenClient;
+let fileList = [];
 
 
 /**
@@ -103,7 +108,7 @@ async function uploadFile(filename, content) {
  * @param {string} content file contents
  * @return {Promise<string>} file ID
  */
- async function updateFile(fileId, content) {
+async function updateFile(fileId, content) {
   const file = new Blob([content], { type: "text/plain" });
   const accessToken = gapi.auth.getToken().access_token;
 
@@ -116,7 +121,7 @@ async function uploadFile(filename, content) {
       body: file
     });
     ({ id, name, error } = await response.json());
-  
+
     if (error !== undefined) {
       throw new Error(error.message);
     }
@@ -134,9 +139,16 @@ async function uploadFile(filename, content) {
 
 /**
  * List all files inserted in the application data folder
- * @return {Promise<{ id: string, name: string }[]>} Array of files in appdata folder
+ * @param {boolean?} overwrite set to true to overwrite existing list in memory
+ * @return {Promise<{ id: string, name: string }[]>} array of files in appdata folder
  */
-async function listFiles() {
+async function listFiles(overwrite) {
+
+  // If list of files already exist in memory, use existing list
+  if (!overwrite && fileList.length > 0) {
+    return fileList;
+  }
+
   let response;
   try {
     response = await gapi.client.drive.files.list({
@@ -147,13 +159,14 @@ async function listFiles() {
   } catch (err) {
     // TODO(high)(SpeedFox198): handle error message
     // message = err.message;
-    return;
+    // Imaging catching an error just to throw it lmao
+    throw err;
   }
   const files = response.result.files;
   if (!files || files.length == 0) {
     // TODO(high)(SpeedFox198): handle error message
     // message = "No files found.";
-    return;
+    return [];
   }
   return files;
 }
@@ -162,10 +175,11 @@ async function listFiles() {
 /**
  * Downloads a file by given fileIfilenamed
  * @param {string} filename filename
- * @return {Promise<obj>} file object
+ * @param {boolean?} overwrite set to true to overwrite existing list in memory
+ * @return {Promise<obj?>} file object
  */
-async function downloadFile(filename) {
-  const files = await listFiles();
+async function downloadFile(filename, overwrite) {
+  const files = await listFiles(overwrite);
   const file = files.find(file => file.name === filename);
   if (file === undefined) {
     return;
@@ -177,7 +191,7 @@ async function downloadFile(filename) {
 /**
  * Downloads a file by given fileId
  * @param {string} fileId file Id
- * @return {Promise<obj>} file object
+ * @return {Promise<obj?>} file object
  */
 async function _downloadFileById(fileId) {
   try {
@@ -186,6 +200,27 @@ async function _downloadFileById(fileId) {
     // TODO(high)(SpeedFox198): handle error message
     // message = err.result.error.message;
     return;
+  }
+}
+
+
+async function initKeys() {
+  let file;
+  if (masterKey.init()) {
+    file = await downloadFile(MASTER_KEY_FILE_NAME, true);
+    if (file === undefined) {
+      // create new keys
+      // upload file to gdrive
+      // save keys to stores & localstorage
+    }
+  }
+  // init roomKeys
+  if (roomKeys.init()) {
+    file = await downloadFile(MASTER_KEY_FILE_NAME);
+    if (file === undefined) {
+      // upload file to gdrive (??? shld i really do this?)
+      // save keys to stores & localstorage
+    }
   }
 }
 </script>

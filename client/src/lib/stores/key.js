@@ -20,11 +20,11 @@ export const masterKey = (() => {
    * @returns {boolean} true if localStorage has no keys
    */
   function init() {
-    if (localStorage.masterKey !== undefined) {
-      initKeysFromJson(localStorage.masterKey);
-      return false;
+    if (localStorage.masterKey === undefined) {
+      return true;
     }
-    return true;
+    initKeysFromJson(localStorage.masterKey);
+    return false;
   }
 
 
@@ -64,11 +64,11 @@ export const roomKeys = (() => {
    * @returns {boolean} true if localStorage has no keys
    */
   function init() {
-    if (localStorage.roomKeys !== undefined) {
-      initKeysFromJson(localStorage.roomKeys);
-      return false;
+    if (localStorage.roomKeys === undefined) {
+      return true;
     }
-    return true;
+    initKeysFromJson(localStorage.roomKeys);
+    return false;
   }
 
 

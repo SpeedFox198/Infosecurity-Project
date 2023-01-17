@@ -1,7 +1,7 @@
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import Option from "$lib/settings/templates/Option.svelte";
-import { friends } from "$lib/stores/friend"
+import { friends } from "$lib/stores/friend";
 
 export let displayFriends;
 export let toggleFriends;
