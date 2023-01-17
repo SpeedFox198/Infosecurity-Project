@@ -19,24 +19,40 @@ let photoPreview;
 let groupName = "";
 let disappearing;
 let selectedFriends = [];
+let disappearingOptions = ["off", "24h", "7d", "30d"]
 
 $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
                                                 .includes(friendSearchInput));
 
+$: selectedPhoto = photoUpload ? photoUpload[0] : null
+
+$: haveValidIcon = (() => {
+  const acceptedFileTypes = ["image/jpeg", "image/png", "image/gif"]
+  if (!selectedPhoto) {
+    return true
+  }
+  return acceptedFileTypes.includes(selectedPhoto.type)
+}
+)()
+
+$: haveParticipants = selectedFriends.length !== 0;
+$: haveDisappearingOption = disappearingOptions.includes(disappearing);
+$: haveGroupName = groupName.trim().length !== 0;
+$: newGroupRequirementsFulfilled = haveValidIcon && haveParticipants && haveDisappearingOption && haveGroupName;
+
 const toggleCustomizeGroup = async () => displayCustomizeGroup = !displayCustomizeGroup;
 
 const setGroupPhoto = () => {
-  const photo = photoUpload[0]
 
-  if (photo) {
+  if (selectedPhoto) {
     showPhoto = true
   
     const reader = new FileReader()
     reader.addEventListener("load", () => {
       photoPreview.setAttribute("src", reader.result)
     })
-    reader.readAsDataURL(photo)
+    reader.readAsDataURL(selectedPhoto)
 
     return
   }
@@ -44,10 +60,8 @@ const setGroupPhoto = () => {
 }
 
 const createGroup = async () => {
-  const photoToSend = photoUpload ? photoUpload[0] : null
-
   const request = new FormData()
-  request.append("group_icon", photoToSend)
+  request.append("group_icon", selectedPhoto)
   request.append("metadata", JSON.stringify({
     name: groupName,
     disappearing: disappearing,
@@ -177,7 +191,12 @@ const createGroup = async () => {
     </div>
 
     <div class="d-grid">
-      <button type="submit" class="btn btn-primary btn-block" on:click={ createGroup }>Create Group</button>
+      <button type="submit"
+        class="btn btn-primary btn-block"
+        on:click={ createGroup } 
+        disabled={ !newGroupRequirementsFulfilled }
+      >
+      Create Group</button>
     </div>  
   </div>
 </SlidingMenu>

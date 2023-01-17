@@ -147,22 +147,22 @@ async def login(data: LoginBody):
         return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
 
     # Check if user has 2FA enabled
-    if current_user.twofa_status:
+    if await current_user.twofa_status:
         auth_session["login_existing_user"] = existing_user
         return {"message": "2FA required"}, 200
-    else:
-        logged_in_user = existing_user
-        await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-        # TODO(br1ght) re-enable when needed
-        # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
-        login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-        await log_info(
-            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-        return {"message": "login success"}, 200
+
+    logged_in_user = existing_user
+    await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
+    # TODO(br1ght) re-enable when needed
+    # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+    login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+    await log_info(
+        f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+    return {"message": "login success"}, 200
 
 
 @auth_bp.post("/2fa")
-async def two_fa(data : TwoFABody):
+async def two_fa(data: TwoFABody):
     session = ""
     existing_user = auth_session.get("login_existing_user")
     device_id = str(uuid4())
