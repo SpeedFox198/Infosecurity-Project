@@ -1,9 +1,8 @@
 <script>
 // TODO(mid)(SpeedFox198): change ../google/ to $lib/google/
 import GDrive, { service } from "../google/GDrive.svelte";
-import { e2ee } from "./e2ee";
 import { masterKey, roomKeys } from "$lib/stores/key";
-import { onMount } from "svelte";
+import { e2ee } from "./e2ee";
 
 const MASTER_KEY_FILE_NAME = "master_key.json";
 const ROOM_KEYS_FILE_NAME = "room_keys.json";
@@ -18,10 +17,10 @@ async function initKeys() {
 
   // If masterKey failed to init from localStorage, download from google drive
   if (masterKey.init()) {
-    file = await service.downloadFile(MASTER_KEY_FILE_NAME, true);
+    file = await service.downloadFile(MASTER_KEY_FILE_NAME);
 
     if (file !== undefined) {
-      masterKey.initFromJson(file.body);
+      masterKey.initFromJson(file.body, true);
     } else {
       // Create new keys
       const newMasterKey = getNewMasterKey();
@@ -32,7 +31,8 @@ async function initKeys() {
       masterKey.saveMasterKey(newMasterKey);
     }
   }
-  // init roomKeys
+
+  // If roomKeys failed to init from localStorage, download from google drive
   if (roomKeys.init()) {
     file = await service.downloadFile(ROOM_KEYS_FILE_NAME);
     if (file !== undefined) {
