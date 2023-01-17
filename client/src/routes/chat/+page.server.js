@@ -26,7 +26,7 @@ export async function load({locals, fetch, depends}) {
     }
   
     const getFriends = async () => {
-      const response = await fetch("https://127.0.0.1:8443/api/user/friends", {
+      const response = await fetch("https://127.0.0.1:8443/api/friends", {
         credentials: "include"
       })
       const data = await response.json()
