@@ -9,7 +9,7 @@ export let toggleFriendsList;
 
 
 <SlidingMenu title="Friends List" display={displayFriendsList} on:click={toggleFriendsList} right={false}>
-  {#each $friends as friend}
+  {#each $friends as friend (friend.user_id)}
     <div class="friend d-flex py-2 user-select-none align-items-center">
       <div class="icon p-2">
         <div class="img-wrapper img-1-1">
@@ -58,8 +58,8 @@ export let toggleFriendsList;
     </div>
   {/each}
   <div class="positon-relative">
-    <div class="position-absolute bottom-0 end-0 friend-req">
-      <button class="btn">
+    <div class="position-absolute bottom-0 end-0 pe-3 mb-3">
+      <button type="button" class="btn friend-req">
         <i class="fa-solid fa-user-plus fs-4"></i>
       </button>
     </div>
@@ -98,4 +98,18 @@ export let toggleFriendsList;
 .dropdown-toggle::after {
   content: none;
 }
+
+.friend-req {
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--white);
+  width: 4rem;
+  height: 4rem;
+}
+
+.friend-req:active {
+  background-color: var(--primary-shadow);
+  color: var(--white);
+}
+
 </style>

@@ -12,7 +12,7 @@
 </script>
 
 <SlidingMenu title="Friends" display={displayFriends} on:click={toggleFriends} right={false}>
-	<Option name="All" icon="shield" on:click={toggleFriendsList} />
+	<Option name="All" icon="user-group" on:click={toggleFriendsList} />
 	<Option name="Pending Requests" icon="shield" on:click={togglePendingList} />
 </SlidingMenu>
 
