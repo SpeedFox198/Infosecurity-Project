@@ -8,14 +8,6 @@ let fileList = [];
 
 
 /**
- * Callback after Google API is loaded
- */
-function apiLoaded(event) {
-  ({ gapi, google, tokenClient } = event.detail);
-}
-
-
-/**
  *  Sign in the user.
  */
 function authUser() {
@@ -223,6 +215,18 @@ export const service = {
 
 <script>
 import GAPI from "./GAPI.svelte";
+import { createEventDispatcher } from "svelte";
+
+const dispatch = createEventDispatcher();
+
+
+/**
+ * Callback after Google API is loaded
+ */
+function apiLoaded(event) {
+  ({ gapi, google, tokenClient } = event.detail);
+  dispatch("load");
+}
 </script>
 
 

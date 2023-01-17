@@ -1,4 +1,5 @@
 <script>
+// TODO(mid)(SpeedFox198): change ../google/ to $lib/google/
 import GDrive, { service } from "../google/GDrive.svelte";
 import { e2ee } from "./e2ee";
 import { masterKey, roomKeys } from "$lib/stores/key";
@@ -23,7 +24,7 @@ async function initKeys() {
       masterKey.initFromJson(file.body);
     } else {
       // Create new keys
-      const newMasterKey = generateNewMasterKey();  // Work on the naming lmao
+      const newMasterKey = getNewMasterKey();
       // upload file to gdrive
       service.uploadJSONFile(MASTER_KEY_FILE_NAME, newMasterKey);
 
@@ -46,12 +47,13 @@ async function initKeys() {
 
 
 async function getNewMasterKey() {
-  const newMasterKey = await e2ee.generateKeyPair();
-  console.log(newMasterKey);
+  const key = await e2ee.generateKeyPair();
+  const privKey = await e2ee.exportPrivateKey(key.privateKey);
+  const pubKey = await e2ee.exportPublicKey(key.publicKey);
+  return { privKey, pubKey };
 }
-
-onMount(getNewMasterKey);
 </script>
 
 
-<GDrive/>
+<!-- TODO(high)(SpeedFox198) Change from null to something -->
+<GDrive on:load={null}/>
