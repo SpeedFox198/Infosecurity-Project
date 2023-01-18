@@ -1,4 +1,4 @@
-
+/** @type {import('@sveltejs/kit').Handle} */
 export const handle = async ({event, resolve}) => {
     // Get cookie
     const session = event.cookies.get("QUART_AUTH")
@@ -24,10 +24,11 @@ export const handle = async ({event, resolve}) => {
     return await resolve(event)    
 }
 
+/** @type {import('@sveltejs/kit').HandleFetch} */
 export async function handleFetch({ event, request, fetch }) {
     // for some reason fetches are not sent with cookies so this will handle it
-    if (request.url.startsWith("https://localhost:8443/") || request.url.startsWith("https://127.0.0.1:8443/")) {
-        request.headers.set('Cookie', `QUART_AUTH=${event.cookies.get("QUART_AUTH")}`)
+    if (request.url.startsWith("https://127.0.0.1:8443/")) {
+        request.headers.set('cookie', `QUART_AUTH=${event.cookies.get("QUART_AUTH")}`)
     }
     
     return fetch(request)
