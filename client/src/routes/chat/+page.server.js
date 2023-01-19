@@ -8,9 +8,7 @@ export async function load({locals, fetch, depends}) {
   
     const getDevices = async () => {
       depends("app:devices")
-      const deviceRes = await fetch("https://127.0.0.1:8443/api/devices/", {
-            credentials: "include"
-        })
+      const deviceRes = await fetch("https://127.0.0.1:8443/api/devices/")
         const devicesData = await deviceRes.json()
         if (!deviceRes.ok) {
             return {
@@ -26,9 +24,7 @@ export async function load({locals, fetch, depends}) {
     }
   
     const getFriends = async () => {
-      const response = await fetch("https://127.0.0.1:8443/api/friends", {
-        credentials: "include"
-      })
+      const response = await fetch("https://127.0.0.1:8443/api/friends/")
       const data = await response.json()
       if (!response.ok) {
         return {
