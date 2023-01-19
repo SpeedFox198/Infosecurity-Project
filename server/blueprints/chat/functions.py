@@ -2,7 +2,6 @@ from io import BytesIO
 from PIL import Image
 
 
-# TODO(medium)(SpeedFox198): usel pillow
 def get_display_dimensions(picture: bytes):
     """ Generates the height and width to display picture """
 

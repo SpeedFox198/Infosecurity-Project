@@ -36,7 +36,7 @@
   <title>Bubbles | Home</title>
 </svelte:head>
 
-<main class="background h-100">
+<main class="background">
   <div class="container-fluid">
     <div class="row">
       <!-- Bubbles Logo -->
@@ -59,6 +59,7 @@
 <style>
 .background{
   background-color: var(--grey);
+  background-size: cover;
 }
 
 .logo-with-text{

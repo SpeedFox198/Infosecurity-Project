@@ -4,7 +4,6 @@ import { gToken } from "$lib/stores/token";
 let gapi;
 let google;
 let tokenClient;
-let fileList = [];
 
 
 /**
@@ -137,15 +136,9 @@ async function updateFile(fileId, content) {
 
 /**
  * List all files inserted in the application data folder
- * @param {boolean?} overwrite set to true to overwrite existing list in memory
  * @return {Promise<{ id: string, name: string }[]>} array of files in appdata folder
  */
-async function listFiles(overwrite) {
-
-  // If list of files already exist in memory, use existing list
-  if (!overwrite && fileList.length > 0) {
-    return fileList;
-  }
+async function listFiles() {
 
   let response;
   try {
@@ -173,11 +166,10 @@ async function listFiles(overwrite) {
 /**
  * Downloads a file by given fileIfilenamed
  * @param {string} filename filename
- * @param {boolean?} overwrite set to true to overwrite existing list in memory
  * @return {Promise<obj?>} file object
  */
-async function downloadFile(filename, overwrite) {
-  const files = await listFiles(overwrite);
+async function downloadFile(filename) {
+  const files = await listFiles();
   const file = files.find(file => file.name === filename);
   if (file === undefined) {
     return;

@@ -58,9 +58,7 @@ function selectMsg() {
   </div>
 
   <div class="bubble-container d-flex justify-content-end flex-shrink-1">
-
     <div class="tail"></div>
-
     <div class="bubble">
 
       {#if !$selectMode}
@@ -74,6 +72,35 @@ function selectMsg() {
       {#if msg.type === "image"}
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <img src={msg.path} alt="">
+        </div>
+        <div class="virustotal-score">
+          <div class="percent">
+            <svg>
+              <circle cx="33" cy="33" r="30"></circle>
+              <circle cx="33" cy="33" r="30" style="--percent: 30"></circle>
+            </svg>
+            <div class="number">
+              <span>30/100</span>
+            </div>
+          </div>
+        </div>  
+      {/if}
+      {#if msg.type === "video"}
+        <div class="video-container video-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
+          <video src={msg.path} controls>
+            <track kind="captions">
+            Your browser does not support embedded videos
+          </video>
+        </div>
+      {/if}
+        
+      {#if msg.type === "file"}
+        <div class="file-container file-wrapper">
+          <i class="fa-solid fa-file"></i>
+          <div class="file-info">
+            <div class="file-name">{msg.name}</div>
+            <div class="file-size">{msg.size}</div>
+          </div>
         </div>
       {/if}
 
@@ -94,6 +121,52 @@ function selectMsg() {
 
 
 <style>
+.percent {
+  position: relative;
+}
+
+svg {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  transform: rotate(-90deg);
+}
+
+svg circle {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #f0f0f0;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+svg circle:last-of-type {
+  stroke-dasharray: 625px;
+  stroke-dashoffset: calc(625px - (625px * var(--percent)) / 100);
+  stroke: #3498db; 
+}
+
+.number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.number span {
+  font-weight: 200;
+  font-size: 20px;
+}
+
+.card:nth-child(1) svg circle:last-of-type {
+  stroke: #f39c12;
+}
+
+.card:nth-child(2) svg circle:last-of-type {
+  stroke: #2ecc71;
+}
+
 .message {
   padding: 0 3rem;
   overflow-anchor: none;

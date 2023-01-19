@@ -36,17 +36,16 @@ async def google_secret():
 @validate_request(TwoFABody)
 async def google_authenticator(data: TwoFABody):
     #Check if 2FA is already enabled
-    if current_user.twofa_status:
+    if (await current_user.twofa_status):
         return {"message": "2FA already enabled"}, 400
     else:
-        twoFA_code = (await get_2fa(await current_user.user_id))[1]
-        secret_token = twoFA_code
+        twoFA_code = await get_2fa(await current_user.user_id)
+        secret_token = twoFA_code.secret
         OTP_check = data.twofacode
         verified = pyotp.TOTP(secret_token).verify(OTP_check)
         if verified:
             await create_2fa_backup_codes(await current_user.user_id)
             backupcodes = await get_2fa_backup_codes(await current_user.user_id)
-            await current_user.update(twofa_status=True)
             return {"message": "2FA enabled", "backupcodes": backupcodes}, 200
         else:
             return {"message": "Invalid 2FA code"}, 400

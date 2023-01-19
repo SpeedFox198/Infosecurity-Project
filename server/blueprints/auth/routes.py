@@ -28,12 +28,14 @@ from models.request_data import (
     OTPBody,
     ResetPasswordBody,
     SignUpBody,
-    GoogleCallBackBody
+    GoogleCallBackBody,
+    BackupCodeBody
 )
 from models.response_data import UserData
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.twoFA import get_2fa
 from models.request_data import TwoFABody
+from db_access.backup_codes import get_2fa_backup_codes
 from utils.logging import log_info, log_warning, log_exception
 from .functions import (
     generate_otp,
@@ -149,6 +151,7 @@ async def login(data: LoginBody):
     # Check if user has 2FA enabled
     if await current_user.twofa_status:
         auth_session["login_existing_user"] = existing_user
+        auth_session["login_session"] = session
         return {"message": "2FA required"}, 200
 
     logged_in_user = existing_user
@@ -163,7 +166,7 @@ async def login(data: LoginBody):
 
 @auth_bp.post("/2fa")
 async def two_fa(data: TwoFABody):
-    session = ""
+    session = auth_session.get("login_session")
     existing_user = auth_session.get("login_existing_user")
     device_id = str(uuid4())
     browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
@@ -184,6 +187,31 @@ async def two_fa(data: TwoFABody):
     else:
         return {"message": "Invalid 2FA code"}, 400
 
+@auth_bp.post("/backupcode")
+@validate_request(BackupCodeBody)
+async def backupcode(data: BackupCodeBody):
+    session = auth_session.get("login_session")
+    existing_user = auth_session.get("login_existing_user")
+    device_id = str(uuid4())
+    browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
+                                await get_location_from_ip(request.remote_addr))
+    backup_code = [(await get_2fa_backup_codes(await current_user.user_id))]
+    #While backup code list is less than the backup code, check if the backup code is in the list
+    counter = 0
+    while len(backup_code) > counter:
+        for i in backup_code:
+            if data.backupcode == i:
+                logged_in_user = existing_user
+                await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
+                # TODO(br1ght) re-enable when needed
+                # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+                login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+                await log_info(
+                    f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+                return {"message": "login success"}, 200
+            else:
+                counter += 1
+    return {"message": "Invalid backup code"}, 400
 
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
@@ -271,6 +299,12 @@ async def google_callback(data: GoogleCallBackBody):
     if existing_user is None:
         # Create a new user
         await insert_user_by_google(user_id, name, email, picture)
+
+    # Check if user has 2FA enabled
+    if await current_user.twofa_status:
+        auth_session["login_existing_user"] = existing_user
+        auth_session["login_session"] = session
+        return {"message": "2FA required"}, 200
 
     await add_logged_in_device(session, device_id, user_id, browser_data)
     login_user(AuthedUser(f"{user_id}.{device_id}"))

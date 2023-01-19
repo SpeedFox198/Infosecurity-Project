@@ -121,7 +121,7 @@ async function submitTwoFA () {
 <SlidingMenu title="Backup Code" display={displayBackupCode} on:click={toggleBackupCode} right={true}>
   <div>
     <p>Here is your backup code. Write it down and keep it somewhere safe. If you lose your phone, you can use this code to log in.</p>
-    <p>Backup codes: <b>{ backupCode[1] }</b></p>
+    <p>Backup codes: <b>{ backupCode[1] }, { backupCode[2] }, { backupCode[3] }, { backupCode[4] }, { backupCode[5] }, { backupCode[6] }</b></p>
   </div>
 </SlidingMenu>
 
