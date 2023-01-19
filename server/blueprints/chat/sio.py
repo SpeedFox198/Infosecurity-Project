@@ -119,8 +119,9 @@ async def send_message(sid, data: dict):
                 session.add(media)
 
     # If room has disappearing messages enabled
-    if room.disappearing:
-        await messages_queue.add_disappearing_messages(message.message_id, seconds=15)
+    if room.disappearing != "off":
+        days = {"24h": 1, "7d": 7, "30d": 30}[room.disappearing]
+        await messages_queue.add_disappearing_messages(message.message_id, days=days)
 
     # Forward messages to other clients in same room
     await sio.emit("receive_message", {

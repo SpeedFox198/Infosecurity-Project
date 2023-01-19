@@ -351,7 +351,7 @@ async function removeMsg(message_id, room_id) {
     </div>
   </div>
 
-  <E2EE/>
+  <!-- <E2EE/> -->
   {#if $room_id}
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs}/>

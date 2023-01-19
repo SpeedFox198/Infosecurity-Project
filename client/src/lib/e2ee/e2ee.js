@@ -86,7 +86,7 @@ async function importPublickey(keyData) {
 
 /**
  * Imports the key from keyData using specified format
- * @param {"jwk" | "raw" | "pkcs8" | "spki"} format format of key to be imported
+ * @param {"jwk" | "raw"} format format of key to be imported
  * @param {object} keyData data of key to be imported
  * @param {Array} usage usage of key to be imported
  * @returns {Promise<CryptoKey>}
