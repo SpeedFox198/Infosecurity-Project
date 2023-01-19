@@ -5,8 +5,8 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import "filepond/dist/filepond.css";
-
+import 'filepond/dist/filepond.css';
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 const dispatch = createEventDispatcher();
 
 // Register the plugins
@@ -106,7 +106,7 @@ async function onSend(event) {
 
         allowImagePreview={true}
         imagePreviewMinHeight={50}
-        imagePreviewMaxHeight={120}
+        imagePreviewMaxHeight={200}
 
         allowImageExifOrientation={true}
         />
