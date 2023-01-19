@@ -1,9 +1,8 @@
 <script>
 // TODO(mid)(SpeedFox198): change ../google/ to $lib/google/
 import GDrive, { service } from "../google/GDrive.svelte";
-import { e2ee } from "./e2ee";
 import { masterKey, roomKeys } from "$lib/stores/key";
-import { onMount } from "svelte";
+import { e2ee } from "./e2ee";
 
 const MASTER_KEY_FILE_NAME = "master_key.json";
 const ROOM_KEYS_FILE_NAME = "room_keys.json";
@@ -18,29 +17,36 @@ async function initKeys() {
 
   // If masterKey failed to init from localStorage, download from google drive
   if (masterKey.init()) {
-    file = await service.downloadFile(MASTER_KEY_FILE_NAME, true);
+    file = await service.downloadFile(MASTER_KEY_FILE_NAME);
 
+    // Init masterKey from downloaded file, else create new masterKey
     if (file !== undefined) {
-      masterKey.initFromJson(file.body);
+      masterKey.initFromJson(file.body, true);
     } else {
       // Create new keys
       const newMasterKey = getNewMasterKey();
-      // upload file to gdrive
+
+      // Upload masterKey file to gdrive
       service.uploadJSONFile(MASTER_KEY_FILE_NAME, newMasterKey);
 
-      // Save keys to stores and localStorage
+      // Save masterKey to stores and localStorage
       masterKey.saveMasterKey(newMasterKey);
     }
   }
-  // init roomKeys
+
+  // If roomKeys failed to init from localStorage, download from google drive
   if (roomKeys.init()) {
     file = await service.downloadFile(ROOM_KEYS_FILE_NAME);
+
+    // Init roomKeys from downloaded file, else create new empty object
     if (file !== undefined) {
-      roomKeys.initFromJson(file.body);
+      roomKeys.initFromJson(file.body, true);
     } else {
-      // upload file to gdrive (??? shld i really do this?)
+      // Upload roomKeys file to gdrive
       service.uploadJSONFile(ROOM_KEYS_FILE_NAME, {});
-      roomKeys.initFromJson("{}");
+
+      // Save roomKeys to stores and localStorage
+      roomKeys.initFromJson("{}", true);
     }
   }
 }
