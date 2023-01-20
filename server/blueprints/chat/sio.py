@@ -1,13 +1,12 @@
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import AuthedUser, Group, Media, Membership, Message, Room, User, Disappearing
+from models import AuthedUser, Disappearing, Media, Membership, Message, Room
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 from utils import to_unix
 
-from .disappearing import DisappearingQueue
-from .functions import get_display_dimensions, save_file
+from .functions import delete_expired_messages, get_room, messages_queue, save_file
 from .sio_auth_manager import SioAuthManager
 
 ASYNC_MODE = "asgi"
@@ -23,8 +22,6 @@ sio = socketio.AsyncServer(
     max_http_buffer_size=MAX_HTTP_BUFFER_SIZE
 )
 
-# Create and get a queue disappearing messages
-messages_queue = DisappearingQueue()
 
 sio_auth_manager = SioAuthManager()  # Authentication Manager
 
@@ -244,73 +241,6 @@ async def get_user(sid: str) -> AuthedUser | None:
     return (await sio.get_session(sid)).get(SIO_SESSION_USER_KEY, None)
 
 
-async def get_room(user_id: str):
-    async with async_session() as session:
-
-        # Retrieve room and membership info of user
-        statement = sa.select(
-            Room.room_id, Room.disappearing, Room.type, Membership.is_admin
-        ).join_from(
-            Room, Membership
-        ).where(
-            Membership.user_id == user_id
-        )
-        result = (await session.execute(statement)).all()
-
-        # Unpack retrieved values
-        rooms = [{
-            "room_id": row[0],
-            "disappearing": row[1],
-            "type": row[2],
-            "is_admin": row[3],
-        } for row in result]
-
-        # Retrieve additional room details for UI
-        for room in rooms:
-            if room["type"] == "direct":
-                statement = sa.select(User.username, User.avatar).where(
-                    User.user_id == sa.select(Membership.user_id).where(
-                        (Membership.room_id == room["room_id"]) &
-                        (Membership.user_id != user_id)
-                    ).scalar_subquery()
-                )
-                result = (await session.execute(statement)).one()
-            elif room["type"] == "group":
-                statement = sa.select(Group.name, Group.icon).where(Group.room_id == room["room_id"])
-                result = (await session.execute(statement)).one()
-            else:
-                continue  # Just in case hahaha
-            room["name"] = result[0]
-            room["icon"] = result[1]
-
-    return rooms
-
-
-async def delete_expired_messages(messages):
-    async with async_session() as session:
-        statement = sa.select(Message.message_id, Message.room_id).where(Message.message_id.in_(messages))
-        result = (await session.execute(statement)).fetchall()
-        filter_ids = [row[0] for row in result]
-
-        statement = sa.delete(Media).where(Media.message_id.in_(filter_ids))
-        await session.execute(statement)
-        statement = sa.delete(Message).where(Message.message_id.in_(filter_ids))
-        await session.execute(statement)
-
-        await session.commit()
-
-    # Format a dictionary of deleted messages
-    deleted = {}
-    for row in result:
-        messages = deleted.get(row[1], [])
-        if not messages:
-            deleted[row[1]] = messages
-        messages.append(row[0])
-
-    for room_id, messages in deleted.items():
-        await delete_client_messages(messages, room_id)
-
-
 async def delete_client_messages(messages, room_id, skip_sid=None):
     """ Inform other clients in room to delete messages """
     await sio.emit("message_deleted", {
@@ -319,11 +249,21 @@ async def delete_client_messages(messages, room_id, skip_sid=None):
     }, room=room_id, skip_sid=skip_sid)
 
 
+async def _job_callback(messages):
+    deleted = await delete_expired_messages(messages)
+
+    for room_id, messages in deleted.items():
+        await delete_client_messages(messages, room_id)
+
+
 async def job_disappear_messages():
     # print("Job ran")  # TODO(medium)(SpeedFox198): Change to log
-    await messages_queue.check_disappearing_messages(delete_expired_messages)
+    await messages_queue.check_disappearing_messages(_job_callback)
 
 
+# TODO(high)(SpeedFox198):
+# edit frequency of running scheduler
+# 3 different timings == 3 different queues
 async def task_disappear_messages(scheduler):
     """ Task to run scheduled checking for disappearing of messages """
     scheduler.add_job(job_disappear_messages, "interval", seconds=5)
