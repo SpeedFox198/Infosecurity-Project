@@ -73,7 +73,7 @@ function selectMsg() {
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <img src={msg.path} alt="">
         </div>
-        <div class="virustotal-score">
+        <!-- <div class="virustotal-score">
           <div class="percent">
             <svg>
               <circle cx="33" cy="33" r="30"></circle>
@@ -83,8 +83,9 @@ function selectMsg() {
               <span>30/100</span>
             </div>
           </div>
-        </div>  
+        </div>   -->
       {/if}
+
       {#if msg.type === "video"}
         <div class="video-container video-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <video src={msg.path} controls>
@@ -114,57 +115,39 @@ function selectMsg() {
         </div>
       </div>
     </div>
-
   </div>
-
+</div>
+<div class="malware-message">
+  <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe. (This option can be disabled in the settings)</p>
 </div>
 
 
 <style>
-.percent {
-  position: relative;
+.malware-message {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
+  width: 82%;
+  height: auto;
+  background-color: rgba(251, 238, 238, 0.1);
+
+  border-color: red;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 20px;
+
+  font-size: 1rem;
+  color: rgb(255, 0, 0);
+
 }
 
-svg {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  transform: rotate(-90deg);
-}
-
-svg circle {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: #f0f0f0;
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-
-svg circle:last-of-type {
-  stroke-dasharray: 625px;
-  stroke-dashoffset: calc(625px - (625px * var(--percent)) / 100);
-  stroke: #3498db; 
-}
-
-.number {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.number span {
-  font-weight: 200;
-  font-size: 20px;
-}
-
-.card:nth-child(1) svg circle:last-of-type {
-  stroke: #f39c12;
-}
-
-.card:nth-child(2) svg circle:last-of-type {
-  stroke: #2ecc71;
+.malware-message p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
 }
 
 .message {
