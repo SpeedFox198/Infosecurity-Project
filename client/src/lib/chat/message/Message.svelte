@@ -58,9 +58,7 @@ function selectMsg() {
   </div>
 
   <div class="bubble-container d-flex justify-content-end flex-shrink-1">
-
     <div class="tail"></div>
-
     <div class="bubble">
 
       {#if !$selectMode}
@@ -75,6 +73,36 @@ function selectMsg() {
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <img src={msg.path} alt="">
         </div>
+        <!-- <div class="virustotal-score">
+          <div class="percent">
+            <svg>
+              <circle cx="33" cy="33" r="30"></circle>
+              <circle cx="33" cy="33" r="30" style="--percent: 30"></circle>
+            </svg>
+            <div class="number">
+              <span>30/100</span>
+            </div>
+          </div>
+        </div>   -->
+      {/if}
+
+      {#if msg.type === "video"}
+        <div class="video-container video-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
+          <video src={msg.path} controls>
+            <track kind="captions">
+            Your browser does not support embedded videos
+          </video>
+        </div>
+      {/if}
+        
+      {#if msg.type === "file"}
+        <div class="file-container file-wrapper">
+          <i class="fa-solid fa-file"></i>
+          <div class="file-info">
+            <div class="file-name">{msg.name}</div>
+            <div class="file-size">{msg.size}</div>
+          </div>
+        </div>
       {/if}
 
       <div class="content-container d-flex">
@@ -87,13 +115,41 @@ function selectMsg() {
         </div>
       </div>
     </div>
-
   </div>
-
+</div>
+<div class="malware-message">
+  <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe. (This option can be disabled in the settings)</p>
 </div>
 
 
 <style>
+.malware-message {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
+  width: 82%;
+  height: auto;
+  background-color: rgba(251, 238, 238, 0.1);
+
+  border-color: red;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 20px;
+
+  font-size: 1rem;
+  color: rgb(255, 0, 0);
+
+}
+
+.malware-message p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+
 .message {
   padding: 0 3rem;
   overflow-anchor: none;

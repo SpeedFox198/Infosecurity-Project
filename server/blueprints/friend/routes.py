@@ -1,10 +1,11 @@
 from quart import Blueprint
 from quart_auth import login_required, current_user
 import sqlalchemy as sa
+from quart_schema import validate_response
 
 from db_access.globals import async_session
-from models import Friend, User
-from models.response_data import FriendData
+from models import Friend, User, FriendRequest
+from models.response_data import FriendData, FriendRequestsData
 
 friend_bp = Blueprint("friends", __name__, url_prefix="/friends")
 
@@ -36,7 +37,36 @@ async def user_friends():
     ]}
 
 
-@friend_bp.post("/")
+@friend_bp.get("/requests")
 @login_required
-async def create_friend_request():
-    return {"message": "ball"}
+@validate_response(FriendRequestsData)
+async def get_friend_requests():
+    async with async_session() as session:
+        recipient_statement_subquery = sa.select(FriendRequest.sender).where(
+            FriendRequest.recipient == await current_user.user_id
+        ).subquery()
+        recipient_statement = sa.select(User.user_id, User.username, User.avatar).where(
+            User.user_id.in_(sa.select(recipient_statement_subquery))
+        )
+
+        sender_statement_subquery = sa.select(FriendRequest.recipient).where(
+            FriendRequest.sender == await current_user.user_id
+        ).subquery()
+        sender_statement = sa.select(User.user_id, User.username, User.avatar).where(
+            User.user_id.in_(sa.select(sender_statement_subquery))
+        )
+
+        received_requests: list[tuple[str, str, str]] = (await session.execute(recipient_statement)).all()
+        sent_requests: list[tuple[str, str, str]] = (await session.execute(sender_statement)).all()
+
+    return FriendRequestsData(sent=[FriendData(*friend) for friend in sent_requests],
+                              received=[FriendData(*friend) for friend in received_requests])
+
+
+@friend_bp.post("/requests/add/<string:user_id>")
+@login_required
+async def create_friend_request(user_id: str):
+    async with async_session() as session:
+        session.add(FriendRequest(sender=await current_user.user_id, recipient=user_id))
+        session.commit()
+    return {"message": "Friend request sent successfully!"}
