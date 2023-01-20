@@ -1,16 +1,14 @@
-import os
-
 import socketio
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import AuthedUser, Group, Media, Membership, Message, Room, User, Disappearing
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
-from utils import secure_save_file, to_unix
+from utils import to_unix
 
 from .disappearing import DisappearingQueue
+from .functions import get_display_dimensions, save_file
 from .sio_auth_manager import SioAuthManager
-from .functions import get_display_dimensions
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -103,20 +101,9 @@ async def send_message(sid, data: dict):
         # Save file if message type is not text, and file exists
         # TODO(high)(SpeedFox198): test what happens when upload file of size 0 bytes lmao
         if message.type != "text" and file:
-            destination_directory = os.path.join(
+            await save_file(
                 sio_auth_manager.app.config["ATTACHMENTS_PATH"],
-                message.room_id,
-                message.message_id
-            )
-            os.makedirs(destination_directory)
-            filename = await secure_save_file(destination_directory, filename, file)
-
-            # TODO(high)(SpeedFox198): Check if file is image (check what kind of file)
-            height, width = get_display_dimensions(file)
-
-            media = Media(message.message_id, path=filename, height=height, width=width)
-            async with session.begin():
-                session.add(media)
+                file, filename, message.room_id, message.message_id, session)
 
     # If room has disappearing messages enabled
     if room.disappearing != "off":

@@ -32,3 +32,5 @@ class User(Base):
     twofa_status = Column(Boolean, default=False)
 
     devices = relationship("Device", back_populates="user")
+
+    public_key = Column(CHAR(88))
