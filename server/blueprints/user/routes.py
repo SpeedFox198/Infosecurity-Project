@@ -25,3 +25,19 @@ async def user_details(user_id: str):
         "username": user[0],
         "avatar": user[1]
     }
+
+
+@user_bp.post("/find/<string:username>")
+async def find_user(username: str):
+    async with async_session() as session:
+        statement = sa.select(User.user_id, User.username, User.avatar).where(User.username == username)
+        results = (await session.execute(statement)).all()
+    return {"user_search_results": [
+        {
+            "user_id": user[0],
+            "username": user[1],
+            "avatar": user[2]
+        }
+        for user in results
+        ]
+    }
