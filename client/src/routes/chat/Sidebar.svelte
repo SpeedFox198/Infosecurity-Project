@@ -1,4 +1,8 @@
 <script>
+import { onMount } from 'svelte';
+import { getFlash } from "sveltekit-flash-message/client"
+import { page } from "$app/stores"
+
 import { room_id, roomStorage, roomList } from '$lib/stores/room';
 import { count } from '$lib/stores/count';
 import { selectedMsgs } from '$lib/stores/select';
@@ -10,7 +14,11 @@ import NewGroup from '$lib/settings/NewGroup.svelte';
 import Friends from '$lib/settings/Friends.svelte';
 
 // SocketIO instance
+/** @type {import('socket.io-client').Socket}*/
+export let socket;
 export let getRoomMsgs;
+
+const flash = getFlash(page)
 
 let displaySettings = false;
 let displayNewGroup = false;
@@ -41,6 +49,22 @@ const toggleSettings = async () => displaySettings = !displaySettings;
 const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
 const toggleFriends = async () => displayFriends = !displayFriends;
 
+
+const sendNewGroup = async (event) => {
+  let { group_metadata } = event.detail
+  console.log(group_metadata)
+  socket.emit("create_group", group_metadata)
+}
+
+onMount(() => {
+  socket.on("group_created", () => {
+    $flash = {type: 'success', message: 'Group created!'}
+  })
+  
+  socket.on("create_group_error", () => {
+    $flash = {type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
+  })
+})
 </script>
 
 <!-- Left Sidebar -->
@@ -48,7 +72,7 @@ const toggleFriends = async () => displayFriends = !displayFriends;
 
   <!-- Settings Display Section -->
   <Settings {displaySettings} {toggleSettings}/>
-  <NewGroup {displayNewGroup} {toggleNewGroup}/>
+  <NewGroup {displayNewGroup} {toggleNewGroup} on:create-group={sendNewGroup}/>
   <Friends {displayFriends} {toggleFriends}/>
   <!-- Profile & Settings Section -->
   <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends}/>

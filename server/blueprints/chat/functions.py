@@ -116,3 +116,11 @@ async def delete_expired_messages(messages):
         messages.append(row[0])
 
     return deleted
+
+
+async def save_group_icon(room: Room, group_icon_name: str, group_icon: bytes) -> os.PathLike | str:
+    """ Returns the group icon path for future reference"""
+    icon_base_path = os.path.join("media/icon", room.room_id)
+    os.makedirs(icon_base_path)
+    saved_group_icon_name = await secure_save_file(icon_base_path, group_icon_name, group_icon)
+    return os.path.join(icon_base_path, saved_group_icon_name)
