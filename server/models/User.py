@@ -25,12 +25,13 @@ class User(Base):
     email = Column(VARCHAR(255), unique=True, nullable=False)
     password = Column(VARCHAR(255))
     avatar = Column(VARCHAR(255))
+    public_key = Column(CHAR(88))
     dark_mode = Column(Boolean, default=False)
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
     censor = Column(Boolean, default=True)
     twofa_status = Column(Boolean, default=False)
+    online = Column(Boolean)
 
     devices = relationship("Device", back_populates="user")
 
-    public_key = Column(CHAR(88))

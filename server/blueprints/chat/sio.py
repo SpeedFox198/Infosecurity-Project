@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from pydantic import ValidationError
 
 from db_access.globals import async_session
+from db_access.sio import set_online_status, add_sio_connection, remove_sio_connection, get_sid_from_sio_connection
 from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
@@ -41,6 +42,9 @@ async def connect(sid, environ, auth):
     # Save user session
     await save_user(sid, current_user)
 
+    await set_online_status(await current_user.user_id, True)
+    await add_sio_connection(sid, await current_user.user_id)
+
     # Add client to their respective rooms
     rooms = await get_room(await current_user.user_id)
 
@@ -57,6 +61,9 @@ async def disconnect(sid):
     """ Event when client disconnects from server """
     # TODO(medium)(SpeedFox198): change to log later
     # print("disconnected:", sid)
+    current_user = await get_user(sid)
+    await set_online_status(await current_user.user_id, False)
+    await remove_sio_connection(sid, await current_user.user_id)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -237,7 +244,7 @@ async def delete_messages(sid, data):
 
 @sio.event
 async def create_group(sid, data):
-    print(f"Received {data}")
+    # print(f"Received {data}")
     current_user = await get_user(sid)
 
     try:
@@ -285,9 +292,20 @@ async def create_group(sid, data):
 
         await session.commit()
 
-    await sio.emit("group_created", {
-        "message": "Group created!"
-    }, to=sid)
+    await sio.emit("group_created", to=sid)
+
+    # Emit event to tell users they have been added to group
+    for user_id in (group_metadata.users + [await current_user.user_id]):
+        user_sid = await get_sid_from_sio_connection(user_id)
+        if user_sid is None:
+            continue
+
+        rooms = await get_room(user_id)
+        for room in rooms:
+            sio.enter_room(user_sid, room["room_id"])
+
+        # Send room_ids that client belongs to
+        await sio.emit("group_invite", rooms, to=user_sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:
