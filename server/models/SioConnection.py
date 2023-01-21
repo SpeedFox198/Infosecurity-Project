@@ -12,5 +12,5 @@ class SioConnection(Base):
 
     __tablename__ = "sio_connection"
 
-    sid = Column(VARCHAR(255))
+    sid = Column(VARCHAR(255), primary_key=True)
     user_id = Column(CHAR(36), ForeignKey(User.user_id), primary_key=True)

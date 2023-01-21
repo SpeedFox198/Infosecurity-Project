@@ -67,20 +67,17 @@ onMount(() => {
   })
   
   socket.on("group_invite", async (data) => {
-    console.log("group invited")
-    let newroomStorage = {};
+    let newRoomStorage = {};
 
     const newRoomList = data.map(room => room.room_id)
     data.forEach(room => {
-      newroomStorage[room.room_id] = room
+      newRoomStorage[room.room_id] = room
     });
     
-    console.log(newRoomList)
-    console.log(newroomStorage)
 
     // Initialise rooms
     roomList.set(newRoomList);           // Set list of room_id
-    roomStorage.set(newroomStorage);     // Set collection of rooms
+    roomStorage.set(newRoomStorage);     // Set collection of rooms
     allMsgs.initRooms(newRoomList)       // Initialise empty arrays for rooms
   })
 })
