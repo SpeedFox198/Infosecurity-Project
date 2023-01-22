@@ -16,10 +16,9 @@ async def set_online_status(user_id: str, status: bool) -> None:
             await session.rollback()
 
 
-async def add_sio_connection(sid, user_id: str) -> None:
+async def add_sio_connection(sid: str, user_id: str) -> None:
     async with async_session() as session:
         connection_exists_statement = sa.select(SioConnection).where(
-            (SioConnection.sid == sid) &
             (SioConnection.user_id == user_id)
         )
         connection_exists = (await session.execute(connection_exists_statement)).scalar()
@@ -37,16 +36,15 @@ async def add_sio_connection(sid, user_id: str) -> None:
         if diff_sid_connection:
             try:
                 update_sid_statement = sa.update(SioConnection)\
-                    .where(SioConnection.sid == diff_sid_connection.sid)\
+                    .where(SioConnection.user_id == diff_sid_connection.user_id)\
                     .values(sid=sid)
                 await session.execute(update_sid_statement)
-                await session.commit()
                 await session.commit()
             except SQLAlchemyError:
                 await session.rollback()
 
 
-async def remove_sio_connection(sid, user_id: str) -> None:
+async def remove_sio_connection(sid: str, user_id: str) -> None:
     async with async_session() as session:
         try:
             statement = sa.delete(SioConnection).where(

@@ -53,7 +53,6 @@ const toggleFriends = async () => displayFriends = !displayFriends;
 
 const sendNewGroup = async (event) => {
   let { group_metadata } = event.detail
-  console.log(group_metadata)
   socket.emit("create_group", group_metadata)
 }
 
@@ -89,7 +88,7 @@ onMount(() => {
   <!-- Settings Display Section -->
   <Settings {displaySettings} {toggleSettings}/>
   <NewGroup {displayNewGroup} {toggleNewGroup} on:create-group={sendNewGroup}/>
-  <Friends {displayFriends} {toggleFriends}/>
+  <Friends {displayFriends} {toggleFriends} socket={socket}/>
   <!-- Profile & Settings Section -->
   <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends}/>
 

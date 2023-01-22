@@ -19,7 +19,6 @@ class SioAuthManager(AppContext):
 
         return AuthedUser(auth_id)
 
-
     def load_cookie(self, cookie: str) -> str | None:
         try:
             # TODO(low)(SpeedFox198): Consider catching possible error when parsing error

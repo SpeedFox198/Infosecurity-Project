@@ -75,10 +75,18 @@ async def add_users(session):
     async with session.begin():
         bob = User("bob", "bob@gmail.com", pw_hash("bob123"))
         alice = User("alice", "alice@yahoo.com", pw_hash("alice456"))
+        eden = User("eden", "eden@joker.com", pw_hash("eden789"))
+        daniel = User("daniel", "daniel@dynamicprogramming.com", pw_hash("daniel123"))
+
         bob.avatar = "/galaxy.jpg"
         alice.avatar = "/default.png"
+        eden.avatar = "/default.png"
+        daniel.avatar = "/default.png"
+
         session.add(bob)
         session.add(alice)
+        session.add(eden)
+        session.add(daniel.avatar)
 
     return alice, bob
 

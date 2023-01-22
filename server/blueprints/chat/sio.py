@@ -294,7 +294,7 @@ async def create_group(sid, data):
 
     await sio.emit("group_created", to=sid)
 
-    # Emit event to tell users they have been added to group
+    # Emit event to update users they have been added to group
     for user_id in (group_metadata.users + [await current_user.user_id]):
         user_sid = await get_sid_from_sio_connection(user_id)
         if user_sid is None:
@@ -306,6 +306,12 @@ async def create_group(sid, data):
 
         # Send room_ids that client belongs to
         await sio.emit("group_invite", rooms, to=user_sid)
+
+
+@sio.event
+async def send_friend_request(sid, data):
+    print(f"Received {data}")
+    return
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:
