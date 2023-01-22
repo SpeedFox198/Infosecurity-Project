@@ -3,6 +3,7 @@
 let gapi;
 let google;
 let tokenClient;
+let fileList = [];
 
 
 /**
@@ -89,16 +90,21 @@ async function _uploadFile(filename, content, type) {
  * Updates an existing file
  * @param {string} fileId file ID
  * @param {string} content file contents
- * @return {Promise<{ id?: string; name?: string; error?: { message: string; code: number; }; }>} file ID
+ * @return {Promise<{ content?: string; id?: string; name?: string; error?: { message: string; code: number; }; }>} file ID
  */
 async function updateJSONFile(filename, key, value) {
-  const { file, error } = await downloadFile(filename);
+  const { file, error } = await downloadFile(filename, true);
   if (error) return { error };
 
   const data = JSON.parse(file.body);
   data[key] = value;
 
-  return await _updateFile(file.id, JSON.stringify(data), "application/json");
+  const content = JSON.stringify(data)
+
+  const details = await _updateFile(file.id, content, "application/json");
+  details.content = content;
+
+  return details;
 }
 
 
@@ -134,7 +140,8 @@ async function _updateFile(fileId, content, type) {
  * List all files inserted in the application data folder
  * @return {Promise<{ files?: { id: string; name: string }[]; error?: { message: string; code: number; }; }>} array of files in appdata folder
  */
-async function listFiles() {
+async function listFiles(useCached) {
+  if (useCached) return { files: fileList };
 
   let response;
   try {
@@ -149,7 +156,11 @@ async function listFiles() {
     }
     throw err.result.error;
   }
+
   const files = response.result.files;
+
+  fileList = files;
+
   if (!files || files.length == 0) {
     return { files: [] };
   }
@@ -162,8 +173,8 @@ async function listFiles() {
  * @param {string} filename filename
  * @return {Promise<{ file?: obj; error?: { message: string; code: number; }; }>} file object
  */
-async function downloadFile(filename) {
-  const { fileId, error } = await _getFileId(filename);
+async function downloadFile(filename, useCached) {
+  const { fileId, error } = await _getFileId(filename, useCached);
   if (error) return { error };
   return await _downloadFileById(fileId);
 }
@@ -190,8 +201,8 @@ async function _downloadFileById(fileId) {
  * @param {string} filename filename
  * @return {Promise<{ fileId?: string; error?: { message: string; code: number; }; }>} file ID
  */
-async function _getFileId(filename) {
-  const { files, error } = await listFiles();
+async function _getFileId(filename, useCached) {
+  const { files, error } = await listFiles(useCached);
   if (error) return { error };
   const file = files.find(file => file.name === filename);
   if (file === undefined) {

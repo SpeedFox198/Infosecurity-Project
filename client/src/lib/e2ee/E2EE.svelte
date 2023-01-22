@@ -17,11 +17,6 @@ const ROOM_KEYS_FILE_NAME = "room_keys.json";
 let keysInited = false;
 
 
-function initComponent() {
-  service.authUser(initKeys);
-}
-
-
 /**
  * Initialise keys from localStorage if possible,
  * else download keys from google drive.
@@ -86,12 +81,23 @@ async function initKeys() {
 
 
 encryption.encryptMessage = async message => {
+  const key = await getRoomKey();
+  return await e2ee.encryptMessage(message, key);
+}
+
+
+encryption.decryptMessage = async message => {
+  const key = await getRoomKey();
+  return await e2ee.decryptMessage(message, key);
+}
+
+
+async function getRoomKey() {
   let key = $roomKeys[$room_id];
   if (key === undefined) {
     key = await createAndSaveRoomKey($room_id, $user_id);
   }
-  key = await e2ee.importRoomKey(key);
-  return await e2ee.encryptMessage(message, key);
+  return await e2ee.importRoomKey(key);
 }
 
 
@@ -124,7 +130,9 @@ async function createAndSaveRoomKey(room_id, user_id) {
  */
 async function saveRoomKey(room_id, key) {
   // Upload room key to google drive
-  const { error } = service.updateJSONFile(ROOM_KEYS_FILE_NAME, room_id, key);
+  const { content, error } = await service.updateJSONFile(ROOM_KEYS_FILE_NAME, room_id, key);
+
+  console.log(error)
 
   // If user is not authenticated yet
   if (error && error.code === 403) {
@@ -135,6 +143,9 @@ async function saveRoomKey(room_id, key) {
     const data = {};
     data[room_id] = key;
     service.uploadJSONFile(ROOM_KEYS_FILE_NAME, data);
+    roomKeys.saveNewKey(room_id, key);
+  } else {
+    roomKeys.initFromJson(content, true);
   }
 }
 
@@ -158,4 +169,3 @@ async function deriveRoomKey(userPubKey) {
 
 <!-- TODO(high)(SpeedFox198) Change from null to something -->
 <GDrive on:load={initKeys}/>
-<!-- <GDrive on:load={async () => console.log(await deriveRoomKey("BNBP/IX/gJRrfQTWE3eDJJ6BmDSsjspXt7SuWkmG4DAUVhN6JrVxKC2DY16JqDxglw4Wf6D1tdTBL6hQp81HlbE="))}/> -->

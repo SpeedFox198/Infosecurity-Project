@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime, timedelta
 
 from db_access.globals import *
@@ -8,12 +9,14 @@ from security_functions.cryptography import pw_hash
 ROOM_GROUP_NUM = 4  # Number of groups group chats
 ROOM_DIRECT_NUM = 2  # Number of direct group chats
 
-# PATH_MESSAGES = r"./_init_db/messages.txt"
-# PATH_GROUPS = r"./_init_db/groups.txt"
-# PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
-PATH_MESSAGES = r"server/_init_db/messages.txt"
-PATH_GROUPS = r"server/_init_db/groups.txt"
-PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
+if os.getcwd().split("\\")[-1] == "server":
+    PATH_MESSAGES = r"./_init_db/messages.txt"
+    PATH_GROUPS = r"./_init_db/groups.txt"
+    PATH_MEMBERSHIPS = r"./_init_db/memberships.txt"
+else:
+    PATH_MESSAGES = r"server/_init_db/messages.txt"
+    PATH_GROUPS = r"server/_init_db/groups.txt"
+    PATH_MEMBERSHIPS = r"server/_init_db/memberships.txt"
 
 
 # Windows specific issue https://stackoverflow.com/questions/61543406/asyncio-run-runtimeerror-event-loop-is-closed
@@ -133,6 +136,8 @@ async def main():
         await add_friends(session, alice.user_id, bob.user_id, clarence.user_id)
         await add_memberships(session, room_ids, alice.user_id, bob.user_id, clarence.user_id)
         await get_messages(session, room_ids, alice.user_id, bob.user_id, clarence.user_id)
+
+    print("Database initialised! :)")
 
 
 asyncio.run(main())

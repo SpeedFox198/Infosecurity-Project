@@ -95,11 +95,6 @@ async function sendMsg(event) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
   }
 
-  const encrypted = $roomStorage[$room_id].encrypted;
-  if (encrypted) {
-    content = await encryption.encryptMessage(content);
-  }
-
   const message_id = getTempId();  // Temporary id for referencing message
   const msg = {
     message_id,
@@ -109,8 +104,7 @@ async function sendMsg(event) {
     content,
     // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
     reply_to: null,
-    type, // <type> ENUM(image, document, video, text)
-    encrypted
+    type // <type> ENUM(image, document, video, text)
   };
 
   // TODO(high)(SpeedFox198): implement ui for message is masked
@@ -121,7 +115,11 @@ async function sendMsg(event) {
   // Emit message to server and add message to client stores
   let filename = (file || {}).name
   await addMsg(msg, filename);
-  console.log("message:", msg);
+
+  // Encrypt message before sending
+  if ($roomStorage[$room_id].encrypted) {
+    msg.content = await encryption.encryptMessage(content);
+  }
   socket.emit("send_message", { message: msg, file, filename });
 }
 
@@ -251,7 +249,7 @@ async function formatMsg(data, prev_id, room_id_) {
   if (prev_id && prev_id === user_id_){
     
     // Continuous messages have no avatar
-    msg = { sent, time, content, reply_to, type, corner, encrypted };
+    msg = { sent, time, content, reply_to, type, corner };
 
   } else {
     
@@ -261,8 +259,12 @@ async function formatMsg(data, prev_id, room_id_) {
     const avatar = user.avatar;
     const username = user.username;
  
-    msg = { sent, username, avatar, time, content, reply_to, type, corner, encrypted };
+    msg = { sent, username, avatar, time, content, reply_to, type, corner };
 
+  }
+
+  if (encrypted) {
+    msg.content = await encryption.decryptMessage(content);
   }
 
   // If message contains media, get media path
@@ -358,7 +360,7 @@ async function removeMsg(message_id, room_id) {
     </div>
   </div>
 
-  <!-- <E2EE/> -->
+  <E2EE/>
   {#if $room_id}
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs}/>
