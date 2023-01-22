@@ -98,9 +98,9 @@ async def send_message(sid, data: dict):
             user_id,
             room.room_id,
             message_data["content"],
-            reply_to = message_data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
-            type_ = message_data["type"],
-            encrypted = room.encrypted
+            reply_to=message_data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
+            type_=message_data["type"],
+            encrypted=room.encrypted
         )
 
         # Add message to database
@@ -318,25 +318,36 @@ async def send_friend_request(sid: str, data):
     recipient_id = data.get("user")
     if recipient_id is None:
         await sio.emit("friend_request_failed", {
-            "message": "Failed to send friend request"
+            "message": "Invalid user"
         }, to=sid)
         return
 
     valid_user = await get_user_details(recipient_id)
     if valid_user is None:
         await sio.emit("friend_request_failed", {
-            "message": "Failed to send friend request"
+            "message": "Invalid user"
         }, to=sid)
         return
 
     async with async_session() as session:
+        fr_made_before_statement = sa.select(FriendRequest).where(
+            (FriendRequest.sender == await current_user.user_id) &
+            (FriendRequest.recipient == recipient_id)
+        )
+        friend_request_made_before: FriendRequest | None = (await session.execute(fr_made_before_statement)).first()
+        if friend_request_made_before:
+            await sio.emit("friend_request_failed", {
+                "message": "Request was sent previously"
+            }, to=sid)
+            return
+
         session.add(
             FriendRequest(sender=await current_user.user_id,
                           recipient=recipient_id)
         )
-        session.commit()
+        await session.commit()
 
-    await sio.emit("friend_request_sent", to=sid)
+    await sio.emit("friend_request_sent", data=recipient_id, to=sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

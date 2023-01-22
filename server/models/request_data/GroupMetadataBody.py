@@ -14,8 +14,6 @@ class GroupMetadataBody(BaseModel):
         if value is None:
             return value
 
-        # icon_bytes = BytesIO(value)
-        # icon_mimetype: str = mimetypes.guess_type(icon_bytes.name)[0]
         file_magic = magic.Magic(mime=True)
         icon_mimetype = file_magic.from_buffer(value)
         if icon_mimetype not in ("image/jpeg", "image/png", "image/gif"):

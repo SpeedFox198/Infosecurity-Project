@@ -1,11 +1,11 @@
 <script>
 	import SlidingMenu from '$lib/settings/templates/SlidingMenu.svelte';
-	import Friend from './Friend.svelte';
+	import Friend from '$lib/friends/Friend.svelte';
+  import { friendRequestsStore } from '$lib/stores/friend-requests'
 
 	export let displayFriendRequests;
 	export let toggleFriendRequests;
 
-  let friend = {}
 </script>
 
 <SlidingMenu
@@ -14,18 +14,20 @@
 	on:click={toggleFriendRequests}
 	right="false"
 >
-  <div class="m-3">
-    <div class="mb-4">
-      <span class="fw-bold fs-4">Sent</span>
-      <Friend {friend}>
+  <div class="mb-4">
+    <span class="fw-bold fs-4 mx-3">Sent</span>
+    {#each $friendRequestsStore.sent as user}
+      <Friend friend={user}>
         <div class="ms-auto">
           <button type="button" class="btn btn-danger">Cancel</button>
         </div>
-      </Friend>
-    </div>
-    <div>
-      <span class="fw-bold fs-4">Received</span>
-      <Friend {friend}>
+      </Friend>  
+    {/each}
+  </div>
+  <div>
+    <span class="fw-bold fs-4 mx-3">Received</span>
+    {#each $friendRequestsStore.received as user}
+      <Friend friend={user}>
         <div class="ms-auto">
           <button type="button" class="circle-btn me-2 pos">
             <i class="fa-solid fa-check fs-3"></i>
@@ -34,8 +36,9 @@
             <i class="fa-solid fa-xmark fs-3"></i>
           </button>
         </div>
-      </Friend>
-    </div>
+      </Friend>  
+    {/each}
+    
   </div>
 </SlidingMenu>
 

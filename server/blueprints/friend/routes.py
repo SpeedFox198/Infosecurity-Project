@@ -61,12 +61,3 @@ async def get_friend_requests():
 
     return FriendRequestsData(sent=[FriendData(*friend) for friend in sent_requests],
                               received=[FriendData(*friend) for friend in received_requests])
-
-
-@friend_bp.post("/requests/add/<string:user_id>")
-@login_required
-async def create_friend_request(user_id: str):
-    async with async_session() as session:
-        session.add(FriendRequest(sender=await current_user.user_id, recipient=user_id))
-        session.commit()
-    return {"message": "Friend request sent successfully!"}

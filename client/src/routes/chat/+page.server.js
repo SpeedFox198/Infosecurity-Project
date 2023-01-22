@@ -9,18 +9,18 @@ export async function load({locals, fetch, depends}) {
     const getDevices = async () => {
       depends("app:devices")
       const deviceRes = await fetch("https://127.0.0.1:8443/api/devices/")
-        const devicesData = await deviceRes.json()
-        if (!deviceRes.ok) {
-            return {
-                errors: "Error while retrieving devices",
-                devices: []
-            }
-        }
-    
-        return {
-            errors: null,
-            devices: devicesData.devices
-        }
+      const devicesData = await deviceRes.json()
+      if (!deviceRes.ok) {
+          return {
+            errors: "Error while retrieving devices",
+            devices: []
+          }
+      }
+  
+      return {
+          errors: null,
+          devices: devicesData.devices
+      }
     }
   
     const getFriends = async () => {
@@ -38,9 +38,27 @@ export async function load({locals, fetch, depends}) {
         friendsList: data.friends
       }
     }
+    
+    const getFriendRequests = async () => {
+      const response = await fetch("https://127.0.0.1:8443/api/friends/requests")
+      const data = await response.json()
+      if (!response.ok) {
+        return {
+          errors: "Error while retrieving friend requests",
+          friendRequestsList: []
+        }
+      }
+      
+      return {
+        errors: null,
+        friendRequestsList: data
+      }
+
+    }
   
     return {
       devices: getDevices(),
-      friends: getFriends()
+      friends: getFriends(),
+      friendRequests: getFriendRequests()
     }
 };

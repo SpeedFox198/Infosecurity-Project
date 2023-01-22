@@ -13,6 +13,7 @@ import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
 import { deviceStore } from "$lib/stores/device"
 import { friends } from "$lib/stores/friend"
+import { friendRequestsStore } from "$lib/stores/friend-requests"
 export let data;
 
 const namespace = "https://localhost:8443";
@@ -28,6 +29,7 @@ let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to c
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
 friends.set(data.friends.friendsList); // TODO(cw): get a better name for this
+friendRequestsStore.set(data.friendRequests.friendRequestsList)
 $: deviceStore.set(data.devices);
 
 let socket;  // Forward declare socket :)
