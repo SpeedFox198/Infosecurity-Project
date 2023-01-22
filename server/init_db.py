@@ -61,7 +61,7 @@ async def add_friends(session, alice, bob, carol):
 
 async def add_memberships(session, room_ids, alice, bob, carol):
     read = read_from_file(PATH_MEMBERSHIPS)
-    mnm = []  # forgive me for the name im dyin
+    mnm = []  # forgive me for the name im dying
     for data in read:
         room, user, admin = data.split(",")
         room_id = room_ids[int(room) - 1]

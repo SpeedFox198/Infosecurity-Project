@@ -20,6 +20,7 @@ async def get_user_details(user_id: str) -> tuple:
         result = await session.execute(statement)
         return result.first()
 
+
 async def insert_user_by_google(user_id: str, username: str, email: str, avatar: str) -> None:
     async with async_session() as session:
         statement = sa.insert(User).values(user_id=user_id, username=username, email=email, avatar=avatar)
