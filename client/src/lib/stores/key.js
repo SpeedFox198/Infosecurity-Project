@@ -6,9 +6,8 @@ import { writable } from "svelte/store";
  * 
  * Structure:
  * {
- *   privKey: string;  - Base64 encoded string of private key
- *   pubKey: string;
- *   auth(something idk)
+ *   privKey: string;  - JSON string format of private key
+ *   pubKey: string;   - Base64 encoded string of public key
  * }
  */
 export const masterKey = (() => {

@@ -46,17 +46,18 @@ async function generateKeyPair() {
 
 
 /**
- * Exports the provided key to a JSON string
- * @param {CryptoKey} key key to be exported
+ * Exports the provided private key to a JSON string
+ * @param {CryptoKey} key private key to be exported
  * @returns {Promise<string>}
  */
 async function exportPrivateKey(key) {
   return JSON.stringify(await SubtleCrypto.exportKey("jwk", key));
 }
 
+
 /**
- * Exports the provided key to a Base64 string
- * @param {CryptoKey} key key to be exported
+ * Exports the provided public key to a Base64 string
+ * @param {CryptoKey} key public key to be exported
  * @returns {Promise<string>}
  */
 async function exportPublicKey(key) {
@@ -65,8 +66,17 @@ async function exportPublicKey(key) {
 
 
 /**
+ * Exports the provided room key to a Base64 string
+ * @param {CryptoKey} key room key to be exported
+ * @returns {Promise<string>}
+ */
+async function exportRoomKey(key) {
+  return encode(await SubtleCrypto.exportKey("raw", key));
+}
+
+/**
  * Imports the JSON string private key
- * @param {string} jwk JSON string key to be imported
+ * @param {string} keyData JSON string key to be imported
  * @returns {Promise<CryptoKey>}
  */
 async function importPrivateKey(keyData) {
@@ -75,12 +85,22 @@ async function importPrivateKey(keyData) {
 
 
 /**
- * Imports the JSON string public key
- * @param {string} jwk JSON string key to be imported
+ * Imports the Base64 string public key
+ * @param {string} keyData Base64 string key to be imported
  * @returns {Promise<CryptoKey>}
  */
 async function importPublickey(keyData) {
   return await _importKey("raw", decode(keyData), []);
+}
+
+
+/**
+ * Imports the Base64 string room key
+ * @param {string} keyData Base64 string key to be imported
+ * @returns {Promise<CryptoKey>}
+ */
+async function importRoomKey(keyData) {
+  return await SubtleCrypto.importKey("raw", decode(keyData), "AES-GCM", true, ["encrypt", "decrypt"]);
 }
 
 
@@ -104,19 +124,54 @@ function _decodeMessage(encoded) {
   return (new TextDecoder()).decode(encoded);
 }
 
+/**
+ * Returns the array buffer of a file
+ * @param {File} file object
+ * @returns {Promise<ArrayBuffer>} array buffer of file
+ */
+async function _encodeFile(file) {
+  return await file.arrayBuffer();
+}
+
+/**
+ * Encrypts data using key
+ * 
+ * @param {ArrayBuffer} data data to be encrypted
+ * @param {CryptoKey} key key used for encryption
+ * @returns {Promise<string>} encrypted data and IV separated by a separator
+ */
+async function _encrypt(data, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await SubtleCrypto.encrypt({ name: AES_MODE, iv }, key, data);
+  return encode(encrypted) + SEPARATOR + encode(iv);
+}
+
+
+/**
+ * Decrypts ciphertext using key
+ * 
+ * @param {string} ciphertext Base64 encoded ciphertext to be decrypted
+ * @param {CryptoKey} key key used for decryption
+ * @returns {Promise<ArrayBuffer>} encrypted message and IV separated by a separator
+ */
+async function _decrypt(ciphertext, key) {
+  let [encrypted, iv] = ciphertext.split(SEPARATOR);
+  iv = decode(iv);
+  encrypted = decode(encrypted);
+  const decrypted = await SubtleCrypto.decrypt({ name: AES_MODE, iv }, key, encrypted);
+  return decrypted;
+}
+
 
 /**
  * Encrypts message using key
  * 
- * @param {*} message message to be encrypted
+ * @param {string} message message to be encrypted
  * @param {CryptoKey} key key used for encryption
  * @returns {Promise<string>} encrypted message and IV separated by a separator
  */
 async function encryptMessage(message, key) {
-  const encoded = _encodeMessage(message);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await SubtleCrypto.encrypt({ name: AES_MODE, iv }, key, encoded);
-  return encode(encrypted) + SEPARATOR + encode(iv);
+  return await _encrypt(_encodeMessage(message), key);
 }
 
 
@@ -128,11 +183,7 @@ async function encryptMessage(message, key) {
  * @returns {Promise<string>} encrypted message and IV separated by a separator
  */
 async function decryptMessage(ciphertext, key) {
-  let [encrypted, iv] = ciphertext.split(SEPARATOR);
-  iv = decode(iv);
-  encrypted = decode(encrypted);
-  const decrypted = await SubtleCrypto.decrypt({ name: AES_MODE, iv }, key, encrypted);
-  return _decodeMessage(decrypted);
+  return _decodeMessage(await _decrypt(ciphertext, key));
 }
 
 
@@ -141,8 +192,10 @@ export const e2ee = {
   generateKeyPair,
   exportPrivateKey,
   exportPublicKey,
+  exportRoomKey,
   importPrivateKey,
   importPublickey,
+  importRoomKey,
   deriveSecretKey,
   encryptMessage,
   decryptMessage

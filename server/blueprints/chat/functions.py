@@ -57,7 +57,7 @@ async def get_room(user_id: str):
 
         # Retrieve room and membership info of user
         statement = sa.select(
-            Room.room_id, Room.disappearing, Room.type, Membership.is_admin
+            Room.room_id, Room.disappearing, Room.type, Room.encrypted, Membership.is_admin
         ).join_from(
             Room, Membership
         ).where(
@@ -70,7 +70,8 @@ async def get_room(user_id: str):
             "room_id": row[0],
             "disappearing": row[1],
             "type": row[2],
-            "is_admin": row[3],
+            "encrypted": row[3],
+            "is_admin": row[4]
         } for row in result]
 
         # Retrieve additional room details for UI

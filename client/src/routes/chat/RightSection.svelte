@@ -13,7 +13,7 @@ import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
-import E2EE from "$lib/e2ee/E2EE.svelte";
+import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 
 
 // SocketIO instance
@@ -40,7 +40,7 @@ onMount(async () => {
     // Initialise rooms
     roomList.set(newRoomList);           // Set list of room_id
     roomStorage.set(newroomStorage);     // Set collection of rooms
-    allMsgs.initRooms(newRoomList)       // Initialise empty arrays for rooms
+    allMsgs.initRooms(newRoomList);      // Initialise empty arrays for rooms
   });
 
 
@@ -93,6 +93,10 @@ async function sendMsg(event) {
 
   if (currentUser.censor) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
+  }
+
+  if ($roomStorage[$room_id].encrypted) {
+    content = await encryption.encryptMessage(content);
   }
 
   const message_id = getTempId();  // Temporary id for referencing message
