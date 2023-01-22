@@ -12,8 +12,6 @@ let displayAddFriend = false;
 const toggleAddFriend = () => {
   displayAddFriend = !displayAddFriend
 }
-
-
 </script>
 
 

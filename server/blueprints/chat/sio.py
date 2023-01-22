@@ -350,6 +350,24 @@ async def send_friend_request(sid: str, data):
     await sio.emit("friend_request_sent", data=recipient_id, to=sid)
 
 
+@sio.event
+async def cancel_sent_friend_request(sid: str, data):
+    print(f"Received {data}")
+    return
+
+
+@sio.event
+async def accept_friend_request(sid: str, data):
+    print(f"Received {data}")
+    return
+
+
+@sio.event
+async def cancel_received_friend_request(sid: str, data):
+    print(f"Received {data}")
+    return
+
+
 async def save_user(sid: str, user: AuthedUser) -> None:
     """ Save user object to sio session """
     await sio.save_session(sid, {SIO_SESSION_USER_KEY: user})

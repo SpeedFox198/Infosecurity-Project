@@ -21,4 +21,4 @@
 </SlidingMenu>
 
 <FriendsList {displayFriendsList} {toggleFriendsList} {socket} />
-<FriendRequests {displayFriendRequests} {toggleFriendRequests} />
+<FriendRequests {displayFriendRequests} {toggleFriendRequests} {socket} />
