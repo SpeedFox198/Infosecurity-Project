@@ -1,9 +1,8 @@
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import User
+from models import Membership, User
 from quart import Blueprint
 from sqlalchemy.orm.exc import NoResultFound
-
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
@@ -40,4 +39,27 @@ async def find_user(username: str):
         }
         for user in results
         ]
+    }
+
+
+@user_bp.get("/public-key/<string:room_id>/<string:user_id>")
+async def user_public_key(room_id: str, user_id: str):
+    if not room_id or not user_id:
+        return {"message": "Public key not found."}, 404
+
+    async with async_session() as session:
+        # Currently only supports direct messages
+        statement = sa.select(User.public_key).where(
+            User.user_id == sa.select(Membership.user_id).where(
+                (Membership.room_id == room_id) &
+                (Membership.user_id != user_id)
+            ).scalar_subquery()
+        )
+        try:
+            user = (await session.execute(statement)).one()
+        except NoResultFound:
+            return {"message": "Public key not found."}, 404
+
+    return {
+        "public_key": user[0]
     }

@@ -1,5 +1,4 @@
 <script context="module">
-import { gToken } from "$lib/stores/token";
 
 let gapi;
 let google;
@@ -7,25 +6,19 @@ let tokenClient;
 
 
 /**
- *  Sign in the user.
+ * Authenticates user and calls callback if given
+ * @param {function?} callback
  */
-function authUser() {
+function authUser(callback) {
   tokenClient.callback = async resp => {
     if (resp.error !== undefined) {
       message = resp.error;
       throw resp;
     }
-    // TODO(high)(SpeedFox198): Event - user authenticated!
+    if (callback !== undefined) callback();
   };
-
-  if (gapi.client.getToken() === null) {
-    // Prompt the user to select a Google Account and ask for consent to share their data
-    // when establishing a new session.
-    tokenClient.requestAccessToken({ prompt: "consent" });
-  } else {
-    // Skip display of account chooser and consent dialog for an existing session.
-    tokenClient.requestAccessToken({ prompt: "" });
-  }
+  // Request for client access token
+  tokenClient.requestAccessToken({ prompt: "" });
 }
 
 
@@ -43,11 +36,12 @@ function handleSignoutClick() {
   }
 }
 
+
 /**
  * Upload a new JSON file with JSON content
  * @param {string} filename file name
  * @param {obj} jsonObject JSON-like object
- * @return {Promise<string>} file ID
+ * @return {Promise<{ id?: string; error?: { message: string; code: number; }; }>} file ID
  */
 async function uploadJSONFile(filename, jsonObject) {
   return await _uploadFile(filename, JSON.stringify(jsonObject), "application/json");
@@ -59,7 +53,7 @@ async function uploadJSONFile(filename, jsonObject) {
  * @param {string} filename file name
  * @param {string} content file contents
  * @param {string} type file mime type
- * @return {Promise<string>} file ID
+ * @return {Promise<{ id?: string; error?: { message: string; code: number; }; }>} file ID
  */
 async function _uploadFile(filename, content, type) {
   const file = new Blob([content], { type });
@@ -68,12 +62,14 @@ async function _uploadFile(filename, content, type) {
     mimeType: type,
     parents: ["appDataFolder"]
   };
-  const accessToken = gapi.auth.getToken().access_token;
+  const token = gapi.auth.getToken();
+  if (token === null) return { error: { message: "User not authenticated.", code: 403 } };
+  const accessToken = token.access_token;
+
   const form = new FormData();
   form.append("metadata", new Blob([JSON.stringify(metadata)], { type }));
   form.append("file", file);
 
-  let id, error;
   try {
     const url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id";
     const response = await fetch(url, {
@@ -81,35 +77,44 @@ async function _uploadFile(filename, content, type) {
       headers: new Headers({ Authorization: `Bearer ${accessToken}`}),
       body: form
     });
-    ({ id, error } = await response.json());
+    return await response.json();
 
-    if (error !== undefined) {
-      throw new Error(error.message);
-    }
-
-  } catch (err) {
-    // TODO(high)(SpeedFox198): handle error message
-    // message = err;
-    return;
+  } catch (error) {
+    return { error };
   }
-
-  // TODO(high)(SpeedFox198): handle file update success
-  // message = `File uploaded!\nFile ID: ${id}\nFilename: ${filename}\nContent: ${content}`;
-  return id;
 }
 
 
 /**
- * Update aa existing file
+ * Updates an existing file
  * @param {string} fileId file ID
  * @param {string} content file contents
- * @return {Promise<string>} file ID
+ * @return {Promise<{ id?: string; name?: string; error?: { message: string; code: number; }; }>} file ID
  */
-async function updateFile(fileId, content) {
-  const file = new Blob([content], { type: "text/plain" });
-  const accessToken = gapi.auth.getToken().access_token;
+async function updateJSONFile(filename, key, value) {
+  const { file, error } = await downloadFile(filename);
+  if (error) return { error };
 
-  let id, name, error;
+  const data = JSON.parse(file.body);
+  data[key] = value;
+
+  return await _updateFile(file.id, JSON.stringify(data), "application/json");
+}
+
+
+/**
+ * Updates an existing file
+ * @param {string} fileId file ID
+ * @param {string} content file contents
+ * @param {string} type file mime type
+ * @return {Promise<{ id?: string; name?: string; error?: { message: string; code: number; }; }>} file ID
+ */
+async function _updateFile(fileId, content, type) {
+  const file = new Blob([content], { type });
+  const token = gapi.auth.getToken();
+  if (token === null) return { error: { message: "User not authenticated.", code: 403 } };
+  const accessToken = token.access_token;
+
   try {
     const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`
     const response = await fetch(url, {
@@ -117,26 +122,17 @@ async function updateFile(fileId, content) {
       headers: new Headers({ Authorization: `Bearer ${accessToken}`}),
       body: file
     });
-    ({ id, name, error } = await response.json());
+    return await response.json();
 
-    if (error !== undefined) {
-      throw new Error(error.message);
-    }
-
-  } catch (err) {
-    // TODO(high)(SpeedFox198): handle error
-    // message = err;
-    return;
+  } catch (error) {
+    return { error };
   }
-
-  // TODO(high)(SpeedFox198): handle update success
-  return { id, name };
 }
 
 
 /**
  * List all files inserted in the application data folder
- * @return {Promise<{ id: string, name: string }[]>} array of files in appdata folder
+ * @return {Promise<{ files?: { id: string; name: string }[]; error?: { message: string; code: number; }; }>} array of files in appdata folder
  */
 async function listFiles() {
 
@@ -148,49 +144,60 @@ async function listFiles() {
       pageSize: 10,
     });
   } catch (err) {
-    // TODO(high)(SpeedFox198): handle error message
-    // message = err.message;
-    // Imaging catching an error just to throw it lmao
-    throw err;
+    if (err.status === 403) {
+      return { error: err.result.error };
+    }
+    throw err.result.error;
   }
   const files = response.result.files;
   if (!files || files.length == 0) {
-    // TODO(high)(SpeedFox198): handle error message
-    // message = "No files found.";
-    return [];
+    return { files: [] };
   }
-  return files;
+  return { files };
 }
 
 
 /**
- * Downloads a file by given fileIfilenamed
+ * Downloads a file by given filename
  * @param {string} filename filename
- * @return {Promise<obj?>} file object
+ * @return {Promise<{ file?: obj; error?: { message: string; code: number; }; }>} file object
  */
 async function downloadFile(filename) {
-  const files = await listFiles();
-  const file = files.find(file => file.name === filename);
-  if (file === undefined) {
-    return;
-  }
-  return await _downloadFileById(file.id);
+  const { fileId, error } = await _getFileId(filename);
+  if (error) return { error };
+  return await _downloadFileById(fileId);
 }
 
 
 /**
  * Downloads a file by given fileId
  * @param {string} fileId file Id
- * @return {Promise<obj?>} file object
+ * @return {Promise<{ file?: obj; error?: { message: string; code: number; }; }>} file object
  */
 async function _downloadFileById(fileId) {
   try {
-    return await gapi.client.drive.files.get({ fileId, alt: "media"});
+    const file = await gapi.client.drive.files.get({ fileId, alt: "media"});
+    file.id = fileId;
+    return { file };
   } catch (err) {
-    // TODO(high)(SpeedFox198): handle error message
-    // message = err.result.error.message;
-    return;
+    return { error: err.result.error };
   }
+}
+
+
+/**
+ * Resolves given filename to file ID
+ * @param {string} filename filename
+ * @return {Promise<{ fileId?: string; error?: { message: string; code: number; }; }>} file ID
+ */
+async function _getFileId(filename) {
+  const { files, error } = await listFiles();
+  if (error) return { error };
+  const file = files.find(file => file.name === filename);
+  if (file === undefined) {
+    return { error: { message: `File with filename ${filename} not found`, code: 404 } };
+  }
+  return { fileId: file.id };
 }
 
 
@@ -199,7 +206,7 @@ export const service = {
   authUser,
   handleSignoutClick,
   uploadJSONFile,
-  updateFile,
+  updateJSONFile,
   downloadFile,
 };
 </script>

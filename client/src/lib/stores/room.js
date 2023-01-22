@@ -15,6 +15,7 @@ export const room_id = (() => {
  *   <room_id>: {
  *     disappearing: boolean;
  *     type: string;
+ *     encrypted: boolean;
  *     is_admin: boolean;
  *   },
  *   ...
