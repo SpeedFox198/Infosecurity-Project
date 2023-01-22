@@ -1,6 +1,6 @@
 1,alice,False
 1,bob,True
-1,carol,False
+1,clarence,False
 2,alice,False
 2,bob,True
 3,alice,True
@@ -10,4 +10,4 @@
 5,alice,True
 5,bob,True
 6,bob,True
-6,carol,True
+6,clarence,True

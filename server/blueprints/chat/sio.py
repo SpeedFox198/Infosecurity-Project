@@ -91,15 +91,16 @@ async def send_message(sid, data: dict):
         except NoResultFound:
             return  # If room not found, abort adding of message
         else:
-            room = result[0]
+            room: Room = result[0]
 
         # Create message object
         message = Message(
             user_id,
             room.room_id,
             message_data["content"],
-            message_data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
-            message_data["type"]
+            reply_to = message_data["reply_to"],  # TODO(low)(SpeedFox198): remove if unused
+            type_ = message_data["type"],
+            encrypted = room.encrypted
         )
 
         # Add message to database
@@ -160,18 +161,20 @@ async def get_room_messages(sid, data):
             Message.user_id,
             Message.time,
             Message.content,
-            Message.type
+            Message.type,
+            Message.encrypted
         ).where(
             Message.room_id == room_id
         ).order_by(Message.time.desc()).limit(limit).offset(offset)
 
-        result = (await session.execute(statement)).all()
+        result: list[Message] = (await session.execute(statement)).all()
         room_messages = [{
             "message_id": result[i].message_id,
             "user_id": result[i].user_id,
             "time": to_unix(result[i].time),
             "content": result[i].content,
-            "type": result[i].type
+            "type": result[i].type,
+            "encrypted": result[i].encrypted
         } for i in range(len(result) - 1, -1, -1)]
 
     await sio.emit("receive_room_messages", {

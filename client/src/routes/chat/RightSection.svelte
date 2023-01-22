@@ -95,7 +95,8 @@ async function sendMsg(event) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
   }
 
-  if ($roomStorage[$room_id].encrypted) {
+  const encrypted = $roomStorage[$room_id].encrypted;
+  if (encrypted) {
     content = await encryption.encryptMessage(content);
   }
 
@@ -108,7 +109,8 @@ async function sendMsg(event) {
     content,
     // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
     reply_to: null,
-    type: type // <type> ENUM(image, document, video, text)
+    type, // <type> ENUM(image, document, video, text)
+    encrypted
   };
 
   // TODO(high)(SpeedFox198): implement ui for message is masked
@@ -119,6 +121,7 @@ async function sendMsg(event) {
   // Emit message to server and add message to client stores
   let filename = (file || {}).name
   await addMsg(msg, filename);
+  console.log("message:", msg);
   socket.emit("send_message", { message: msg, file, filename });
 }
 
@@ -238,7 +241,7 @@ async function addMsgBatch(data) {
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id, time, content, reply_to, type, filename } = data;
+  const { message_id, room_id, time, content, reply_to, type, filename, encrypted } = data;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
@@ -248,7 +251,7 @@ async function formatMsg(data, prev_id, room_id_) {
   if (prev_id && prev_id === user_id_){
     
     // Continuous messages have no avatar
-    msg = { sent, time, content, reply_to, type, corner };
+    msg = { sent, time, content, reply_to, type, corner, encrypted };
 
   } else {
     
@@ -258,7 +261,7 @@ async function formatMsg(data, prev_id, room_id_) {
     const avatar = user.avatar;
     const username = user.username;
  
-    msg = { sent, username, avatar, time, content, reply_to, type, corner };
+    msg = { sent, username, avatar, time, content, reply_to, type, corner, encrypted };
 
   }
 
