@@ -4,7 +4,8 @@ from pydantic import ValidationError
 
 from db_access.globals import async_session
 from db_access.sio import set_online_status, add_sio_connection, remove_sio_connection, get_sid_from_sio_connection
-from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group
+from db_access.user import get_user_details
+from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group, FriendRequest
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -25,7 +26,6 @@ sio = socketio.AsyncServer(
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
     max_http_buffer_size=MAX_HTTP_BUFFER_SIZE
 )
-
 
 sio_auth_manager = SioAuthManager()  # Authentication Manager
 
@@ -309,9 +309,31 @@ async def create_group(sid, data):
 
 
 @sio.event
-async def send_friend_request(sid, data):
-    print(f"Received {data}")
-    return
+async def send_friend_request(sid: str, data):
+    current_user = await get_user(sid)
+
+    recipient_id = data.get("user")
+    if recipient_id is None:
+        await sio.emit("friend_request_failed", {
+            "message": "Failed to send friend request"
+        }, to=sid)
+        return
+
+    valid_user = await get_user_details(recipient_id)
+    if valid_user is None:
+        await sio.emit("friend_request_failed", {
+            "message": "Failed to send friend request"
+        }, to=sid)
+        return
+
+    async with async_session() as session:
+        session.add(
+            FriendRequest(sender=await current_user.user_id,
+                          recipient=recipient_id)
+        )
+        session.commit()
+
+    await sio.emit("friend_request_sent", to=sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

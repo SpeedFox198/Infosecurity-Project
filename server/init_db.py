@@ -5,7 +5,7 @@ from db_access.globals import *
 from models import *
 from security_functions.cryptography import pw_hash
 
-ROOM_GROUP_NUM = 4  # Number of groups group chats
+ROOM_GROUP_NUM = 4  # Number of group chats
 ROOM_DIRECT_NUM = 4  # Number of direct group chats
 
 # PATH_MESSAGES = r"./_init_db/messages.txt"
@@ -58,7 +58,7 @@ async def add_friends(session, alice, bob):
 
 async def add_memberships(session, room_ids, alice, bob):
     read = read_from_file(PATH_MEMBERSHIPS)
-    mnm = []  # forgive me for the name im dyin
+    mnm = []  # forgive me for the name im dying
     for data in read:
         room, user, admin = data.split(",")
         room_id = room_ids[int(room) - 1]
@@ -86,7 +86,7 @@ async def add_users(session):
         session.add(bob)
         session.add(alice)
         session.add(eden)
-        session.add(daniel.avatar)
+        session.add(daniel)
 
     return alice, bob
 
