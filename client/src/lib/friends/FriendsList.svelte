@@ -1,9 +1,22 @@
 <script>
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import { friends } from "$lib/stores/friend"
+import AddFriend from "$lib/friends/AddFriend.svelte";
+import { onMount } from "svelte";
 
 export let displayFriendsList;
 export let toggleFriendsList;
+/** @type {import('socket.io-client').Socket}*/
+export let socket;
+
+let displayAddFriend = false;
+const toggleAddFriend = () => {
+  displayAddFriend = !displayAddFriend
+}
+
+const sendFriendRequest = async (event) => {
+  socket.emit("send_friend_request", event.detail)
+}
 
 </script>
 
@@ -57,15 +70,15 @@ export let toggleFriendsList;
 
     </div>
   {/each}
-  <div class="positon-relative">
-    <div class="position-absolute bottom-0 end-0 pe-3 mb-3">
-      <button type="button" class="btn friend-req">
-        <i class="fa-solid fa-user-plus fs-4"></i>
-      </button>
-    </div>
+  <div class="position-absolute bottom-0 end-0 pe-3 mb-3">
+    <button type="button" class="btn friend-req" on:click={toggleAddFriend}>
+      <i class="fa-solid fa-user-plus fs-4"></i>
+    </button>
   </div>
 
 </SlidingMenu>
+
+<AddFriend {displayAddFriend} {toggleAddFriend} on:create-friend-request={sendFriendRequest} />
 
 <style>
 .friend {

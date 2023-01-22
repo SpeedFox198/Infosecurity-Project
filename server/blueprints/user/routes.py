@@ -1,7 +1,9 @@
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Membership, User
+from models.request_data import SearchUserBody
 from quart import Blueprint
+from quart_schema import validate_request
 from sqlalchemy.orm.exc import NoResultFound
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
@@ -26,10 +28,11 @@ async def user_details(user_id: str):
     }
 
 
-@user_bp.post("/find/<string:username>")
-async def find_user(username: str):
+@user_bp.post("/find")
+@validate_request(SearchUserBody)
+async def find_user(data: SearchUserBody):
     async with async_session() as session:
-        statement = sa.select(User.user_id, User.username, User.avatar).where(User.username == username)
+        statement = sa.select(User.user_id, User.username, User.avatar).where(User.username.like(f"{data.username}%"))
         results = (await session.execute(statement)).all()
     return {"user_search_results": [
         {

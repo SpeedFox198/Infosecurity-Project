@@ -6,6 +6,7 @@
 
 	export let displayFriends;
 	export let toggleFriends;
+  export let socket;
 
 	let displayFriendsList = false;
 	let displayFriendRequests = false;
@@ -19,5 +20,5 @@
 	<Option name="Pending Requests" icon="shield" on:click={toggleFriendRequests} />
 </SlidingMenu>
 
-<FriendsList {displayFriendsList} {toggleFriendsList} />
+<FriendsList {displayFriendsList} {toggleFriendsList} {socket} />
 <FriendRequests {displayFriendRequests} {toggleFriendRequests} />

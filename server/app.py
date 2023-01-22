@@ -9,7 +9,6 @@ from blueprints.auth import auth_bp
 from blueprints.chat import chat_bp, messages_queue, sio, sio_auth_manager, task_disappear_messages
 from blueprints.device import device_bp
 from blueprints.friend import friend_bp
-from blueprints.group import group_bp
 from blueprints.media import media_bp
 from blueprints.user import user_bp
 from blueprints.settings import settings_bp
@@ -45,7 +44,6 @@ api_bp.register_blueprint(device_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(friend_bp)
 api_bp.register_blueprint(settings_bp)
-api_bp.register_blueprint(group_bp)
 app.register_blueprint(api_bp)
 
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"

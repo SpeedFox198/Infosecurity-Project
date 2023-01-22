@@ -1,13 +1,14 @@
 <script>
+import { createEventDispatcher } from "svelte";
+
+
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import { friends } from "$lib/stores/friend"
-import { page } from "$app/stores"
-import { getFlash } from "sveltekit-flash-message/client"
 
 export let displayNewGroup;
 export let toggleNewGroup;
 
-const flash = getFlash(page)
+const dispatch = createEventDispatcher()
 
 let displayCustomizeGroup = false;
 let friendSearchInput = "";
@@ -25,6 +26,7 @@ $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
                                                 .includes(friendSearchInput));
 
+/** @type {?File} */
 $: selectedPhoto = photoUpload ? photoUpload[0] : null
 
 $: haveValidIcon = (() => {
@@ -60,31 +62,20 @@ const setGroupPhoto = () => {
 }
 
 const createGroup = async () => {
-  const request = new FormData()
-  request.append("group_icon", selectedPhoto)
-  request.append("metadata", JSON.stringify({
+  const groupMetadata = {
+    icon: selectedPhoto,
+    icon_name: selectedPhoto?.name || null,
     name: groupName,
     disappearing: disappearing,
     users: selectedFriends.map(user => user.user_id)
-  }))
-
-  const response = await fetch("https://localhost:8443/api/group/new", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Accept": "application/json",
-    },
-    body: request
-  })
-  
-  const data = await response.json()
-
-  if (!response.ok) {
-    $flash = { type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
-    return
   }
+  
+  dispatch(
+    'create-group', {
+      group_metadata: groupMetadata
+    }
+  )
 
-  $flash = { type: 'success', message: "Group created!"}
   await toggleCustomizeGroup()
   await toggleNewGroup()
 }

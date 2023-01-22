@@ -1,20 +1,24 @@
 import socketio
 import sqlalchemy as sa
+from pydantic import ValidationError
+
 from db_access.globals import async_session
-from models import AuthedUser, Disappearing, Media, Membership, Message, Room
+from db_access.sio import set_online_status, add_sio_connection, remove_sio_connection, get_sid_from_sio_connection
+from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
+
+from models.request_data import GroupMetadataBody
 from utils import to_unix
 
-from .functions import delete_expired_messages, get_room, messages_queue, save_file
+from .functions import delete_expired_messages, get_room, messages_queue, save_file, save_group_icon
 from .sio_auth_manager import SioAuthManager
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
-MAX_HTTP_BUFFER_SIZE = 5000000
+MAX_HTTP_BUFFER_SIZE = 5000000  # 5 megabyte payload limit
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
-
 
 sio = socketio.AsyncServer(
     async_mode=ASYNC_MODE,
@@ -24,6 +28,7 @@ sio = socketio.AsyncServer(
 
 
 sio_auth_manager = SioAuthManager()  # Authentication Manager
+
 
 # TODO(medium)(SpeedFox198): logging
 @sio.event
@@ -36,6 +41,9 @@ async def connect(sid, environ, auth):
 
     # Save user session
     await save_user(sid, current_user)
+
+    await set_online_status(await current_user.user_id, True)
+    await add_sio_connection(sid, await current_user.user_id)
 
     # Add client to their respective rooms
     rooms = await get_room(await current_user.user_id)
@@ -53,6 +61,9 @@ async def disconnect(sid):
     """ Event when client disconnects from server """
     # TODO(medium)(SpeedFox198): change to log later
     # print("disconnected:", sid)
+    current_user = await get_user(sid)
+    await set_online_status(await current_user.user_id, False)
+    await remove_sio_connection(sid, await current_user.user_id)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -229,6 +240,78 @@ async def delete_messages(sid, data):
     await delete_client_messages(messages, room_id)
     # TODO(UI)(SpeedFox198): skip_sid=sid (client side must del 1st)
     # ^ maybe not? (im lazy)
+
+
+@sio.event
+async def create_group(sid, data):
+    # print(f"Received {data}")
+    current_user = await get_user(sid)
+
+    try:
+        group_metadata = GroupMetadataBody(**data)
+    except ValidationError as err:
+        error_list = [error["msg"] for error in err.errors()]
+        error_message = error_list[0]
+        await sio.emit("create_group_error", {
+            "message": error_message
+        }, to=sid)
+        return
+
+    async with async_session() as session:
+        # Create new room
+        new_room = Room(group_metadata.disappearing, "group")
+        session.add(new_room)
+        await session.flush()
+
+        if group_metadata.icon and group_metadata.icon_name:
+            # Add Group icon if any and the group details
+            icon_path = await save_group_icon(new_room, group_metadata.icon_name, group_metadata.icon)
+
+            session.add(
+                Group(new_room.room_id, group_metadata.name, icon_path)
+            )
+            await session.flush()
+        else:
+            session.add(
+                Group(new_room.room_id, group_metadata.name)
+            )
+            await session.flush()
+
+        # Add the current user as admin of the group
+        session.add(
+            Membership(new_room.room_id, await current_user.user_id, is_admin=True)
+        )
+        await session.flush()
+
+        # Add the included users to the group
+        for user_id in group_metadata.users:
+            session.add(
+                Membership(new_room.room_id, user_id)
+            )
+            await session.flush()
+
+        await session.commit()
+
+    await sio.emit("group_created", to=sid)
+
+    # Emit event to update users they have been added to group
+    for user_id in (group_metadata.users + [await current_user.user_id]):
+        user_sid = await get_sid_from_sio_connection(user_id)
+        if user_sid is None:
+            continue
+
+        rooms = await get_room(user_id)
+        for room in rooms:
+            sio.enter_room(user_sid, room["room_id"])
+
+        # Send room_ids that client belongs to
+        await sio.emit("group_invite", rooms, to=user_sid)
+
+
+@sio.event
+async def send_friend_request(sid, data):
+    print(f"Received {data}")
+    return
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

@@ -1,12 +1,10 @@
+import magic
 from pydantic import BaseModel, validator
-from quart.datastructures import FileStorage
 
 
 class GroupMetadataBody(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    icon: FileStorage | None
+    icon: bytes | None
+    icon_name: str | None
     name: str
     disappearing: str
     users: list[str]
@@ -16,7 +14,11 @@ class GroupMetadataBody(BaseModel):
         if value is None:
             return value
 
-        if value.mimetype not in ("image/jpeg", "image/png", "image/gif"):
+        # icon_bytes = BytesIO(value)
+        # icon_mimetype: str = mimetypes.guess_type(icon_bytes.name)[0]
+        file_magic = magic.Magic(mime=True)
+        icon_mimetype = file_magic.from_buffer(value)
+        if icon_mimetype not in ("image/jpeg", "image/png", "image/gif"):
             raise ValueError("Invalid file type.")
 
         return value

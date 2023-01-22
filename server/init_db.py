@@ -79,15 +79,24 @@ async def add_users(session):
         alice = User("alice", "alice@yahoo.com", pw_hash("alice456"))
         bob = User("bob", "bob@gmail.com", pw_hash("bob123"))
         carol = User("carol", "carol@outlook.com", pw_hash("carol789"))
+        daniel = User("daniel", "daniel@dynamicprogramming.com", pw_hash("daniel123"))
+        eden = User("eden", "eden@joker.com", pw_hash("eden789"))
+
         alice.avatar = "/default.png"
         bob.avatar = "/galaxy.jpg"
         carol.avatar = "/murder.jpg"
+        daniel.avatar = "/COVID SPREADS DIGITALLY.png"
+        eden.avatar = "/ALL THE BEST EMOJI.png"
+
         # for now use same key LMAO cuz i lazy (if got time, prob not, change this)
         bob.public_key = "BNBP/IX/gJRrfQTWE3eDJJ6BmDSsjspXt7SuWkmG4DAUVhN6JrVxKC2DY16JqDxglw4Wf6D1tdTBL6hQp81HlbE="
         carol.public_key = "BNBP/IX/gJRrfQTWE3eDJJ6BmDSsjspXt7SuWkmG4DAUVhN6JrVxKC2DY16JqDxglw4Wf6D1tdTBL6hQp81HlbE="
+
         session.add(bob)
         session.add(alice)
         session.add(carol)
+        session.add(daniel)
+        session.add(eden)
 
     return alice, bob, carol
 
