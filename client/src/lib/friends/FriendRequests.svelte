@@ -2,6 +2,8 @@
 	import SlidingMenu from '$lib/settings/templates/SlidingMenu.svelte';
 	import Friend from '$lib/friends/Friend.svelte';
   import { friendRequestsStore } from '$lib/stores/friend-requests'
+	import { onMount } from 'svelte';
+	import { invalidate } from '$app/navigation';
 
 	export let displayFriendRequests;
 	export let toggleFriendRequests;
@@ -25,6 +27,12 @@
       user: user_id
     })
   }
+
+  onMount(async () => {
+    socket.on("friend_requests_update", async () => {
+      invalidate("app:friend-requests")
+    })
+  })
 </script>
 
 <SlidingMenu

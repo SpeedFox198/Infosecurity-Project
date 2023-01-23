@@ -3,9 +3,15 @@ import sqlalchemy as sa
 from pydantic import ValidationError
 
 from db_access.globals import async_session
-from db_access.sio import set_online_status, add_sio_connection, remove_sio_connection, get_sid_from_sio_connection
+from db_access.sio import (
+    set_online_status,
+    add_sio_connection,
+    remove_sio_connection,
+    get_sid_from_sio_connection,
+    remove_friend_request
+)
 from db_access.user import get_user_details
-from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group, FriendRequest
+from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group, FriendRequest, Friend
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -312,9 +318,8 @@ async def create_group(sid, data):
 
 
 @sio.event
-async def send_friend_request(sid: str, data):
+async def send_friend_request(sid: str, data: dict):
     current_user = await get_user(sid)
-
     recipient_id = data.get("user")
     if recipient_id is None:
         await sio.emit("friend_request_failed", {
@@ -351,21 +356,88 @@ async def send_friend_request(sid: str, data):
 
 
 @sio.event
-async def cancel_sent_friend_request(sid: str, data):
+async def cancel_sent_friend_request(sid: str, data: dict):
     print(f"Received {data}")
-    return
+    current_user = await get_user(sid)
+
+    recipient_id = data.get("user")
+    if recipient_id is None:
+        await sio.emit("failed_cancel_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    valid_recipient = await get_user_details(recipient_id)
+    if valid_recipient is None:
+        await sio.emit("failed_cancel_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    await remove_friend_request(await current_user.user_id, recipient_id)
+    await sio.emit("friend_requests_update", to=sid)
+
+    recipient_sid = await get_sid_from_sio_connection(recipient_id)
+    if recipient_sid:
+        await sio.emit("friend_requests_update", to=recipient_sid)
 
 
 @sio.event
-async def accept_friend_request(sid: str, data):
+async def accept_friend_request(sid: str, data: dict):
     print(f"Received {data}")
-    return
+    current_user = await get_user(sid)
+
+    sender_id = data.get("user")
+    if sender_id is None:
+        await sio.emit("failed_accept_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    valid_sender = await get_user_details(sender_id)
+    if valid_sender is None:
+        await sio.emit("failed_accept_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    await remove_friend_request(sender_id, await current_user.user_id)
+    async with async_session() as session:
+        session.add(Friend(sender_id, await current_user.user_id))
+        await session.commit()
+
+    await sio.emit("friend_requests_update", to=sid)
+
+    sender_sid = await get_sid_from_sio_connection(sender_id)
+    if sender_sid:
+        await sio.emit("friend_requests_update", to=sender_sid)
 
 
 @sio.event
 async def cancel_received_friend_request(sid: str, data):
     print(f"Received {data}")
-    return
+    current_user = await get_user(sid)
+
+    sender_id = data.get("user")
+    if sender_id is None:
+        await sio.emit("failed_accept_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    valid_sender = await get_user_details(sender_id)
+    if valid_sender is None:
+        await sio.emit("failed_accept_friend_request", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    await remove_friend_request(sender_id, await current_user.user_id)
+    await sio.emit("friend_requests_update", to=sid)
+
+    sender_sid = await get_sid_from_sio_connection(sender_id)
+    if sender_sid:
+        await sio.emit("friend_requests_update", to=sender_sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

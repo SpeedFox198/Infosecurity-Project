@@ -5,7 +5,9 @@
   import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 	import Friend from "$lib/friends/Friend.svelte";
   import { friends } from "$lib/stores/friend"
+  import { friendRequestsStore } from "$lib/stores/friend-requests"
   import { page } from "$app/stores"
+	import { invalidate } from "$app/navigation";
   
   export let displayAddFriend
   export let toggleAddFriend
@@ -53,6 +55,7 @@
     socket.emit("send_friend_request", {
       user: user_id
     })
+    invalidate("app:friend-requests")
   }
   
   onMount(async () => {
