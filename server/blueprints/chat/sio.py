@@ -357,7 +357,6 @@ async def send_friend_request(sid: str, data: dict):
 
 @sio.event
 async def cancel_sent_friend_request(sid: str, data: dict):
-    print(f"Received {data}")
     current_user = await get_user(sid)
 
     recipient_id = data.get("user")
@@ -375,16 +374,15 @@ async def cancel_sent_friend_request(sid: str, data: dict):
         return
 
     await remove_friend_request(await current_user.user_id, recipient_id)
-    await sio.emit("friend_requests_update", to=sid)
+    await sio.emit("friend_requests_update", data=recipient_id, to=sid)
 
     recipient_sid = await get_sid_from_sio_connection(recipient_id)
     if recipient_sid:
-        await sio.emit("friend_requests_update", to=recipient_sid)
+        await sio.emit("friend_requests_update", data=recipient_id, to=recipient_sid)
 
 
 @sio.event
 async def accept_friend_request(sid: str, data: dict):
-    print(f"Received {data}")
     current_user = await get_user(sid)
 
     sender_id = data.get("user")
@@ -415,7 +413,6 @@ async def accept_friend_request(sid: str, data: dict):
 
 @sio.event
 async def cancel_received_friend_request(sid: str, data):
-    print(f"Received {data}")
     current_user = await get_user(sid)
 
     sender_id = data.get("user")

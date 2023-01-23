@@ -5,7 +5,6 @@
   import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 	import Friend from "$lib/friends/Friend.svelte";
   import { friends } from "$lib/stores/friend"
-  import { friendRequestsStore } from "$lib/stores/friend-requests"
   import { page } from "$app/stores"
 	import { invalidate } from "$app/navigation";
   
@@ -68,6 +67,18 @@
       sentRequests.push(data)
       sentRequests = sentRequests
     })
+    
+    socket.on("friend_requests_update", async (data) => {
+      /** Because this event is shared in a few server events,
+       *  need to make sure there is data sent since in this context need the user_id
+       *  while other contexts don't need data
+       **/
+      if (!data) {
+        return
+      }
+      sentRequests.splice(sentRequests.indexOf(data), 1)
+      sentRequests = sentRequests
+    })
   })
   
 </script>
@@ -93,7 +104,9 @@
   {:else}
 
     {#if searchError}
-      <span class="position-absolute top-50 start-50 translate-middle fs-4">{searchError}</span>
+      <span class="position-absolute top-50 start-50 translate-middle fs-4">
+        {searchError}
+      </span>
     {/if}
 
     {#if searchResults}

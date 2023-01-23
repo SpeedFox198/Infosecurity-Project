@@ -28,7 +28,7 @@ let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to c
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
-$: friends.set(data.friends.friendsList); // TODO(cw): get a better name for this
+$: friends.set(data.friends.friendsList);
 $: friendRequestsStore.set(data.friendRequests.friendRequestsList)
 $: deviceStore.set(data.devices);
 
