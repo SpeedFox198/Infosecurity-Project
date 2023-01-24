@@ -131,10 +131,31 @@ async function submitTwoFA () {
   <Option name="Request personal data" icon="file-zipper" on:click={toggleData}/>
 </SlidingMenu>
 <SlidingMenu title="Scan incoming files" display={displaySusFiles} on:click={toggleSusFiles} right={true}>
+  <div>
+    <p>
+      Bubbles can scan incoming files for viruses and malware. This is highly recommended for all accounts and on by default.
+    </p>
+  </div>
 </SlidingMenu>
 <SlidingMenu title="Disappearing messages" display={displayMagic} on:click={toggleMagic} right={true}>
 </SlidingMenu>
 <SlidingMenu title="Request personal data" display={displayData} on:click={toggleData} right={true}>
+  <div class="file-icon">
+    <i class="fa-duotone fa-print"></i>
+  </div>
+  <div class="p-data">
+    <span class="p-data-disclaimer">
+      Bubbles can export all of your data, including messages, files, and contacts.
+    </span>
+  </div>
+  <hr>
+  <button class="btn req-data"><i class="fa-solid fa-file"></i>Request personal data</button>
+  <hr>
+  <div class="p-data">
+    <span class="p-data-disclaimer">
+      When the report is available to download, you'll receive an email, stating “<b>Your account info report is now available</b>”. Because this report contains your information, you should be careful about storing, sending, or uploading it to any other services.
+    </span>
+  </div>
 </SlidingMenu>
 
 
@@ -143,6 +164,37 @@ async function submitTwoFA () {
 </SlidingMenu>
 
 <style>
+.p-data {
+  display: flex;
+  flex-direction: column;
+  font-size: 1rem; 
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+.req-data {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.fa-solid {
+  font-size: 2.5rem;
+  margin-right: 10px;
+  padding-left:1rem;
+} 
+
+.file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
 .QR2fa {
   width: 150px;
   height: 150px;
