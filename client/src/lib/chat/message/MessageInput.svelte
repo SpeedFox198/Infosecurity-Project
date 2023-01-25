@@ -147,6 +147,7 @@ async function onSend(event) {
   z-index: 30;
   bottom: 0;
   height: var(--bottom-bar-height);
+  max-width: 100%;
   background-color: var(--grey);
   border-left: 0.1rem solid var(--grey-shadow);
 }

@@ -13,7 +13,7 @@ $: console.log(currentChat);
     {#if currentChat !== undefined}
 
       <!-- Chat Icon -->
-      <div class="icon d-flex ms-2 me-1">
+      <div class="icon d-flex ms-3 me-1">
         <div class="img-wrapper img-1-1">
           {#if !currentChat.icon.startsWith("media/")}
             <img class="rounded-circle p-2" src={currentChat.icon} alt="">

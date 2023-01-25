@@ -24,7 +24,7 @@ export let getRoomMsgs;
 
 let currentUser = $page.data.user
 let displayRoomInfo = false;
-$: roomInfoLength = displayRoomInfo ? "25rem" : "0";
+$: roomInfoLength = displayRoomInfo ? "25rem" : "0rem";
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
