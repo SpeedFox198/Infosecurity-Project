@@ -94,7 +94,7 @@ class AuthedUser(AuthUser):
         return self._censor
 
     @property
-    async def twofa_status(self):
+    async def google_account(self):
         await self._resolve()
         return self._google_account
 
