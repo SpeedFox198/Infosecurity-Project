@@ -76,7 +76,7 @@ export const actions = {
         loginError: result.message
       }
     }
-    
+
     const quartCookie = Cookie.parse(response.headers.get("set-cookie"))
     cookies.set(quartCookie.key, quartCookie.value, {
       path: quartCookie.path,
@@ -84,6 +84,10 @@ export const actions = {
       sameSite: quartCookie.sameSite,
       maxAge: 60 * 24 * 60 * 60, // formatted as (days * hours * minutes * seconds)
     })
+
+    if (result.message === "2FA required") {
+      throw redirect(302, "/twoFA")
+    }
 
     throw redirect(302, "/chat")
   },

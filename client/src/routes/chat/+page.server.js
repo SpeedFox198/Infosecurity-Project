@@ -58,9 +58,24 @@ export async function load({locals, fetch, depends}) {
 
     }
   
+    const get2FAStatus = async () => {
+      depends("app:twofa-check")
+      const response = await fetch("https://127.0.0.1:8443/api/settings/2fa-check")
+      const data = await response.json()
+      if (data.message === "2FA not enabled") {
+        return {
+          twoFAEnabledCheck: false
+        }
+      }
+      return {
+        twoFAEnabledCheck: true
+      }
+    }
+
     return {
       devices: getDevices(),
       friends: getFriends(),
-      friendRequests: getFriendRequests()
+      friendRequests: getFriendRequests(),
+      twoFAEnabled: get2FAStatus(),
     }
 };

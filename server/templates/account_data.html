@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Information</title>
+</head>
+
+<body>
+    <h1>Account Information Report</h1>
+    <h2>User Details</h2>
+
+    <div class="info-box">
+        <ul>
+            <li>
+                Username: {{ username }}
+            </li>
+            <li>
+                Email: {{ email }}
+            </li>
+            <li>
+                Avatar: {{ avatar }}
+            </li>
+        </ul>
+    </div>
+
+    <h2>Settings</h2>
+    <div class="info-box">
+        <ul>
+            <li>
+                Malware Scan: {{ malware_scan }}
+            </li>
+            <li>
+                Friends Only: {{ friends_only }}
+            </li>
+            <li>
+                Censor: {{ censor }}
+            <li>
+                Two Factor Authentication: {{ two_factor }}
+            </li>
+            <li>
+                Disappearing Messages: {{ disappearing }}
+            </li>
+        </ul>
+    </div>
+
+    <h2>Device Details</h2>
+    <div class="info-box">
+        <ul>
+            {% for device in device_list %}
+            <li>
+                Device ID: {{ device["device_id"] }}
+            </li>
+            <li>
+                Last Accessed: {{ device["time"] }}
+            </li>
+            <li>
+                Location: {{ device["location"] }}
+            </li>
+            <li>
+                Operating System: {{ device["os"] }}
+            </li>
+            <li>
+                Browser: {{ device["browser"] }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <p>
+        This report contains your account information, you should be careful about storing, sending, or uploading it to any other
+        services.
+    </p>
+
+    <p>
+        Thanks,
+        <br />
+        Bubbles Team
+    </p>
+
+</body>
+</html>

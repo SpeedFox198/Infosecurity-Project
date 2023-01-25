@@ -7,10 +7,10 @@ import RightSection from "./RightSection.svelte";
 import ChatDetails from "$lib/chat/info/ChatDetails.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
-import { deviceStore } from "$lib/stores/device"
-import { friends } from "$lib/stores/friend"
-import { friendRequestsStore } from "$lib/stores/friend-requests"
-
+import { deviceStore } from "$lib/stores/device";
+import { twoFACheckStore } from "$lib/stores/twofa-check.js";
+import { friends } from "$lib/stores/friend";
+import { friendRequestsStore } from "$lib/stores/friend-requests";
 export let data;
 
 const namespace = "https://localhost:8443";
@@ -31,6 +31,7 @@ user_id.set($page.data.user.user_id);
 $: friends.set(data.friends.friendsList);
 $: friendRequestsStore.set(data.friendRequests.friendRequestsList)
 $: deviceStore.set(data.devices);
+$: twoFACheckStore.set(data.twoFAEnabled.twoFAEnabledCheck);
 
 let socket;  // Forward declare socket :)
 

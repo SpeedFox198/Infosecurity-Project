@@ -149,9 +149,10 @@ async def login(data: LoginBody):
         return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
 
     # Check if user has 2FA enabled
-    if await current_user.twofa_status:
-        auth_session["login_existing_user"] = existing_user
-        auth_session["login_session"] = session
+    if await get_2fa_backup_codes(existing_user.user_id):
+        print(await get_2fa_backup_codes(existing_user.user_id))
+        auth_session["login_existing_user"] = existing_user.user_id
+        print(auth_session["login_existing_user"])
         return {"message": "2FA required"}, 200
 
     logged_in_user = existing_user
@@ -165,14 +166,19 @@ async def login(data: LoginBody):
 
 
 @auth_bp.post("/2fa")
+@validate_request(TwoFABody)
 async def two_fa(data: TwoFABody):
-    session = auth_session.get("login_session")
-    existing_user = auth_session.get("login_existing_user")
+    user_id = auth_session.get("login_existing_user")
+    print(user_id)
+    if auth_session.get("login_existing_user") is None:
+        return {"message": "Invalid request"}, 401
+    async with async_session() as session:
+        existing_user: User = (await session.execute(sa.select(User).where(User.user_id == user_id))).scalars().first()
     device_id = str(uuid4())
     browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
                                 await get_location_from_ip(request.remote_addr))
-    twoFA_code = (await get_2fa(await current_user.user_id))[1]
-    secret_token = twoFA_code
+    twoFA_code = await get_2fa(user_id)
+    secret_token = twoFA_code.secret
     OTP_check = data.twofacode
     verified = pyotp.TOTP(secret_token).verify(OTP_check)
     if verified:
@@ -300,12 +306,6 @@ async def google_callback(data: GoogleCallBackBody):
         # Create a new user
         await insert_user_by_google(user_id, name, email, picture)
 
-    # Check if user has 2FA enabled
-    if await current_user.twofa_status:
-        auth_session["login_existing_user"] = existing_user
-        auth_session["login_session"] = session
-        return {"message": "2FA required"}, 200
-
     await add_logged_in_device(session, device_id, user_id, browser_data)
     login_user(AuthedUser(f"{user_id}.{device_id}"))
     # TODO(br1ght) re-enable when needed
@@ -356,5 +356,5 @@ async def is_logged_in():
         await current_user.malware_scan,
         await current_user.friends_only,
         await current_user.censor,
-        await current_user.twofa_status
+        await current_user.google_account
     )

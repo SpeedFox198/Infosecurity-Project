@@ -1,14 +1,17 @@
+<script>
+  export let errors
+</script>
 <div class="login card rounded-4 shadow">
     <div class=" p-5 pb-4 border-bottom-0">
       <h1 class="card-title fw-bold mb-0 fs-2">Input your 2FA from your Google Authenticator.</h1>
     </div>
   
     <div class="card-body p-5 pt-0">
-      <form method="POST" action="?/twofA">
+      <form method="POST" action="?/twoFA">
         <div class="form-floating mb-3">
           <input
             type="text"
-            name="twofa"
+            name="twoFA"
             class="form-control rounded-3"
             id="floatingInput"
             placeholder="123456"
@@ -16,10 +19,13 @@
           >
           <label for="floatingInput">2FA</label>
         </div>
+        {#if errors}
+        <p class="text-danger">{errors}</p>
+        {/if}
         <button class="login-btn w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">
         Submit
         </button>
-  
+
         <hr class="my-4" />
       </form>
     </div>
