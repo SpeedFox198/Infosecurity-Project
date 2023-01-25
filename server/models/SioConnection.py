@@ -1,4 +1,4 @@
-from sqlalchemy import Column, VARCHAR, CHAR, ForeignKey
+from sqlalchemy import Column, CHAR, ForeignKey
 
 from db_access.globals import Base
 from models import User

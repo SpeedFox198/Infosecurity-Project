@@ -18,6 +18,7 @@ class AuthedUser(AuthUser):
         self._friends_only = None
         self._censor = None
         self._twofa_status = None
+        self._disappearing = None
 
     async def _resolve(self):
         if not self._resolved:
@@ -26,8 +27,7 @@ class AuthedUser(AuthUser):
             except (ValueError, AttributeError):
                 self._user_id, self._device_id = ("",)*2
 
-            user_details = await get_user_details(self._user_id) or ("",) * 9
-            print(f"\n{user_details}\n")
+            user_details = await get_user_details(self._user_id) or ("",) * 10
 
             (
                 self._username,
@@ -38,62 +38,68 @@ class AuthedUser(AuthUser):
                 self._malware_scan,
                 self._friends_only,
                 self._censor,
-                self._twofa_status
+                self._twofa_status,
+                self._disappearing
             ) = user_details
 
             self._resolved = True
 
     @property
-    async def user_id(self):
+    async def user_id(self) -> str:
         await self._resolve()
         return self._user_id
 
     @property
-    async def device_id(self):
+    async def device_id(self) -> str:
         await self._resolve()
         return self._device_id
 
     @property
-    async def username(self):
+    async def username(self) -> str:
         await self._resolve()
         return self._username
 
     @property
-    async def email(self):
+    async def email(self) -> str:
         await self._resolve()
         return self._email
 
     @property
-    async def avatar(self):
+    async def avatar(self) -> str:
         await self._resolve()
         return self._avatar
 
     @property
-    async def public_key(self):
+    async def public_key(self) -> str:
         await self._resolve()
         return self._public_key
 
     @property
-    async def dark_mode(self):
+    async def dark_mode(self) -> bool:
         await self._resolve()
         return self._dark_mode
 
     @property
-    async def malware_scan(self):
+    async def malware_scan(self) -> bool:
         await self._resolve()
         return self._malware_scan
 
     @property
-    async def friends_only(self):
+    async def friends_only(self) -> bool:
         await self._resolve()
         return self._friends_only
 
     @property
-    async def censor(self):
+    async def censor(self) -> bool:
         await self._resolve()
         return self._censor
 
     @property
-    async def twofa_status(self):
+    async def twofa_status(self) -> bool:
         await self._resolve()
         return self._twofa_status
+
+    @property
+    async def disappearing(self) -> bool:
+        await self._resolve()
+        return self._disappearing

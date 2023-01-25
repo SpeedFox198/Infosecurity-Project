@@ -19,7 +19,7 @@ async def create_2fa(user_id, secret) -> None:
 #Retrieve 2FA
 async def get_2fa(user_id) -> TwoFA | None:
     async with async_session() as session:
-        statement = sa.select(TwoFA).where(TwoFA.user_id == user_id)
+        statement = sa.select(models.TwoFA).where(models.TwoFA.user_id == user_id)
         result = await session.execute(statement)
         twoFA = result.scalars().first()
         if twoFA:
@@ -30,7 +30,7 @@ async def get_2fa(user_id) -> TwoFA | None:
 #Check if 2FA exists
 async def check_2fa_exists(user_id) -> bool:
     async with async_session() as session:
-        statement = sa.select(TwoFA).where(TwoFA.user_id == user_id)
+        statement = sa.select(models.TwoFA).where(models.TwoFA.user_id == user_id)
         result = await session.execute(statement)
         twoFA = result.scalars().first()
         if twoFA:
@@ -41,7 +41,7 @@ async def check_2fa_exists(user_id) -> bool:
 #Delete 2FA
 async def delete_2fa(user_id):
     async with async_session() as session:
-        statement = sa.delete(TwoFA).where(TwoFA.user_id == user_id)
+        statement = sa.delete(models.TwoFA).where(models.TwoFA.user_id == user_id)
         try:
             await session.execute(statement)
             await session.commit()

@@ -64,6 +64,7 @@
     
     socket.on("friend_request_sent", async (data) => {
       $flash = {type: 'success', message: `Friend request successfully sent!`}
+      invalidate("app:friend-requests")
       sentRequests.push(data)
       sentRequests = sentRequests
     })

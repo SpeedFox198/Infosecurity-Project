@@ -14,6 +14,7 @@ export let name;
   <div class="d-flex align-items-center">
     <span class="fs-5">{name}</span>
   </div>
+  <slot />
 </div>
 
 
@@ -31,6 +32,7 @@ export let name;
 
 .icon {
   width: 4.5rem;
+  height: 4.5rem;
   color: var(--grey-dark);
 }
 </style>

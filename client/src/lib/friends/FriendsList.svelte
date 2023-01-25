@@ -1,4 +1,11 @@
 <script>
+import { onMount } from "svelte";
+import { getFlash } from "sveltekit-flash-message/client";
+import { createEventDispatcher } from 'svelte';
+
+
+import { page } from "$app/stores";
+import { invalidate } from "$app/navigation";
 import SlidingMenu from "$lib/settings/templates/SlidingMenu.svelte";
 import { friends } from "$lib/stores/friend"
 import AddFriend from "$lib/friends/AddFriend.svelte";
@@ -7,11 +14,43 @@ export let displayFriendsList;
 export let toggleFriendsList;
 export let socket;
 
+const dispatch = createEventDispatcher()
+const flash = getFlash(page)
 let displayAddFriend = false;
 
 const toggleAddFriend = () => {
   displayAddFriend = !displayAddFriend
 }
+
+const removeFriend = async (user_id) => {
+  socket.emit("remove_friend", {
+    user: user_id
+  })
+}
+
+const messageFriend = async (user_id) => {
+  socket.emit("message_friend", {
+    user: user_id  
+  })
+}
+
+onMount(async () => {
+  socket.on("remove_friend_failed", async (data) => {
+    $flash = {type: 'failure', message: `Friend failed to remove! Reason: ${data.message}`}
+  })
+  
+  socket.on("friend_removed", async () => {
+    invalidate("app:friends")
+  })
+  
+  socket.on("message_friend_error", async (data) => {
+    $flash = {type: 'failure', message: `Failed to message friend! Reason: ${data.message}`}
+  })
+  
+  socket.on("message_friend_success", async () => {
+    dispatch("message-friend")
+  })
+})
 </script>
 
 
@@ -42,7 +81,7 @@ const toggleAddFriend = () => {
 
         <ul class="dropdown-menu" aria-labelledby="{friend.user_id}-dropdown">
           <li>
-            <button class="dropdown-item">
+            <button class="dropdown-item" on:click={messageFriend(friend.user_id)}>
               <i class="fa-solid fa-message"></i>
               Message
             </button>
@@ -54,7 +93,7 @@ const toggleAddFriend = () => {
             </button>
           </li>
           <li>
-            <button class="dropdown-item" type="button" on:click>
+            <button class="dropdown-item" type="button" on:click={removeFriend(friend.user_id)}>
               <i class="fa-solid fa-xmark"></i>
               Remove Friend
             </button>
