@@ -1,5 +1,6 @@
 <script>
 import { onMount, createEventDispatcher } from "svelte";
+import { getFlash } from "sveltekit-flash-message/client";
 import { page } from "$app/stores"
 
 import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
@@ -28,6 +29,7 @@ export let toggleChatDetails;
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 
 const dispatch = createEventDispatcher();
+const flash = getFlash(page)
 
 let currentUser = $page.data.user
 let roomsLoaded = false;
@@ -125,7 +127,7 @@ async function sendMsg(event) {
 
   // TODO(high)(SpeedFox198): implement ui for message is masked
   if (messageChanged) {
-    console.log("YOUR SENSITIVE DATA HAS BEEN LEAKED BOZO");
+    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
   }
 
   // Emit message to server and add message to client stores
