@@ -30,7 +30,7 @@ class User(Base):
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)
     censor = Column(Boolean, default=True)
-    twofa_status = Column(Boolean, default=False)
+    google_account = Column(Boolean, default=False)
     online = Column(Boolean)
 
     devices = relationship("Device", back_populates="user")

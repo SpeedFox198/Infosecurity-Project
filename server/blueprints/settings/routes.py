@@ -16,6 +16,18 @@ from db_access.backup_codes import create_2fa_backup_codes
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
+@settings_bp.get("/2fa-check")
+@login_required
+async def google_check():
+    #Check if 2FA is already enabled
+    if (await get_2fa_backup_codes(await current_user.user_id)):
+        print(await get_2fa_backup_codes(await current_user.user_id))
+        print("Checkpoint Yes")
+        return {"message": "2FA enabled"}, 200
+    else:
+        print(await get_2fa_backup_codes(await current_user.user_id))
+        print("Checkpoint No")
+        return {"message":"2FA not enabled"}, 200
 
 @settings_bp.get("/twofa_secretgenerate")
 @login_required
@@ -36,7 +48,7 @@ async def google_secret():
 @validate_request(TwoFABody)
 async def google_authenticator(data: TwoFABody):
     #Check if 2FA is already enabled
-    if (await current_user.twofa_status):
+    if (await get_2fa_backup_codes(await current_user.user_id)):
         print("Checkpoint No")
         return {"message": "2FA already enabled"}, 400
     else:
@@ -60,7 +72,7 @@ async def google_authenticator(data: TwoFABody):
 @settings_bp.delete("/twofa-delete")
 @login_required
 async def delete_2fa():
-    if current_user.twofa_status:
+    if await get_2fa_backup_codes(await current_user.user_id):
         await delete_2fa(await current_user.user_id)
         return {"message": "2FA disabled"}, 200
     else:

@@ -8,9 +8,10 @@ export async function load({ cookies }) {
 }
 
 export const actions = {
-  twofA: async (event) => {
+  twoFA: async (event) => {
         const data = await event.request.formData()
-        const twofA = data.get("twofA")
+        const twoFA = data.get("twoFA")
+        console.log(twoFA)
         const response = await fetch("https://127.0.0.1:8443/api/auth/2fa", {   
             method: "POST",
             credentials: "include",
@@ -19,7 +20,7 @@ export const actions = {
                 "Content-Type": "application/json",
                 "Cookie": event.request.headers.get("cookie")
             },
-            body: JSON.stringify({"twofacode": twofA})
+            body: JSON.stringify({"twofacode": twoFA})
         });  
         const result = await response.json();
         if (!response.ok) {
@@ -32,7 +33,7 @@ export const actions = {
         //throw redirect(302, "/")
         throw redirect(
           302,
-          "/",
+          "/chat",
           { type: "success", message: "2FA sign in completed!" },
           event
         )

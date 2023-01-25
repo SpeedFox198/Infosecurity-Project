@@ -19,7 +19,7 @@ async def create_2fa(user_id, secret) -> None:
 #Retrieve 2FA
 async def get_2fa(user_id) -> TwoFA | None:
     async with async_session() as session:
-        statement = sa.select(models.TwoFA).where(models.TwoFA.user_id == user_id)
+        statement = sa.select(TwoFA).where(TwoFA.user_id == user_id)
         result = await session.execute(statement)
         twoFA = result.scalars().first()
         if twoFA:

@@ -76,7 +76,11 @@ export const actions = {
         loginError: result.message
       }
     }
-    
+    //Check if response is 302
+    if (result.message === "2FA required") {
+      throw redirect(302, "/twoFA")
+    }
+
     const quartCookie = Cookie.parse(response.headers.get("set-cookie"))
     cookies.set(quartCookie.key, quartCookie.value, {
       path: quartCookie.path,
