@@ -74,7 +74,6 @@ async def delete_2fa():
         return {"message": "2FA not enabled"}, 400
 
 
-
 @settings_bp.get("/get-account-information")
 @login_required
 async def get_account_information():

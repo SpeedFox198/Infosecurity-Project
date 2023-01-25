@@ -1,3 +1,5 @@
+import os
+
 import socketio
 import sqlalchemy as sa
 from pydantic import ValidationError
@@ -17,7 +19,8 @@ from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 
 from models.request_data import GroupMetadataBody
-from utils import to_unix
+from security_functions.ocr import ocr_scan
+from utils import to_unix, remove_tree_directory
 
 from .functions import delete_expired_messages, get_room, messages_queue, save_file, save_group_icon
 from .sio_auth_manager import SioAuthManager
@@ -198,6 +201,8 @@ async def delete_messages(sid, data):
 @sio.event
 async def create_group(sid, data):
     current_user = await get_user(sid)
+    have_group_icon = False
+    icon_path = None
 
     try:
         group_metadata = GroupMetadataBody(**data)
@@ -209,16 +214,26 @@ async def create_group(sid, data):
         }, to=sid)
         return
 
+    new_room = Room(group_metadata.disappearing, type_="group")
+
+    if group_metadata.icon and group_metadata.icon_name:
+        icon_path = await save_group_icon(new_room.room_id, group_metadata.icon_name, group_metadata.icon)
+        is_image_sensitive = ocr_scan(icon_path)
+        if is_image_sensitive:
+            await remove_tree_directory(os.path.dirname(icon_path))
+            await sio.emit("create_group_error", {
+                "message": "Group icon contains sensitive data"
+            })
+            return
+        have_group_icon = True
+
     async with async_session() as session:
         # Create new room
-        new_room = Room(group_metadata.disappearing, type_="group")
         session.add(new_room)
         await session.flush()
 
-        if group_metadata.icon and group_metadata.icon_name:
+        if have_group_icon:
             # Add Group icon if any and the group details
-            icon_path = await save_group_icon(new_room.room_id, group_metadata.icon_name, group_metadata.icon)
-
             session.add(
                 Group(new_room.room_id, group_metadata.name, icon_path)
             )
