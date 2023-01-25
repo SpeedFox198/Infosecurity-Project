@@ -19,7 +19,7 @@ async def upload_and_scan_file():
     file_id = upload_file(file)
     file_hash = get_file_analysis(file_id)
     score = scan_file_hash(file_hash)
-    print(score)
+    print(score) 
     return {"Score": score}
     # print("\n\n\n")
     # print(request)

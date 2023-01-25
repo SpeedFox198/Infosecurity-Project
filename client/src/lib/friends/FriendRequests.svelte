@@ -1,11 +1,38 @@
 <script>
 	import SlidingMenu from '$lib/settings/templates/SlidingMenu.svelte';
-	import Friend from './Friend.svelte';
+	import Friend from '$lib/friends/Friend.svelte';
+  import { friendRequestsStore } from '$lib/stores/friend-requests'
+	import { onMount } from 'svelte';
+	import { invalidate } from '$app/navigation';
 
 	export let displayFriendRequests;
 	export let toggleFriendRequests;
+  /** @type {import('socket.io-client').Socket}*/
+  export let socket;
 
-  let friend = {}
+  const cancelSentFriendRequest = async (user_id) => {
+    socket.emit("cancel_sent_friend_request", {
+      user: user_id
+    })
+  }
+  
+  const acceptFriendRequest = async (user_id) => {
+    socket.emit("accept_friend_request", {
+      user: user_id
+    })
+  }
+  
+  const cancelReceivedFriendRequest = async (user_id) => {
+    socket.emit("cancel_received_friend_request", {
+      user: user_id
+    })
+  }
+
+  onMount(async () => {
+    socket.on("friend_requests_update", async () => {
+      invalidate("app:friend-requests")
+    })
+  })
 </script>
 
 <SlidingMenu
@@ -14,28 +41,33 @@
 	on:click={toggleFriendRequests}
 	right="false"
 >
-  <div class="m-3">
-    <div class="mb-4">
-      <span class="fw-bold fs-4">Sent</span>
-      <Friend {friend}>
+  <div class="mb-4">
+    <span class="fw-bold fs-4 mx-3">Sent</span>
+    {#each $friendRequestsStore.sent as user (user.user_id)}
+      <Friend friend={user}>
         <div class="ms-auto">
-          <button type="button" class="btn btn-danger">Cancel</button>
+          <button type="button" class="btn btn-danger" on:click={cancelSentFriendRequest(user.user_id)}>Cancel</button>
         </div>
-      </Friend>
-    </div>
-    <div>
-      <span class="fw-bold fs-4">Received</span>
-      <Friend {friend}>
+      </Friend>  
+    {/each}
+  </div>
+
+  <div>
+
+    <span class="fw-bold fs-4 mx-3">Received</span>
+    {#each $friendRequestsStore.received as user (user.user_id)}
+      <Friend friend={user}>
         <div class="ms-auto">
-          <button type="button" class="circle-btn me-2 pos">
+          <button type="button" class="circle-btn me-2 pos" on:click={acceptFriendRequest(user.user_id)}>
             <i class="fa-solid fa-check fs-3"></i>
           </button>
-          <button type="button" class="circle-btn neg">
+          <button type="button" class="circle-btn neg" on:click={cancelReceivedFriendRequest(user.user_id)}>
             <i class="fa-solid fa-xmark fs-3"></i>
           </button>
         </div>
-      </Friend>
-    </div>
+      </Friend>  
+    {/each}
+    
   </div>
 </SlidingMenu>
 
