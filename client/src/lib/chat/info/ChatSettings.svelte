@@ -2,23 +2,36 @@
 export let icon;
 export let name;
 export let red;
+export let good;
+export let bad;
+export let arrow;
 if (!red) red = false;
+if (!good) good = false;
+if (!bad) bad = false;
+if (!arrow) arrow = false;
 </script>
 
 
 <div
   class="option d-flex flex-column user-select-none p-3"
   class:red
+  class:good
+  class:bad
   on:click
   on:keydown>
 
   <div class="d-flex flex-row">
     <div class="icon d-flex align-items-center justify-content-center">
-      <i class="fa-solid fa-{icon} fs-4"></i>
+      <i class="fa-solid fa-{icon} fs-5"></i>
     </div>
     <div class="d-flex align-items-center">
       <span class="fs-5">{name}</span>
     </div>
+    {#if arrow}
+      <div class="icon d-flex align-items-center justify-content-center">
+        <i class="fa-solid fa-angle-right fs-5"></i>
+      </div>
+    {/if}
   </div>
   <div class="text">
     <slot />
@@ -28,7 +41,7 @@ if (!red) red = false;
 
 <style>
 :root {
-  --icon-width: 4.5rem;
+  --icon-width: 4rem;
 }
 
 .option:hover {
@@ -50,11 +63,15 @@ if (!red) red = false;
   margin-left: var(--icon-width);
 }
 
-.red {
+.red, .red .icon, .red .text {
   color: var(--red);
 }
 
-.red .icon {
-  color: var(--red);
+.good, .good .icon, .good .text {
+  color: var(--primary);
+}
+
+.bad, .bad .icon, .bad .text {
+  color: var(--orange);
 }
 </style>

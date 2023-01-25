@@ -1,6 +1,7 @@
 <script>
 import { room_id, roomStorage } from "$lib/stores/room";
 import ChatSettings from "./ChatSettings.svelte";
+import SlidingMenu from "./SlidingMenu.svelte";
 
 export let displayChatDetails;
 export let closeChatDetails;
@@ -8,16 +9,17 @@ export let animateHideChatDetails;
 
 let displayNone = true;
 $: currentChat = ($roomStorage || {})[$room_id] || {};
-$: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 500);
+$: displayChatDetails ? (() => displayNone=hide)() : setTimeout(() => displayNone=hide, 500);
+$: hide = animateHideChatDetails && !displayChatDetails;
 </script>
 
 
 <!-- Chat Details Section -->
-<div class="chat-details-section" class:hide={animateHideChatDetails && !displayChatDetails} class:d-none={displayNone}>
-  <div class="main">
+<div class="chat-details-section" class:hide class:d-none={displayNone}>
+  <div class="section-container">
 
-    <!-- Profile -->
-    <div class="chat-profile d-flex flex-row align-items-center p-2">
+    <!-- Section Header -->
+    <div class="title d-flex flex-row align-items-center p-2">
       <div class="d-flex">
         <button
           class="back d-flex align-items-center justify-content-center rounded-circle"
@@ -45,11 +47,21 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
 
       <div class="section mb-3">
         <!-- encrypted? -->
-        <ChatSettings icon={"lock"} name="Encryption" on:click>
-          {"Messages in this chat are end-to-end encrypted. Click to learn more."}
+        <ChatSettings
+          icon={currentChat.encrypted ? "lock" : "unlock"}
+          name="Encryption"
+          good={currentChat.encrypted}
+          bad={!currentChat.encrypted}
+          on:click
+        >
+          {#if currentChat.encrypted}
+            Messages in this chat are end-to-end encrypted. Click to learn more.
+          {:else}
+            End-to-end encryption is not enabled for this chat. Click to learn more.
+          {/if}
         </ChatSettings>
         <!-- disappearing messages settings -->
-        <ChatSettings icon="stopwatch" name="Disappearing Messages" on:click>
+        <ChatSettings icon="stopwatch" name="Disappearing Messages" arrow on:click>
           {"Off"}
         </ChatSettings>
       </div>
@@ -66,7 +78,7 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
 
       <div class="section mb-3">
         {#if currentChat.type === "direct"}
-          <ChatSettings icon="ban" name="Block" red on:click/>
+          <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click/>
           <ChatSettings icon="trash" name="Delete chat" red on:click/>
         {:else}
           <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
@@ -99,11 +111,11 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
   animation-duration: 0.5s;
 }
 
-.main {
+.section-container {
   width: var(--side-bar-length);
 }
 
-.chat-profile {
+.title {
   height: var(--top-bar-height);
   background-color: var(--primary);
   color: var(--white);

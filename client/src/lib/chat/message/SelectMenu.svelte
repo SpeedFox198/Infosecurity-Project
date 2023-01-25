@@ -74,6 +74,6 @@ async function deleteMsgs(event) {
 
 .icon-trash {
   font-size: 1.5rem;
-  color: var(--red-dark);
+  color: var(--red);
 }
 </style>
