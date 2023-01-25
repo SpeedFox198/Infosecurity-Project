@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from db_access.globals import async_session
 from db_access.sio import set_online_status, add_sio_connection, remove_sio_connection, get_sid_from_sio_connection
 from db_access.user import get_user_details
+from db_access.message import db_get_room_messages, db_remove_messages
 from models import AuthedUser, Disappearing, Media, Membership, Message, Room, Group, FriendRequest
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
@@ -155,27 +156,7 @@ async def get_room_messages(sid, data):
     offset = MESSAGE_LOAD_NUMBER * n + extra
 
     # Get room messages from database
-    async with async_session() as session:
-        statement = sa.select(
-            Message.message_id,
-            Message.user_id,
-            Message.time,
-            Message.content,
-            Message.type,
-            Message.encrypted
-        ).where(
-            Message.room_id == room_id
-        ).order_by(Message.time.desc()).limit(limit).offset(offset)
-
-        result: list[Message] = (await session.execute(statement)).all()
-        room_messages = [{
-            "message_id": result[i].message_id,
-            "user_id": result[i].user_id,
-            "time": to_unix(result[i].time),
-            "content": result[i].content,
-            "type": result[i].type,
-            "encrypted": result[i].encrypted
-        } for i in range(len(result) - 1, -1, -1)]
+    room_messages = await db_get_room_messages(room_id, limit, offset)
 
     await sio.emit("receive_room_messages", {
         "room_id": room_id,
@@ -198,46 +179,8 @@ async def delete_messages(sid, data):
     user = await get_user(sid)
     user_id = await user.user_id
 
-    # Delete messages from database (ensures that room_id is correct)
-    async with async_session() as session:
-
-        # Get room type details
-        statement = sa.select(Room.type).where(Room.room_id == room_id)
-        room_type = (await session.execute(statement)).one()[0]
-
-        if room_type == "direct":  # User's can't delete other's messages in direct chats
-            is_admin = False
-        else:
-            # Check if user is group admin
-            statement = sa.select(Membership.is_admin).where(
-                (Membership.user_id == user_id)
-                & (Membership.room_id == room_id)
-            )
-            is_admin = (await session.execute(statement)).one()[0]
-
-        condition = (Message.message_id.in_(messages)) & (Message.room_id == room_id)
-
-        # If user is not admin of group chat, only allow deletion of own messages
-        if not is_admin:
-            condition &= (Message.user_id == user_id)
-
-        # Get messages to delete
-        statement = sa.select(Message.message_id).where(condition)
-
-        result = (await session.execute(statement)).all()
-        messages = [row[0] for row in result]
-
-        # Delete messages from database
-        statement = sa.delete(Media).where(Media.message_id.in_(messages))
-        await session.execute(statement)
-
-        statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(messages))
-        await session.execute(statement)
-
-        statement = sa.delete(Message).where(Message.message_id.in_(messages))
-        await session.execute(statement)
-
-        await session.commit()
+    # Delete messages from room with the appropriate permissions of user
+    messages = await db_remove_messages(messages, room_id, user_id)
 
     # Tell other clients in same room to delete the same messages
     await delete_client_messages(messages, room_id)

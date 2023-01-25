@@ -132,8 +132,6 @@ async function saveRoomKey(room_id, key) {
   // Upload room key to google drive
   const { content, error } = await service.updateJSONFile(ROOM_KEYS_FILE_NAME, room_id, key);
 
-  console.log(error)
-
   // If user is not authenticated yet
   if (error && error.code === 403) {
     service.authUser(() => saveRoomKey(room_id, key));
