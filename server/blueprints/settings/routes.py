@@ -1,8 +1,9 @@
 import pyotp
 import json
 import os
+import datetime
 import sqlalchemy as sa
-from quart import Blueprint
+from quart import Blueprint, render_template, current_app 
 from quart_schema import validate_request, validate_response
 from models.request_data import TwoFABody
 from models.response_data import UserData
@@ -12,8 +13,8 @@ from db_access.globals import async_session
 from db_access.user import get_user_details
 from db_access.device import get_device
 from quart_auth import current_user, login_required
-from zipfile import ZipFile
-#from functions import get_all_file_paths
+from zipfile import ZipFile, ZIP_DEFLATED
+from google_authenticator.google_email_send import gmail_send
 
 from models import TwoFA
 from db_access.backup_codes import get_2fa_backup_codes
@@ -87,7 +88,7 @@ async def get_account_information():
             .where(Device.user_id == await current_user.user_id)\
             .order_by(sa.desc(Device.time))
         results = await session.execute(statement)
-        device_results = results.scalars()
+        device_results = results.mappings().all()
     
     # convert all data into json format
     user_json = json.loads(json.dumps(user_results, indent=4, default=str))
@@ -96,39 +97,47 @@ async def get_account_information():
     # write to json file
     with open("account_data.json", "w") as outfile:
         outfile.write(user_json)
-        outfile.write(device_json)
+    
+    with open("account_data.json", "a") as outfile:
+        outfile.append(device_json)
     
     # write to html file
-    f = open("account_data.html", "w")
+    html_template = await render_template("account_data.html", 
+                                username=user_json['username'], 
+                                email=user_json['email'], 
+                                first_name=user_json['first_name'], 
+                                last_name=user_json['last_name'], 
+                                twofa_status=user_json['twofa_status'], 
+                                device_id=device_json['device_id'], 
+                                device_name=device_json['device_name'], 
+                                device_type=device_json['device_type'])
 
-    html_template = """
-    <html>
-    <head>
-    <title>Account Information</title>
-    </head>
-    <body>
-    <h1>Account Information</h1>
-    <h2>User Details</h2>
-    <p>Username: {username}</p>
-    <p>Email: {email}</p>
-    <p>First Name: {first_name}</p>
-    <p>Last Name: {last_name}</p>
-    <p>2FA Status: {twofa_status}</p>
-    <h2>Device Details</h2>
-    <p>Device ID: {device_id}</p>
-    <p>Device Name: {device_name}</p>
-    <p>Device Type: {device_type}</p>
+    with open("account_data.html", "w") as outfile:
+        outfile.write(html_template)
 
-    </body>
-    </html>
-    """.format(username=user_json['username'], email=user_json['email'], first_name=user_json['first_name'], last_name=user_json['last_name'], twofa_status=user_json['twofa_status'], device_id=device_json['device_id'], device_name=device_json['device_name'], device_type=device_json['device_type'])
-
-    f.write(html_template)
-    f.close()
-
+    os.makedirs(f"media/exports/{await current_user.user_id}", exist_ok=True)
     # writing files to zipfile
-    # with ZipFile("account_data.zip", "w") as zip:
-    #     for file in get_all_file_paths("account_data"):
-    #         zip.write(file)
+    with ZipFile(f"media/exports/{await current_user.user_id}/account_data.zip", "w",
+                compression=ZIP_DEFLATED,
+                compresslevel=9) as zip:
+        zip.write("account_data.json")
+        zip.write("account_data.html")
+    
+    # directory = os.path.join(os.getcwd(), f"media/exports/{await current_user.user_id}/account_data.zip")
 
-    return {"message": "Account information downloaded"}, 200
+    # crafting the link
+    url_serialiser = await current_app.config["url_serialiser"]
+    email = user_json['email']
+    token = url_serialiser.dumps(email)
+    link = f"https://localhost:8443/api/{token}/{await current_user.user_id}/account_data.zip"
+
+    # email the link to the user
+    subject = "Your Bubbles Account - Requested Account Report"
+    date_requested = datetime.date.today()
+    expiry_date = date_requested + datetime.timedelta(days=30)
+    message = await render_template("requested_data.html",
+                                    date_requested=date_requested,
+                                    expiry_date=expiry_date,
+                                    link=link
+                                    )
+    gmail_send(email, subject, message)

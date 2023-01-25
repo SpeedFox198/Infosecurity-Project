@@ -17,6 +17,7 @@ let displayDevices = false;
 let displayTwoFactor = false;
 let displayTwoFactorEnabling = false;
 let displayBackupCode = false;
+let displayFilesRequested = true;
 
 const toggleGeneral = async () => displayGeneral = !displayGeneral;
 const toggleSecurity = async () => displaySecurity = !displaySecurity;
@@ -26,6 +27,7 @@ const toggleData = async () => displayData = !displayData;
 const toggleTwoFactor = async () => displayTwoFactor = !displayTwoFactor;
 const toggleTwoFactorEnabling = async () => displayTwoFactorEnabling = !displayTwoFactorEnabling;
 const toggleBackupCode = async () => displayBackupCode = !displayBackupCode;
+const toggleFilesRequested = async () => displayFilesRequested = !displayFilesRequested;
 const currentUser = $page.data.user;
 let twoFaSecretToken;
 let twoFAInput = "";
@@ -156,7 +158,11 @@ async function submitTwoFA () {
     </span>
   </div>
   <hr>
-  <button class="btn req-data"><i class="fa-solid fa-file"></i>Request personal data</button>
+  {#if (displayFilesRequested)}
+  <button class="btn req-data" on:click={toggleFilesRequested}><i class="fa-solid fa-file"></i>Request personal data</button>
+  {:else}
+  <div><p class="requested-data">Report sent. It will be sent to your email shortly.</p></div>
+  {/if}
   <hr>
   <div class="p-data">
     <span class="p-data-disclaimer">
@@ -200,6 +206,11 @@ async function submitTwoFA () {
   padding-bottom: 1rem;
   padding-left: 2rem;
   padding-right: 2rem;
+}
+.requested-data{
+  opacity: 0.7;
+  font-size: 1rem;
+  text-align: center;
 }
 .QR2fa {
   width: 150px;

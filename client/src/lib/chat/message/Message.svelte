@@ -114,7 +114,7 @@ function selectMsg() {
 
 
 <style>
-.malware-message {
+/* .malware-message {
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -139,7 +139,7 @@ function selectMsg() {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-}
+} */
 
 .message {
   padding: 0 3rem;
