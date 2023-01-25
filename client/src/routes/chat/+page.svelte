@@ -60,8 +60,8 @@ async function getRoomMsgs(room_id, n, extra) {
 
 
 const closeChatDetails = () => displayChatDetails = false;
-const toggleChatDetails = () => {
-  displayChatDetails = !displayChatDetails
+const openChatDetails = () => {
+  displayChatDetails = true;
   animateHideChatDetails = true;
 };
 </script>
@@ -76,10 +76,10 @@ const toggleChatDetails = () => {
   <Sidebar {socket} {getRoomMsgs}/>
   <RightSection
     {socket} {getRoomMsgs}
-    {displayChatDetails} {toggleChatDetails} {animateHideChatDetails}
+    {displayChatDetails} {openChatDetails} {animateHideChatDetails}
     on:load={() => appLoaded = true}
   />
-  <ChatDetails {displayChatDetails} {closeChatDetails} {animateHideChatDetails}/>
+  <ChatDetails {socket} {displayChatDetails} {closeChatDetails} {animateHideChatDetails}/>
 
 </main>
 

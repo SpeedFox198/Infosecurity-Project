@@ -1,16 +1,30 @@
 <script>
 import { room_id, roomStorage } from "$lib/stores/room";
 import ChatSettings from "./ChatSettings.svelte";
-import SlidingMenu from "./SlidingMenu.svelte";
+import SlidingMenu_ from "./SlidingMenu_.svelte";
 
+
+export let socket;
 export let displayChatDetails;
 export let closeChatDetails;
 export let animateHideChatDetails;
 
+let disappearing;
 let displayNone = true;
+let _displayDisappearing = false;
+
 $: currentChat = ($roomStorage || {})[$room_id] || {};
-$: displayChatDetails ? (() => displayNone=hide)() : setTimeout(() => displayNone=hide, 500);
+$: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 150);
 $: hide = animateHideChatDetails && !displayChatDetails;
+$: displayDisappearing = _displayDisappearing && displayChatDetails;
+
+
+const toggleDisappearing = () => _displayDisappearing = !_displayDisappearing;
+
+
+function setDisappearing () {
+  socket.emit("set_disappearing", { disappearing, room_id: $room_id });
+}
 </script>
 
 
@@ -46,7 +60,6 @@ $: hide = animateHideChatDetails && !displayChatDetails;
       </div>
 
       <div class="section mb-3">
-        <!-- encrypted? -->
         <ChatSettings
           icon={currentChat.encrypted ? "lock" : "unlock"}
           name="Encryption"
@@ -54,16 +67,19 @@ $: hide = animateHideChatDetails && !displayChatDetails;
           bad={!currentChat.encrypted}
           on:click
         >
-          {#if currentChat.encrypted}
+          {#if currentChat.type === "group"}
+            End-to-end encryption is not available for group chats yet. Click to learn more.
+          {:else if currentChat.encrypted}
             Messages in this chat are end-to-end encrypted. Click to learn more.
           {:else}
             End-to-end encryption is not enabled for this chat. Click to learn more.
           {/if}
         </ChatSettings>
-        <!-- disappearing messages settings -->
-        <ChatSettings icon="stopwatch" name="Disappearing Messages" arrow on:click>
-          {"Off"}
-        </ChatSettings>
+        {#if currentChat.type === "direct" || currentChat.is_admin}
+          <ChatSettings icon="stopwatch" name="Disappearing Messages" arrow on:click={toggleDisappearing}>
+            {"Off"}
+          </ChatSettings>
+        {/if}
       </div>
 
       <div class="section mb-3">
@@ -90,6 +106,41 @@ $: hide = animateHideChatDetails && !displayChatDetails;
   </div>
 </div>
 
+<SlidingMenu_
+  title="Disappearing Messages"
+  display={displayDisappearing}
+  on:click={toggleDisappearing}
+  right="false"
+>
+  <div class="d-flex flex-column p-4">
+    <div class="mb-3" style="color: var(--primary);">
+      Enabling this feature makes messages in this chat disappear after the set amount of time.
+    </div>
+    <div class="mb-3">Anyone in the chat can change this setting.</div>
+    <form on:submit|preventDefault={setDisappearing}>
+      {#each [
+        { value: "off", text: "Off" },
+        { value: "24h", text: "24 hours" },
+        { value: "7d", text: "7 days" },
+        { value: "30d", text: "30 days" }
+      ] as item}
+        <div class="form-check">
+          <input
+          class="form-check-input" type="radio" name="disappearing" id="disappearing"
+          value={item.value} checked={currentChat.disappearing === item.value}
+          bind:group={disappearing}>
+          <label class="form-check-label" for="disappearing">
+            {item.text}
+          </label>
+        </div>
+      {/each}
+      <button
+        type="submit" class="btn mb-3"
+        disabled={disappearing === undefined || disappearing === currentChat.disappearing}
+      >Set disappearing time</button>
+    </form>
+  </div>
+</SlidingMenu_>
 
 <style>
 .chat-details-section {
@@ -97,18 +148,18 @@ $: hide = animateHideChatDetails && !displayChatDetails;
   background-color: var(--white);
   overflow-x: hidden;
   -webkit-animation-name: display-chat-details;
-  -webkit-animation-duration: 0.5s;
+  -webkit-animation-duration: 0.15s;
   animation-name: display-chat-details;
-  animation-duration: 0.5s;
+  animation-duration: 0.15s;
 }
 
 .chat-details-section.hide {
   width: 0;
   overflow-x: hidden;
   -webkit-animation-name: display-none;
-  -webkit-animation-duration: 0.5s;
+  -webkit-animation-duration: 0.15s;
   animation-name: display-none;
-  animation-duration: 0.5s;
+  animation-duration: 0.15s;
 }
 
 .section-container {
@@ -142,6 +193,11 @@ $: hide = animateHideChatDetails && !displayChatDetails;
   height: calc(100vh - var(--top-bar-height));
   overflow-y: scroll;
   background-color: var(--grey);
+}
+
+.btn {
+  background-color: var(--primary);
+  color: var(--white);
 }
 
 

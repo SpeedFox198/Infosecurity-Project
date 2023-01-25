@@ -20,6 +20,13 @@ class DisappearingQueue(PeekQueue):
     Stores a queue of records of disappearing messages
     """
 
+    def __init__(self, data: list = None, maxsize: int = 0, days: int = None) -> None:
+        if days is None:
+            days = 1
+        self.days = days
+        super().__init__(data, maxsize)
+
+
     @property
     def has_expired_messages(self) -> bool:
         if self.empty():
@@ -56,10 +63,10 @@ class DisappearingQueue(PeekQueue):
 
 
     # TODO(medium)(SpeedFox198): Add time paramater?
-    async def add_disappearing_messages(self, message_id:str, **kwargs):
+    async def add_disappearing_messages(self, message_id:str):
 
         # Create new record of message to disappear
-        record = Disappearing(message_id, **kwargs)
+        record = Disappearing(message_id, self.days)
 
         async with async_session() as session:
             async with session.begin():

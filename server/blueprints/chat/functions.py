@@ -10,7 +10,9 @@ from utils import secure_save_file
 from .disappearing import DisappearingQueue
 
 # Create and get a queue disappearing messages
-messages_queue = DisappearingQueue()
+messages_queue_24h = DisappearingQueue(days=1)
+messages_queue_7d = DisappearingQueue(days=7)
+messages_queue_30d = DisappearingQueue(days=30)
 
 
 def get_display_dimensions(picture: bytes):

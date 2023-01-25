@@ -13,7 +13,7 @@ export const room_id = (() => {
  * Structure:
  * {
  *   <room_id>: {
- *     disappearing: boolean;
+ *     disappearing: string;
  *     type: string;
  *     encrypted: boolean;
  *     is_admin: boolean;

@@ -32,7 +32,7 @@ export let title;
 .settings-section {
   visibility: hidden;
   height: 100%;
-  width: 100%;
+  width: var(--side-bar-length);
   position: absolute;
   left: -100%;
   right: initial;

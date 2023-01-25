@@ -24,7 +24,7 @@ export let socket;
 export let getRoomMsgs;
 export let animateHideChatDetails;
 export let displayChatDetails;
-export let toggleChatDetails;
+export let openChatDetails;
 
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 
@@ -378,7 +378,7 @@ async function removeMsg(message_id, room_id) {
 <div class="d-flex flex-column right-section" class:displayChatDetails class:hideChatDetails>
 
   <!-- Chat Info Section -->
-  <ChatInfo on:click={toggleChatDetails}/>
+  <ChatInfo on:click={openChatDetails}/>
 
   <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
   {#if currentUser.public_key && currentUser.public_key.length > 0}
@@ -413,17 +413,17 @@ async function removeMsg(message_id, room_id) {
 .displayChatDetails {
   width: calc(100vw - var(--side-bar-length)*2);
   -webkit-animation-name: display-chat-details;
-  -webkit-animation-duration: 0.5s;
+  -webkit-animation-duration: 0.15s;
   animation-name: display-chat-details;
-  animation-duration: 0.5s;
+  animation-duration: 0.15s;
 }
 
 .hideChatDetails {
   width: calc(100vw - var(--side-bar-length));
   -webkit-animation-name: hide-chat-details;
-  -webkit-animation-duration: 0.5s;
+  -webkit-animation-duration: 0.15s;
   animation-name: hide-chat-details;
-  animation-duration: 0.5s;
+  animation-duration: 0.15s;
 }
 
 

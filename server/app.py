@@ -6,7 +6,7 @@ import socketio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from blueprints.api import api_bp
 from blueprints.auth import auth_bp
-from blueprints.chat import chat_bp, messages_queue, sio, sio_auth_manager, task_disappear_messages
+from blueprints.chat import chat_bp, messages_queue_24h, sio, sio_auth_manager, task_disappear_messages
 from blueprints.device import device_bp
 from blueprints.friend import friend_bp
 from blueprints.media import media_bp
@@ -95,7 +95,7 @@ async def invalid_schema(*_):
 
 @app.before_serving
 async def startup():
-    await messages_queue.init_from_db()
+    await messages_queue_24h.init_from_db()
     await task_disappear_messages(scheduler)
 
 

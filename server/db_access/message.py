@@ -46,8 +46,8 @@ async def db_remove_messages(messages: list[str], room_id: str, user_id: str) ->
         else:
             # Check if user is group admin
             statement = sa.select(Membership.is_admin).where(
-                (Membership.user_id == user_id)
-                & (Membership.room_id == room_id)
+                (Membership.user_id == user_id) &
+                (Membership.room_id == room_id)
             )
             is_admin = (await session.execute(statement)).one()[0]
 
