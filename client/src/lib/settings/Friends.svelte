@@ -15,6 +15,11 @@
 
 	let toggleFriendsList = async () => displayFriendsList = !displayFriendsList;
   let toggleFriendRequests = async () => displayFriendRequests = !displayFriendRequests;
+  
+  const returnToMenuAfterMessage = async () => {
+    await toggleFriendsList()
+    await toggleFriends()
+  }
 </script>
 
 <SlidingMenu title="Friends" display={displayFriends} on:click={toggleFriends} right={false}>
@@ -26,7 +31,7 @@
   </Option>
 </SlidingMenu>
 
-<FriendsList {displayFriendsList} {toggleFriendsList} {socket} />
+<FriendsList {displayFriendsList} {toggleFriendsList} {socket} on:message-friend={returnToMenuAfterMessage} />
 <FriendRequests {displayFriendRequests} {toggleFriendRequests} {socket} />
 
 <style>

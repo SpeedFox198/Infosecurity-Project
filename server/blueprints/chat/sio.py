@@ -471,6 +471,8 @@ async def message_friend(sid: str, data: dict):
 
         await session.commit()
 
+    await sio.emit("message_friend_success", to=sid)
+    
     for user_id in relationship:
         user_sid = await get_sid_from_sio_connection(user_id)
         if user_sid is None:

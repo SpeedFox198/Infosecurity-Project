@@ -1,6 +1,8 @@
 <script>
 import { onMount } from "svelte";
 import { getFlash } from "sveltekit-flash-message/client";
+import { createEventDispatcher } from 'svelte';
+
 
 import { page } from "$app/stores";
 import { invalidate } from "$app/navigation";
@@ -12,6 +14,7 @@ export let displayFriendsList;
 export let toggleFriendsList;
 export let socket;
 
+const dispatch = createEventDispatcher()
 const flash = getFlash(page)
 let displayAddFriend = false;
 
@@ -42,6 +45,10 @@ onMount(async () => {
   
   socket.on("message_friend_error", async (data) => {
     $flash = {type: 'failure', message: `Failed to message friend! Reason: ${data.message}`}
+  })
+  
+  socket.on("message_friend_success", async () => {
+    dispatch("message-friend")
   })
 })
 </script>
