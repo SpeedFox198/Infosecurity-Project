@@ -47,7 +47,7 @@ export const actions = {
         throw redirect(
           302,
           "/chat",
-          { type: "success", message: "2FA sign in completed!" },
+          { type: "success", message: "Login Successful!" },
           event
         )
     }
