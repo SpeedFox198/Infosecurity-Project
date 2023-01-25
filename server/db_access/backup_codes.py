@@ -20,7 +20,7 @@ async def create_2fa_backup_codes(user_id) -> None:
                 await log_exception(err)
 
 #Retrieve 2FA backup codes
-async def get_2fa_backup_codes(user_id) -> BackupCodes | None:
+async def get_2fa_backup_codes(user_id) -> list[BackupCodes] | None:
     async with async_session() as session:
         statement = sa.select(models.BackupCodes).where(models.BackupCodes.user_id == user_id)
         result = await session.execute(statement)
