@@ -14,7 +14,11 @@ const onClickEvent = () => {
 
 
 <!-- Chat Info Section -->
-<div class="chat-info d-flex user-select-none" on:click={onClickEvent} on:keydown>
+<div
+  class="chat-info d-flex user-select-none"
+  class:has-chat={currentChat}
+  on:click={onClickEvent} on:keydown
+>
   <div class="d-flex flex-row">
     {#if currentChat !== undefined}
 
@@ -46,7 +50,7 @@ const onClickEvent = () => {
   border-left: 0.1rem solid var(--primary-shadow);
 }
 
-.chat-info:hover {
+.chat-info.has-chat:hover {
   cursor: pointer;
 }
 

@@ -24,6 +24,7 @@ const options = {
 let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to chat u are at :)
 let appLoaded = false;
 let displayChatDetails = false;
+let animateHideChatDetails = false
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
@@ -59,7 +60,10 @@ async function getRoomMsgs(room_id, n, extra) {
 
 
 const closeChatDetails = () => displayChatDetails = false;
-const toggleChatDetails = () => displayChatDetails = !displayChatDetails;
+const toggleChatDetails = () => {
+  displayChatDetails = !displayChatDetails
+  animateHideChatDetails = true;
+};
 </script>
 
 
@@ -68,14 +72,14 @@ const toggleChatDetails = () => displayChatDetails = !displayChatDetails;
 </svelte:head>
 
 
-<main class="d-flex flex-nowrap h-100" class:d-none={!appLoaded}>
+<main class="d-flex flex-nowrap h-100 overflow-hidden" class:d-none={!appLoaded}>
   <Sidebar {socket} {getRoomMsgs} {closeChatDetails}/>
   <RightSection
     {socket} {getRoomMsgs}
-    {displayChatDetails} {toggleChatDetails}
+    {displayChatDetails} {toggleChatDetails} {animateHideChatDetails}
     on:load={() => appLoaded = true}
   />
-  <ChatDetails {displayChatDetails} {closeChatDetails}/>
+  <ChatDetails {displayChatDetails} {closeChatDetails} {animateHideChatDetails}/>
 
 </main>
 

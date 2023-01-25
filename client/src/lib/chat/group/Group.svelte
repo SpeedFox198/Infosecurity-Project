@@ -16,7 +16,8 @@ const deselect = () => selected = false;
 
 
 const selectCurrentGroup = () => {
-  if ( current ) current.deselect();
+  if (current && current.deselect === deselect) return;
+  if (current) current.deselect();
   current = { deselect };
   selected = true;
   selectGrp(grp.room_id);
@@ -26,6 +27,7 @@ const selectCurrentGroup = () => {
 
 <div class="group d-flex py-2 user-select-none"
   class:selected
+  class:unselected={!selected}
   on:click={selectCurrentGroup}
   on:keydown
 >
@@ -49,7 +51,7 @@ const selectCurrentGroup = () => {
   border-bottom: 0.1rem solid var(--white-shadow);
 }
 
-.group:hover {
+.group.unselected:hover {
   cursor: pointer;
   background-color: var(--grey-light);
 }

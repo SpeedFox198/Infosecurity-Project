@@ -1,57 +1,79 @@
 <script>
-import { room_id, roomStorage, roomList } from "$lib/stores/room";
+import { room_id, roomStorage } from "$lib/stores/room";
+import ChatSettings from "./ChatSettings.svelte";
 
 export let displayChatDetails;
 export let closeChatDetails;
+export let animateHideChatDetails;
 
+let displayNone = true;
 $: currentChat = ($roomStorage || {})[$room_id] || {};
-
-
-
+$: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 500);
 </script>
 
-<div class:d-none={!displayChatDetails} class="chat-details-section">
-  <div class="chat-profile d-flex flex-row align-items-center p-2">
-    <div class="d-flex">
-      <button
-        class="back d-flex align-items-center justify-content-center rounded-circle"
-        type="button" on:click={closeChatDetails}
-      >
-        <i class="fa-solid fa-times fs-5"></i>
-      </button>
-    </div>
-    <div class="d-flex">
-      <div class="ms-4 fs-5 fw-bold user-select-none">{"Contact"} Info</div>
-    </div>
-  </div>
-  <div class="content">
 
-    <div class="section p-4 mb-2">
-      <div class="img-wrapper img-1-1">
-        <img class="rounded-circle p-3" src={currentChat.icon} alt="">
+<!-- Chat Details Section -->
+<div class="chat-details-section" class:hide={animateHideChatDetails && !displayChatDetails} class:d-none={displayNone}>
+  <div class="main">
+
+    <!-- Profile -->
+    <div class="chat-profile d-flex flex-row align-items-center p-2">
+      <div class="d-flex">
+        <button
+          class="back d-flex align-items-center justify-content-center rounded-circle"
+          type="button" on:click={closeChatDetails}
+        >
+          <i class="fa-solid fa-times fs-5"></i>
+        </button>
       </div>
-      <div class="d-flex flex-row justify-content-center">
-        <span class="chat-name fs-5">{currentChat.name}</span>
+      <div class="d-flex">
+        <div class="ms-4 fs-5 fw-bold user-select-none">{"Contact"} Info</div>
       </div>
     </div>
 
-    <div class="section">
-      <!-- encrypted? -->
-      <!-- disappearing messages settings -->
-    </div>
-
-    <div class="section">
-      <!-- Direct -->
-      <!-- groups in common -->
-      <!-- Group -->
-      <!-- participants -->
-    </div>
-
-    <div class="section">
-      <!-- Direct -->
-      <!-- block, delete -->
-      <!-- Group -->
-      <!-- exit -->
+    <!-- Content -->
+    <div class="content">
+  
+      <div class="section px-4 pb-2 mb-3">
+        <div class="img-wrapper img-1-1">
+          <img class="rounded-circle p-4" src={currentChat.icon} alt="">
+        </div>
+        <div class="d-flex flex-row justify-content-center">
+          <span class="chat-name fs-5 user-select-none">{currentChat.name}</span>
+        </div>
+      </div>
+  
+      <div class="section mb-3">
+        <!-- encrypted? -->
+        <ChatSettings icon={"lock"} name="Encryption" on:click>
+          {"Messages in this chat are end-to-end encrypted. Click to learn more."}
+        </ChatSettings>
+        <!-- disappearing messages settings -->
+        <ChatSettings icon="stopwatch" name="Disappearing Messages" on:click>
+          {"Off"}
+        </ChatSettings>
+      </div>
+      
+      <div class="section mb-3">
+        <!-- Direct -->
+        <!-- {#each getGroupsInCommon() as groups}
+          ...
+        {/each} -->
+        <!-- groups in common -->
+        <!-- Group -->
+        <!-- participants -->
+      </div>
+  
+      <div class="section mb-3">
+        <!-- Direct -->
+        <!-- block, delete -->
+        <ChatSettings icon="ban" name="Block" red on:click/>
+        <ChatSettings icon="trash" name="Delete chat" red on:click/>
+        <!-- Group -->
+        <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
+        <!-- exit -->
+      </div>
+  
     </div>
 
   </div>
@@ -60,12 +82,26 @@ $: currentChat = ($roomStorage || {})[$room_id] || {};
 
 <style>
 .chat-details-section {
-  height: 100%;
   width: var(--side-bar-length);
-  right: initial;
   background-color: var(--white);
   overflow-x: hidden;
-  transition: 0.15s;
+  -webkit-animation-name: display-chat-details;
+  -webkit-animation-duration: 0.5s;
+  animation-name: display-chat-details;
+  animation-duration: 0.5s;
+}
+
+.chat-details-section.hide {
+  width: 0;
+  overflow-x: hidden;
+  -webkit-animation-name: display-none;
+  -webkit-animation-duration: 0.5s;
+  animation-name: display-none;
+  animation-duration: 0.5s;
+}
+
+.main {
+  width: var(--side-bar-length);
 }
 
 .chat-profile {
@@ -76,7 +112,7 @@ $: currentChat = ($roomStorage || {})[$room_id] || {};
 
 .section {
   background-color: var(--white);
-  box-shadow: 0 3px 4px var(--grey-shadow);
+  box-shadow: 0 2px 2px var(--grey-shadow);
 }
 
 .back {
@@ -93,7 +129,45 @@ $: currentChat = ($roomStorage || {})[$room_id] || {};
 
 .content {
   height: calc(100vh - var(--top-bar-height));
-  overflow-y: auto;
+  overflow-y: scroll;
   background-color: var(--grey);
+}
+
+
+/* Animations */
+@-webkit-keyframes display-chat-details {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--side-bar-length);
+  }
+}
+
+@keyframes display-chat-details {
+  from {
+    width: 0;
+  }
+  to{
+    width: var(--side-bar-length);
+  }
+}
+
+@-webkit-keyframes display-none {
+  from {
+    width: var(--side-bar-length);
+  }
+  to {
+    width: 0;
+  }
+}
+
+@keyframes display-none {
+  from {
+    width: var(--side-bar-length);
+  }
+  to {
+    width: 0;
+  }
 }
 </style>

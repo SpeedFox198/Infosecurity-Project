@@ -21,15 +21,17 @@ import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 // SocketIO instance
 export let socket;
 export let getRoomMsgs;
+export let animateHideChatDetails;
 export let displayChatDetails;
 export let toggleChatDetails;
+
+$: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 
 const dispatch = createEventDispatcher();
 
 let currentUser = $page.data.user
 let roomsLoaded = false;
 
-$: roomInfoLength = displayChatDetails ? "25rem" : "0rem";
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -371,7 +373,7 @@ async function removeMsg(message_id, room_id) {
 
 
 <!-- Right Section -->
-<div class="d-flex flex-column right-section" style:--chat-info-length={roomInfoLength}>
+<div class="d-flex flex-column right-section" class:displayChatDetails class:hideChatDetails>
 
   <!-- Chat Info Section -->
   <ChatInfo on:click={toggleChatDetails}/>
@@ -401,8 +403,62 @@ async function removeMsg(message_id, room_id) {
 
 <style>
 .right-section {
-  width: calc(100vw - var(--side-bar-length) - var(--chat-info-length));
+  width: calc(100vw - var(--side-bar-length));
   position: relative;
   overflow-y: hidden;
+}
+
+.displayChatDetails {
+  width: calc(100vw - var(--side-bar-length)*2);
+  -webkit-animation-name: display-chat-details;
+  -webkit-animation-duration: 0.5s;
+  animation-name: display-chat-details;
+  animation-duration: 0.5s;
+}
+
+.hideChatDetails {
+  width: calc(100vw - var(--side-bar-length));
+  -webkit-animation-name: hide-chat-details;
+  -webkit-animation-duration: 0.5s;
+  animation-name: hide-chat-details;
+  animation-duration: 0.5s;
+}
+
+
+/* Animations */
+@-webkit-keyframes display-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length));
+  }
+  to {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+}
+
+@keyframes display-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length));
+  }
+  to{
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+}
+
+@-webkit-keyframes hide-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+  to {
+    width: calc(100vw - var(--side-bar-length));
+  }
+}
+
+@keyframes hide-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+  to{
+    width: calc(100vw - var(--side-bar-length));
+  }
 }
 </style>
