@@ -63,9 +63,7 @@ function selectMsg() {
 
       {#if !$selectMode}
         <button class="options" type="button" on:click={selectOption}>
-          <i
-            class="fa-solid fa-ellipsis"
-          ></i>
+          <i class="fa-solid fa-ellipsis"></i>
         </button>
       {/if}
 
