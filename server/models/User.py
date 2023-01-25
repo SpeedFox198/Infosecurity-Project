@@ -31,6 +31,7 @@ class User(Base):
     friends_only = Column(Boolean, default=True)
     censor = Column(Boolean, default=True)
     twofa_status = Column(Boolean, default=False)
+    disappearing = Column(Boolean, default=False)
     online = Column(Boolean)
 
     devices = relationship("Device", back_populates="user")
