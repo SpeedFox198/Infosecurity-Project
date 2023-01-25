@@ -22,6 +22,7 @@ const options = {
 
 let activity = "Chat"; // TODO(UI)(SpeedFox198): make this change according to chat u are at :)
 let appLoaded = false;
+let displayChatDetails = false;
 
 // Get and set user_id and device_id according to cookie data
 user_id.set($page.data.user.user_id);
@@ -55,6 +56,10 @@ async function getRoomMsgs(room_id, n, extra) {
   socket.emit("get_room_messages", { room_id, n, extra });
 }
 
+
+const closeChatDetails = () => displayChatDetails = false;
+const toggleChatDetails = () => displayChatDetails = !displayChatDetails;
+
 </script>
 
 
@@ -64,8 +69,12 @@ async function getRoomMsgs(room_id, n, extra) {
 
 
 <main class="d-flex flex-nowrap h-100" class:d-none={!appLoaded}>
-  <Sidebar {socket} {getRoomMsgs}/>
-  <RightSection {socket} {getRoomMsgs} on:load={() => appLoaded = true}/>
+  <Sidebar {socket} {getRoomMsgs} {closeChatDetails}/>
+  <RightSection
+    {socket} {getRoomMsgs}
+    {displayChatDetails} {toggleChatDetails} {closeChatDetails}
+    on:load={() => appLoaded = true}
+  />
 </main>
 
 

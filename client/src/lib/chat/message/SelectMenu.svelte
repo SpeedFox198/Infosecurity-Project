@@ -30,23 +30,23 @@ async function deleteMsgs(event) {
 
 
 <!-- Texting Input Section -->
-<div class="container input-area">
-  <div class="row justify-content-center align-items-center h-100">
+<div class="d-flex flex-container w-100 input-area">
+  <div class="d-flex flex-row justify-content-center align-items-center h-100 w-100">
 
     <!-- Attachments Input -->
-    <div class="col-1 d-flex justify-content-center">
+    <div class="icon-container d-flex justify-content-center">
       <button class="btn p-0" type="button" on:click={selectedMsgs.clear}>
         <i class="icon-cross fa-solid fa-xmark"></i>
       </button>
     </div>
 
     <!-- Text Input -->
-    <div class="col-10">
+    <div class="flex-grow-1 mx-4">
       <span>{num} message{singular ? "" : "s"} selected</span>
     </div>
 
     <!-- Submit Button -->
-    <div class="col-1">
+    <div class="icon-container">
       <button class="btn" class:invisible type="button" on:click={deleteMsgs}>
         <i class="icon-trash fa-solid fa-trash"></i>
       </button>
@@ -62,6 +62,10 @@ async function deleteMsgs(event) {
   height: var(--bottom-bar-height);
   background-color: var(--grey);
   border-left: 0.1rem solid var(--grey-shadow);
+}
+
+.icon-container {
+  width: 5rem;
 }
 
 .icon-cross {

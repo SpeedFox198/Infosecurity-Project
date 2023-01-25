@@ -22,15 +22,17 @@ import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 // SocketIO instance
 export let socket;
 export let getRoomMsgs;
+export let displayChatDetails;
+export let toggleChatDetails;
+export let closeChatDetails;
 
 const dispatch = createEventDispatcher();
 const flash = getFlash(page)
 
 let currentUser = $page.data.user
-let displayRoomInfo = false;
 let roomsLoaded = false;
 
-$: roomInfoLength = displayRoomInfo ? "25rem" : "0rem";
+$: roomInfoLength = displayChatDetails ? "25rem" : "0rem";
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -375,7 +377,7 @@ async function removeMsg(message_id, room_id) {
 <div class="d-flex flex-column right-section" style:--chat-info-length={roomInfoLength}>
 
   <!-- Chat Info Section -->
-  <ChatInfo/>
+  <ChatInfo on:click={toggleChatDetails}/>
 
   <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
   {#if currentUser.public_key && currentUser.public_key.length > 0}

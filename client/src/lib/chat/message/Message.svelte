@@ -75,17 +75,6 @@ function selectMsg() {
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <img src={msg.path} alt="">
         </div>
-        <!-- <div class="virustotal-score">
-          <div class="percent">
-            <svg>
-              <circle cx="33" cy="33" r="30"></circle>
-              <circle cx="33" cy="33" r="30" style="--percent: 30"></circle>
-            </svg>
-            <div class="number">
-              <span>30/100</span>
-            </div>
-          </div>
-        </div>   -->
       {/if}
 
       {#if msg.type === "video"}
@@ -119,9 +108,9 @@ function selectMsg() {
     </div>
   </div>
 </div>
-<div class="malware-message">
+<!-- <div class="malware-message">
   <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe. (This option can be disabled in the settings)</p>
-</div>
+</div> -->
 
 
 <style>
@@ -181,7 +170,7 @@ function selectMsg() {
 }
 
 .bubble-container {
-  max-width: 65%;
+  max-width: 35rem;
   margin-top: 0.4rem;
   margin-bottom: 0.07rem;
 }

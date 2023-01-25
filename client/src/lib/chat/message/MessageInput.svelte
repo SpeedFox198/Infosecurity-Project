@@ -114,12 +114,12 @@ async function onSend(event) {
   </div>
 </div>
 {/if}
-<div class="container input-area">
-  <form class="row justify-content-center align-items-center h-100" on:submit|preventDefault={onSend}>
+<div class="d-flex flex-container w-100 input-area">
+  <form class="d-flex flex-row justify-content-center align-items-center h-100 w-100" on:submit|preventDefault={onSend}>
 
     <!-- Attachments Input -->
 
-    <div class="col-1" >
+    <div class="icon-container d-flex justify-content-center" >
       <button class="btn" type="button" on:click={toggleFilePondOn}>
         <img class="icon" src="/icons/paperclip.svg" alt="AttachFile">
       </button>
@@ -127,12 +127,12 @@ async function onSend(event) {
     </div>
 
     <!-- Text Input -->
-    <div class="col-10">
+    <div class="flex-grow-1 mx-4">
       <input class="form-control" type="text" name="data" bind:value={content}>
     </div>
 
     <!-- Submit Button -->
-    <div class="col-1">
+    <div class="icon-container">
       <button class="btn" type="submit">
         <img class="icon" src="/icons/plane.svg" alt="Send">
       </button>
@@ -150,6 +150,10 @@ async function onSend(event) {
   max-width: 100%;
   background-color: var(--grey);
   border-left: 0.1rem solid var(--grey-shadow);
+}
+
+.icon-container {
+  width: 5rem;
 }
 
 .icon {
