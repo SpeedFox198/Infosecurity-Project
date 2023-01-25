@@ -104,7 +104,7 @@ onMount(() => {
 .sidebar {
   position: relative;
   width: var(--side-bar-length);
-  background-color: var(--primary-light);
+  background-color: var(--white);
   overflow-x: hidden;
 }
 

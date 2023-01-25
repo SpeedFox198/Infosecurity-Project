@@ -38,7 +38,7 @@ def get_display_dimensions(picture: bytes):
 
 
 async def save_file(attachments_path: str, file: bytes, filename: str, room_id: str, message_id: str, session):
-    """ Save file securely I guess """
+    """ Save file securely I guess (returns image filename, height, and width) """
 
     destination_directory = os.path.join(attachments_path, room_id, message_id)
     os.makedirs(destination_directory)
@@ -50,6 +50,8 @@ async def save_file(attachments_path: str, file: bytes, filename: str, room_id: 
     media = Media(message_id, path=filename, height=height, width=width)
     async with session.begin():
         session.add(media)
+
+    return filename, height, width
 
 
 async def get_room(user_id: str):

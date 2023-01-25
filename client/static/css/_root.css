@@ -7,6 +7,10 @@
     --grey-shadow: #d2d7e8;
     --grey: #e1e5f2;
 
+    --grey-light-shadow: #eff1f5;
+    --grey-light: #f7f8fb;
+
+    --white-shadow: #f2f2f2;
     --white: #ffffff;
 
     --primary-dark: #022b3a;
@@ -17,7 +21,8 @@
     --primary-light-shadow: #b1cfed;
     --primary-light: #bfdbf7;
 
-    --red-dark: #aa3f35;
+    --red-dark: #bc493f;
+    --red: #ed2d1c;
 
     /* Highlight */
     --highlight-primary: #1f7a8c2e;

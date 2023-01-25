@@ -2,7 +2,6 @@
 import { room_id, roomStorage } from "$lib/stores/room";
 
 $: currentChat = ($roomStorage || {})[$room_id] || undefined;
-$: console.log(currentChat);
 
 </script>
 
