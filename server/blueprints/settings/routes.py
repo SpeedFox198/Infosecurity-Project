@@ -13,7 +13,7 @@ from db_access.user import get_user_details
 from db_access.device import get_device
 from quart_auth import current_user, login_required
 from zipfile import ZipFile
-from functions import get_all_file_paths
+#from functions import get_all_file_paths
 
 from models import TwoFA
 from db_access.backup_codes import get_2fa_backup_codes
@@ -128,8 +128,8 @@ async def get_account_information():
     f.close()
 
     # writing files to zipfile
-    with ZipFile("account_data.zip", "w") as zip:
-        for file in get_all_file_paths("account_data"):
-            zip.write(file)
+    # with ZipFile("account_data.zip", "w") as zip:
+    #     for file in get_all_file_paths("account_data"):
+    #         zip.write(file)
 
     return {"message": "Account information downloaded"}, 200
