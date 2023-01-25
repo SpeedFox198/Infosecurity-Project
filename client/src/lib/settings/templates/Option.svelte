@@ -27,7 +27,11 @@ export let name;
 
 .option:hover {
   cursor: pointer;
-  background-color: var(--primary-light-shadow);
+  background-color: var(--grey-light);
+}
+
+.option:focus {
+  background-color: var(--grey-light-shadow);
 }
 
 .icon {

@@ -23,7 +23,6 @@ export let socket;
 export let getRoomMsgs;
 export let displayChatDetails;
 export let toggleChatDetails;
-export let closeChatDetails;
 
 const dispatch = createEventDispatcher();
 

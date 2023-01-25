@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 
 import Sidebar from "./Sidebar.svelte";
 import RightSection from "./RightSection.svelte";
+import ChatDetails from "$lib/chat/info/ChatDetails.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
 import { deviceStore } from "$lib/stores/device"
@@ -59,7 +60,6 @@ async function getRoomMsgs(room_id, n, extra) {
 
 const closeChatDetails = () => displayChatDetails = false;
 const toggleChatDetails = () => displayChatDetails = !displayChatDetails;
-
 </script>
 
 
@@ -72,9 +72,11 @@ const toggleChatDetails = () => displayChatDetails = !displayChatDetails;
   <Sidebar {socket} {getRoomMsgs} {closeChatDetails}/>
   <RightSection
     {socket} {getRoomMsgs}
-    {displayChatDetails} {toggleChatDetails} {closeChatDetails}
+    {displayChatDetails} {toggleChatDetails}
     on:load={() => appLoaded = true}
   />
+  <ChatDetails {displayChatDetails} {closeChatDetails}/>
+
 </main>
 
 
