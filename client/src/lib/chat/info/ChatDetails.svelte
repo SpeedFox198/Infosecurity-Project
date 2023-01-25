@@ -33,7 +33,7 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
 
     <!-- Content -->
     <div class="content">
-  
+
       <div class="section px-4 pb-2 mb-3">
         <div class="img-wrapper img-1-1">
           <img class="rounded-circle p-4" src={currentChat.icon} alt="">
@@ -42,7 +42,7 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
           <span class="chat-name fs-5 user-select-none">{currentChat.name}</span>
         </div>
       </div>
-  
+
       <div class="section mb-3">
         <!-- encrypted? -->
         <ChatSettings icon={"lock"} name="Encryption" on:click>
@@ -53,7 +53,7 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
           {"Off"}
         </ChatSettings>
       </div>
-      
+
       <div class="section mb-3">
         <!-- Direct -->
         <!-- {#each getGroupsInCommon() as groups}
@@ -63,17 +63,16 @@ $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNo
         <!-- Group -->
         <!-- participants -->
       </div>
-  
+
       <div class="section mb-3">
-        <!-- Direct -->
-        <!-- block, delete -->
-        <ChatSettings icon="ban" name="Block" red on:click/>
-        <ChatSettings icon="trash" name="Delete chat" red on:click/>
-        <!-- Group -->
-        <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
-        <!-- exit -->
+        {#if currentChat.type === "direct"}
+          <ChatSettings icon="ban" name="Block" red on:click/>
+          <ChatSettings icon="trash" name="Delete chat" red on:click/>
+        {:else}
+          <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
+        {/if}
       </div>
-  
+
     </div>
 
   </div>

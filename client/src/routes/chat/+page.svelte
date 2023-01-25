@@ -73,7 +73,7 @@ const toggleChatDetails = () => {
 
 
 <main class="d-flex flex-nowrap h-100 overflow-hidden" class:d-none={!appLoaded}>
-  <Sidebar {socket} {getRoomMsgs} {closeChatDetails}/>
+  <Sidebar {socket} {getRoomMsgs}/>
   <RightSection
     {socket} {getRoomMsgs}
     {displayChatDetails} {toggleChatDetails} {animateHideChatDetails}
