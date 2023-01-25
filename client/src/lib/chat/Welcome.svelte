@@ -2,15 +2,39 @@
 export let currentUser;
 </script>
 
-<img class="logo w-25" src="/with-text.svg" alt="Bubbles">
-Your privacy is our priority.
 
-<br/>
-Chats that are end-to-end-encrypted are with a &lt;lock&gt; symbol.
+<div class="welcome-page-section d-flex flex-column flex-grow-1 align-items-center justify-content-center">
+  <img class="logo mb-3" src="/with-text.svg" alt="Bubbles">
+
+  <!-- <div class="mx-2">Your privacy is our priority.</div> -->
+
+  <div class="mx-3 fs-3">
+    Welcome to Bubbles <span style="color: var(--primary);">{currentUser.username}</span>!
+  </div>
+
+  <div class="mx-2">
+    Start chatting by clicking one of the group chats at the left.
+  </div>
+
+  <div class="mx-2">
+    End-to-end-encrypted are labelled with a green lock <i class="icon fa-solid fa-lock"></i>
+  </div>
+
+</div>
 
 
 <style>
-.logo {
+.welcome-page-section {
+  background-color: var(--grey);
+  padding-top: 1%;
+  padding-bottom: 25%;
+}
 
+.icon {
+  color: var(--primary);
+}
+
+.logo {
+  width: 25rem;
 }
 </style>
