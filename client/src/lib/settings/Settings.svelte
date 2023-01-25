@@ -29,7 +29,7 @@ const toggleBackupCode = async () => displayBackupCode = !displayBackupCode;
 const currentUser = $page.data.user;
 let twoFaSecretToken;
 let twoFAInput = "";
-let backupCode = "";
+let backupCodes = "";
 
 async function toggleDevices () {
   displayDevices = !displayDevices;
@@ -61,7 +61,7 @@ async function disableTwoFa () {
 }
 
 async function submitTwoFA () {
-  await fetch ("https://localhost:8443/api/settings/twofa", {
+  const response = await fetch ("https://localhost:8443/api/settings/twofa", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -71,6 +71,13 @@ async function submitTwoFA () {
       twofacode: twoFAInput
     })
   });
+  const data = await response.json();
+  if (response.ok) {
+    toggleTwoFactor();
+    toggleTwoFactorEnabling();
+    backupCodes = data.backup_codes.join(", ");
+    toggleBackupCode();
+  }
 }
 
 </script>
@@ -121,7 +128,7 @@ async function submitTwoFA () {
 <SlidingMenu title="Backup Code" display={displayBackupCode} on:click={toggleBackupCode} right={true}>
   <div>
     <p>Here is your backup code. Write it down and keep it somewhere safe. If you lose your phone, you can use this code to log in.</p>
-    <p>Backup codes: <b>{ backupCode[1] }, { backupCode[2] }, { backupCode[3] }, { backupCode[4] }, { backupCode[5] }, { backupCode[6] }</b></p>
+    <p>Backup codes: <b>{ backupCodes}</b></p>
   </div>
 </SlidingMenu>
 
