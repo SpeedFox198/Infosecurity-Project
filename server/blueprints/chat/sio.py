@@ -117,9 +117,10 @@ async def send_message(sid, data: dict):
         # Save file if message type is not text, and file exists
         # TODO(high)(SpeedFox198): test what happens when upload file of size 0 bytes lmao
         if message.type != "text" and file:
-            await save_file(
+            filename, height, width = await save_file(
                 sio_auth_manager.app.config["ATTACHMENTS_PATH"],
-                file, filename, message.room_id, message.message_id, session)
+                file, filename, message.room_id, message.message_id, session
+            )
 
     # If room has disappearing messages enabled
     if room.disappearing != "off":

@@ -62,7 +62,9 @@ function selectMsg() {
     <div class="bubble">
 
       {#if !$selectMode}
-        <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis rounded-circle"></i></button>
+        <button class="options" type="button" on:click={selectOption}>
+          <i class="fa-solid fa-ellipsis"></i>
+        </button>
       {/if}
 
       {#if !msg.sent && msg.avatar}
@@ -132,15 +134,15 @@ function selectMsg() {
   text-align: center;
   width: 82%;
   height: auto;
-  background-color: rgba(251, 238, 238, 0.1);
+  background-color: var(--white);
 
-  border-color: red;
+  border-color: var(--red);
   border-style: solid;
   border-width: 2px;
   border-radius: 20px;
 
   font-size: 1rem;
-  color: rgb(255, 0, 0);
+  color: var(--red);
 
 }
 
@@ -193,7 +195,7 @@ function selectMsg() {
 }
 
 .bubble {
-  background-color: var(--grey);
+  background-color: var(--white);
   text-align: left;
   padding: 0.5rem 0.6rem 0.65rem 0.8rem;
   border-radius: 0 1.3rem 1.3rem 0.7rem;
@@ -227,8 +229,8 @@ function selectMsg() {
   width: 0;
   height: 0;
   border-bottom: 10px solid transparent;
-  border-right: 10px solid var(--grey);
-  color: var(--grey);
+  border-right: 10px solid var(--white);
+  color: var(--white);
 }
 
 .sent .tail {
@@ -255,7 +257,7 @@ function selectMsg() {
 }
 
 .sent .time {
-  color: var(--grey);
+  color: var(--white);
 }
 
 .hidden {
@@ -283,14 +285,16 @@ span {
   color: var(--grey);
 }
 
-.fa-ellipsis {
-  background-color: var(--grey);
-  box-shadow: 0px 0px 5px 4px var(--grey);
+.options > i {
+  border-radius: 0 100%;
+  background-color: var(--white);
+  box-shadow: -4px 0px 0px 5px var(--white), 4px 0px 0px 5px var(--white);
 }
 
-.sent .fa-ellipsis {
+.sent .options > i {
+  border-radius: 0 100%;
   background-color: var(--primary);
-  box-shadow: 0px 0px 5px 4px var(--primary);
+  box-shadow: -4px 0px 0px 5px var(--primary), 4px 0px 0px 5px var(--primary);
 }
 
 

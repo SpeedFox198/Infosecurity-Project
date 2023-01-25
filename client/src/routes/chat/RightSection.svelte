@@ -1,5 +1,5 @@
 <script>
-import { onMount } from "svelte";
+import { onMount, createEventDispatcher } from "svelte";
 import { page } from "$app/stores"
 
 import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
@@ -22,8 +22,12 @@ import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 export let socket;
 export let getRoomMsgs;
 
+const dispatch = createEventDispatcher();
+
 let currentUser = $page.data.user
 let displayRoomInfo = false;
+let roomsLoaded = false;
+
 $: roomInfoLength = displayRoomInfo ? "25rem" : "0rem";
 
 onMount(async () => {
@@ -45,6 +49,11 @@ onMount(async () => {
     roomList.set(newRoomList);           // Set list of room_id
     roomStorage.set(newroomStorage);     // Set collection of rooms
     allMsgs.initRooms(newRoomList);      // Initialise empty arrays for rooms
+
+    if (!roomsLoaded) {
+      dispatch("load");
+      roomsLoaded = true;
+    }
   });
 
 
