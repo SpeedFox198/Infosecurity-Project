@@ -148,11 +148,11 @@ async function submitTwoFA () {
 </SlidingMenu>
 <SlidingMenu title="Request personal data" display={displayData} on:click={toggleData} right={true}>
   <div class="file-icon">
-    <i class="fa-duotone fa-print"></i>
+    <i class="fa-solid fa-print"></i>
   </div>
   <div class="p-data">
     <span class="p-data-disclaimer">
-      Bubbles can export all of your data, including messages, files, and contacts.
+      Bubbles can export all of your data, including account information and friends.
     </span>
   </div>
   <hr>
@@ -160,7 +160,7 @@ async function submitTwoFA () {
   <hr>
   <div class="p-data">
     <span class="p-data-disclaimer">
-      When the report is available to download, you'll receive an email, stating “<b>Your account info report is now available</b>”. Because this report contains your information, you should be careful about storing, sending, or uploading it to any other services.
+      <b>A download link</b> will be sent to you when the report is available for download. Because this report contains your information, you should be careful about storing, sending, or uploading it to any other services.
     </span>
   </div>
 </SlidingMenu>
@@ -185,14 +185,13 @@ async function submitTwoFA () {
   align-items: center;
   text-align: center;
   font-size: 1.2rem;
+  width: 100%;
 }
-
 .fa-solid {
   font-size: 2.5rem;
   margin-right: 10px;
   padding-left:1rem;
 } 
-
 .file-icon {
   display: flex;
   align-items: center;
