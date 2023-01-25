@@ -16,7 +16,7 @@ const logoutUser = async () => {
       "Accept": "application/json"
     }
   })
-  
+
   location.replace("/")
 }
 </script>

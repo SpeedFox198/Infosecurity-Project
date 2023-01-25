@@ -77,7 +77,7 @@ onMount(() => {
     // Initialise rooms
     roomList.set(newRoomList);           // Set list of room_id
     roomStorage.set(newRoomStorage);     // Set collection of rooms
-    allMsgs.initRooms(newRoomList)       // Initialise empty arrays for rooms
+    allMsgs.initRooms(newRoomList);       // Initialise empty arrays for rooms
   })
 })
 </script>
