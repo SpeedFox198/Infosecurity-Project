@@ -106,11 +106,13 @@ async def get_account_information():
     user_json = json.dumps(user_results, indent=4, default=str)
     device_json = json.dumps(device_json_list, indent=4, default=str)
 
+    export_path = f"media/exports/{await current_user.user_id}"
+    os.makedirs(export_path, exist_ok=True)
     # write to json file
-    with open("account_data.json", "w") as outfile:
+    with open(export_path + "/account_data.json", "w") as outfile:
         outfile.write(user_json + "\n")
     
-    with open("account_data.json", "a") as outfile:
+    with open(export_path + "/account_data.json", "a") as outfile:
         outfile.write(device_json)
     
     # write to html file
@@ -126,16 +128,19 @@ async def get_account_information():
                                 device_list=device_json_list
                                 )
 
-    with open("account_data.html", "w") as outfile:
+    with open(export_path + "/account_data.html", "w") as outfile:
         outfile.write(html_template)
 
-    os.makedirs(f"media/exports/{await current_user.user_id}", exist_ok=True)
     # writing files to zipfile
     with ZipFile(f"media/exports/{await current_user.user_id}/account_data.zip", "w",
                 compression=ZIP_DEFLATED,
                 compresslevel=9) as zip:
-        zip.write("account_data.json")
-        zip.write("account_data.html")
+        zip.write(export_path + "/account_data.json")
+        zip.write(export_path + "/account_data.html")
+
+    # remove the json and html files
+    os.remove(export_path + "/account_data.json")
+    os.remove(export_path + "/account_data.html")
     
     # directory = os.path.join(os.getcwd(), f"media/exports/{await current_user.user_id}/account_data.zip")
 
