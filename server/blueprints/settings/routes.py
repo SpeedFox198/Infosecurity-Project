@@ -135,8 +135,8 @@ async def get_account_information():
     with ZipFile(f"media/exports/{await current_user.user_id}/account_data.zip", "w",
                 compression=ZIP_DEFLATED,
                 compresslevel=9) as zip:
-        zip.write(export_path + "/account_data.json")
-        zip.write(export_path + "/account_data.html")
+        zip.write(export_path + "/account_data.json", arcname="account_data.json")
+        zip.write(export_path + "/account_data.html", arcname="account_data.html")
 
     # remove the json and html files
     os.remove(export_path + "/account_data.json")
