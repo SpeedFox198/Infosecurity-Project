@@ -1,3 +1,5 @@
+import os
+
 import socketio
 import sqlalchemy as sa
 from pydantic import ValidationError
@@ -8,7 +10,7 @@ from db_access.sio import (
     add_sio_connection,
     remove_sio_connection,
     get_sid_from_sio_connection,
-    remove_friend_request
+    remove_friend_request, have_relationship, have_public_key, has_disappearing, get_existing_room
 )
 from db_access.user import get_user_details
 from db_access.message import db_get_room_messages, db_remove_messages
@@ -17,7 +19,8 @@ from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 
 from models.request_data import GroupMetadataBody
-from utils import to_unix
+from security_functions.ocr import ocr_scan
+from utils import to_unix, remove_tree_directory
 
 from .functions import delete_expired_messages, get_room, messages_queue, save_file, save_group_icon
 from .sio_auth_manager import SioAuthManager
@@ -117,9 +120,10 @@ async def send_message(sid, data: dict):
         # Save file if message type is not text, and file exists
         # TODO(high)(SpeedFox198): test what happens when upload file of size 0 bytes lmao
         if message.type != "text" and file:
-            await save_file(
+            filename, height, width = await save_file(
                 sio_auth_manager.app.config["ATTACHMENTS_PATH"],
-                file, filename, message.room_id, message.message_id, session)
+                file, filename, message.room_id, message.message_id, session
+            )
 
     # If room has disappearing messages enabled
     if room.disappearing != "off":
@@ -196,8 +200,9 @@ async def delete_messages(sid, data):
 
 @sio.event
 async def create_group(sid, data):
-    # print(f"Received {data}")
     current_user = await get_user(sid)
+    have_group_icon = False
+    icon_path = None
 
     try:
         group_metadata = GroupMetadataBody(**data)
@@ -209,16 +214,26 @@ async def create_group(sid, data):
         }, to=sid)
         return
 
+    new_room = Room(group_metadata.disappearing, type_="group")
+
+    if group_metadata.icon and group_metadata.icon_name:
+        icon_path = await save_group_icon(new_room.room_id, group_metadata.icon_name, group_metadata.icon)
+        is_image_sensitive = ocr_scan(icon_path)
+        if is_image_sensitive:
+            await remove_tree_directory(os.path.dirname(icon_path))
+            await sio.emit("create_group_error", {
+                "message": "Group icon contains sensitive data"
+            })
+            return
+        have_group_icon = True
+
     async with async_session() as session:
         # Create new room
-        new_room = Room(group_metadata.disappearing, "group")
         session.add(new_room)
         await session.flush()
 
-        if group_metadata.icon and group_metadata.icon_name:
+        if have_group_icon:
             # Add Group icon if any and the group details
-            icon_path = await save_group_icon(new_room, group_metadata.icon_name, group_metadata.icon)
-
             session.add(
                 Group(new_room.room_id, group_metadata.name, icon_path)
             )
@@ -270,10 +285,18 @@ async def send_friend_request(sid: str, data: dict):
         }, to=sid)
         return
 
-    valid_user = await get_user_details(recipient_id)
-    if valid_user is None:
+    valid_recipient = await get_user_details(recipient_id)
+    if valid_recipient is None:
         await sio.emit("friend_request_failed", {
             "message": "Invalid user"
+        }, to=sid)
+        return
+
+    possible_relationship = (await current_user.user_id, recipient_id)
+    existing_friend = await have_relationship(possible_relationship)
+    if existing_friend:
+        await sio.emit("friend_request_failed", {
+            "message": "Cannot add an existing friend"
         }, to=sid)
         return
 
@@ -296,6 +319,9 @@ async def send_friend_request(sid: str, data: dict):
         await session.commit()
 
     await sio.emit("friend_request_sent", data=recipient_id, to=sid)
+    recipient_sid = await get_sid_from_sio_connection(recipient_id)
+    if recipient_sid:
+        await sio.emit("friend_requests_update", to=recipient_sid)
 
 
 @sio.event
@@ -355,7 +381,7 @@ async def accept_friend_request(sid: str, data: dict):
 
 
 @sio.event
-async def cancel_received_friend_request(sid: str, data):
+async def cancel_received_friend_request(sid: str, data: dict):
     current_user = await get_user(sid)
 
     sender_id = data.get("user")
@@ -378,6 +404,101 @@ async def cancel_received_friend_request(sid: str, data):
     sender_sid = await get_sid_from_sio_connection(sender_id)
     if sender_sid:
         await sio.emit("friend_requests_update", to=sender_sid)
+
+
+@sio.event
+async def remove_friend(sid: str, data: dict):
+    current_user = await get_user(sid)
+
+    friend_user_id: str = data.get("user")
+    if friend_user_id is None:
+        await sio.emit("remove_friend_failed", {
+            "message": "Invalid user"
+        }, to=sid)
+        return
+
+    relationship = (await current_user.user_id, friend_user_id)
+
+    valid_friend = await have_relationship(relationship)
+    if not valid_friend:
+        await sio.emit("remove_friend_failed", {
+            "message": "Invalid friend"
+        }, to=sid)
+        return
+
+    async with async_session() as session:
+        statement = sa.delete(Friend).where(
+            Friend.user1_id.in_(relationship) &
+            Friend.user2_id.in_(relationship)
+        )
+        await session.execute(statement)
+        await session.commit()
+
+    await sio.emit("friend_removed", to=sid)
+    ex_friend_sid = await get_sid_from_sio_connection(friend_user_id)
+    if ex_friend_sid:
+        await sio.emit("friend_removed", to=ex_friend_sid)
+
+
+@sio.event
+async def message_friend(sid: str, data: dict):
+
+    friend_user_id: str | None = data.get("user")
+    if friend_user_id is None:
+        await sio.emit("message_friend_error", {
+            "message": "Invalid user"
+        }, to=sid)
+
+    current_user = await get_user(sid)
+    relationship = (await current_user.user_id, friend_user_id)
+
+    valid_friend = await have_relationship(relationship)
+    if not valid_friend:
+        await sio.emit("message_friend_error", {
+            "message": "Invalid friend"
+        }, to=sid)
+        return
+
+    existing_private_room = await get_existing_room(relationship)
+    if existing_private_room:
+        await sio.emit("message_friend_error", {
+            "message": "Message with selected friend already exists"
+        }, to=sid)
+        return
+
+    async with async_session() as session:
+        default_disappearing_option = "30d"
+
+        if (await have_public_key(await current_user.user_id)) and (await have_public_key(friend_user_id)):
+            new_room = Room(disappearing="off", encrypted=True)
+        else:
+            new_room = Room(disappearing="off")
+
+        if await current_user.disappearing and await has_disappearing(friend_user_id):
+            new_room.disappearing = default_disappearing_option
+
+        session.add(new_room)
+        await session.flush()
+
+        session.add(Membership(new_room.room_id, await current_user.user_id, is_admin=True))
+        await session.flush()
+        session.add(Membership(new_room.room_id, friend_user_id, is_admin=True))
+        await session.flush()
+
+        await session.commit()
+
+    await sio.emit("message_friend_success", to=sid)
+    
+    for user_id in relationship:
+        user_sid = await get_sid_from_sio_connection(user_id)
+        if user_sid is None:
+            continue
+
+        rooms = await get_room(user_id)
+        for room in rooms:
+            sio.enter_room(user_sid, room["room_id"])
+
+        await sio.emit("rooms_joined", rooms, to=user_sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

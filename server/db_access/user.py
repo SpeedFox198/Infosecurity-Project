@@ -5,7 +5,7 @@ from db_access.globals import async_session
 from models.User import User
 
 
-async def get_user_details(user_id: str) -> tuple:
+async def get_user_details(user_id: str) -> tuple | None:
     async with async_session() as session:
         statement = sa.select(
                 User.username,
@@ -16,7 +16,8 @@ async def get_user_details(user_id: str) -> tuple:
                 User.malware_scan,
                 User.friends_only,
                 User.censor,
-                User.google_account
+                User.google_account,
+                User.disappearing
         ).where(User.user_id == user_id)
         result = await session.execute(statement)
         return result.first()

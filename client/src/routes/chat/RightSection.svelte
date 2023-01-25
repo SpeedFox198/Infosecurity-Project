@@ -1,5 +1,6 @@
 <script>
-import { onMount } from "svelte";
+import { onMount, createEventDispatcher } from "svelte";
+import { getFlash } from "sveltekit-flash-message/client";
 import { page } from "$app/stores"
 
 import { msgStorage, allMsgs, getTempId } from "$lib/stores/message";
@@ -21,10 +22,18 @@ import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 // SocketIO instance
 export let socket;
 export let getRoomMsgs;
+export let animateHideChatDetails;
+export let displayChatDetails;
+export let toggleChatDetails;
+
+$: hideChatDetails = animateHideChatDetails && !displayChatDetails;
+
+const dispatch = createEventDispatcher();
+const flash = getFlash(page)
 
 let currentUser = $page.data.user
-let displayRoomInfo = false;
-$: roomInfoLength = displayRoomInfo ? "25rem" : "0rem";
+let roomsLoaded = false;
+
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -45,6 +54,11 @@ onMount(async () => {
     roomList.set(newRoomList);           // Set list of room_id
     roomStorage.set(newroomStorage);     // Set collection of rooms
     allMsgs.initRooms(newRoomList);      // Initialise empty arrays for rooms
+
+    if (!roomsLoaded) {
+      dispatch("load");
+      roomsLoaded = true;
+    }
   });
 
 
@@ -113,7 +127,7 @@ async function sendMsg(event) {
 
   // TODO(high)(SpeedFox198): implement ui for message is masked
   if (messageChanged) {
-    console.log("YOUR SENSITIVE DATA HAS BEEN LEAKED BOZO");
+    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
   }
 
   // Emit message to server and add message to client stores
@@ -361,10 +375,10 @@ async function removeMsg(message_id, room_id) {
 
 
 <!-- Right Section -->
-<div class="d-flex flex-column right-section" style:--chat-info-length={roomInfoLength}>
+<div class="d-flex flex-column right-section" class:displayChatDetails class:hideChatDetails>
 
   <!-- Chat Info Section -->
-  <ChatInfo/>
+  <ChatInfo on:click={toggleChatDetails}/>
 
   <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
   {#if currentUser.public_key && currentUser.public_key.length > 0}
@@ -391,8 +405,62 @@ async function removeMsg(message_id, room_id) {
 
 <style>
 .right-section {
-  width: calc(100vw - var(--side-bar-length) - var(--chat-info-length));
+  width: calc(100vw - var(--side-bar-length));
   position: relative;
   overflow-y: hidden;
+}
+
+.displayChatDetails {
+  width: calc(100vw - var(--side-bar-length)*2);
+  -webkit-animation-name: display-chat-details;
+  -webkit-animation-duration: 0.5s;
+  animation-name: display-chat-details;
+  animation-duration: 0.5s;
+}
+
+.hideChatDetails {
+  width: calc(100vw - var(--side-bar-length));
+  -webkit-animation-name: hide-chat-details;
+  -webkit-animation-duration: 0.5s;
+  animation-name: hide-chat-details;
+  animation-duration: 0.5s;
+}
+
+
+/* Animations */
+@-webkit-keyframes display-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length));
+  }
+  to {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+}
+
+@keyframes display-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length));
+  }
+  to{
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+}
+
+@-webkit-keyframes hide-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+  to {
+    width: calc(100vw - var(--side-bar-length));
+  }
+}
+
+@keyframes hide-chat-details {
+  from {
+    width: calc(100vw - var(--side-bar-length)*2);
+  }
+  to{
+    width: calc(100vw - var(--side-bar-length));
+  }
 }
 </style>

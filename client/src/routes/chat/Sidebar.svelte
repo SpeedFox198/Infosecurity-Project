@@ -18,6 +18,7 @@ import Friends from '$lib/settings/Friends.svelte';
 /** @type {import('socket.io-client').Socket}*/
 export let socket;
 export let getRoomMsgs;
+export let closeChatDetails;
 
 const flash = getFlash(page)
 
@@ -38,6 +39,9 @@ async function selectGrp(new_room) {
 
   // Clear any selected messages in previous room
   selectedMsgs.clear();
+
+  // Close chat details if it's opened
+  closeChatDetails();
 
   // Get room messages via socket if n is 0
   if (!($count[$room_id] || {}).n) {
@@ -104,7 +108,7 @@ onMount(() => {
 .sidebar {
   position: relative;
   width: var(--side-bar-length);
-  background-color: var(--primary-light);
+  background-color: var(--white);
   overflow-x: hidden;
 }
 

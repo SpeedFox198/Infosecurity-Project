@@ -16,7 +16,7 @@ class GroupMetadataBody(BaseModel):
 
         file_magic = magic.Magic(mime=True)
         icon_mimetype = file_magic.from_buffer(value)
-        if icon_mimetype not in ("image/jpeg", "image/png", "image/gif"):
+        if icon_mimetype not in ("image/jpeg", "image/png"):
             raise ValueError("Invalid file type.")
 
         return value

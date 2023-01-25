@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from db_access.globals import Base
-from sqlalchemy import CHAR, Column, VARCHAR
+from sqlalchemy import CHAR, Column
 from sqlalchemy.dialects.mysql import ENUM
 from sqlalchemy import BOOLEAN
 

@@ -17,7 +17,7 @@
 
 {#if $flash}
   <!-- Flash messages-->
-  <div class="alert alert-dismissible flash fade show {$flash.type === 'success' ? 'alert-success' : 'alert-danger'}" role="alert">
+  <div class="alert alert-dismissible flash fade show alert-{$flash.type}" role="alert">
     {$flash.message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" on:click={removeFlash}></button>
   </div>

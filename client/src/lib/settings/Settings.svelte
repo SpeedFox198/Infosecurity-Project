@@ -18,6 +18,7 @@ let displayDevices = false;
 let displayTwoFactor = false;
 let displayTwoFactorEnabling = false;
 let displayBackupCode = false;
+let displayFilesRequested = true;
 
 const toggleGeneral = async () => displayGeneral = !displayGeneral;
 const toggleSecurity = async () => displaySecurity = !displaySecurity;
@@ -27,6 +28,7 @@ const toggleData = async () => displayData = !displayData;
 const toggleTwoFactor = async () => displayTwoFactor = !displayTwoFactor;
 const toggleTwoFactorEnabling = async () => displayTwoFactorEnabling = !displayTwoFactorEnabling;
 const toggleBackupCode = async () => displayBackupCode = !displayBackupCode;
+const toggleFilesRequested = async () => displayFilesRequested = !displayFilesRequested;
 const currentUser = $page.data.user;
 let twoFaSecretToken;
 let twoFAInput = "";
@@ -154,19 +156,23 @@ async function submitTwoFA () {
 </SlidingMenu>
 <SlidingMenu title="Request personal data" display={displayData} on:click={toggleData} right={true}>
   <div class="file-icon">
-    <i class="fa-duotone fa-print"></i>
+    <i class="fa-solid fa-print"></i>
   </div>
   <div class="p-data">
     <span class="p-data-disclaimer">
-      Bubbles can export all of your data, including messages, files, and contacts.
+      Bubbles can export all of your data, including account information and friends.
     </span>
   </div>
   <hr>
-  <button class="btn req-data"><i class="fa-solid fa-file"></i>Request personal data</button>
+  {#if (displayFilesRequested)}
+  <button class="btn req-data" on:click={toggleFilesRequested}><i class="fa-solid fa-file"></i>Request personal data</button>
+  {:else}
+  <div><p class="requested-data">Report sent. It will be sent to your email shortly.</p></div>
+  {/if}
   <hr>
   <div class="p-data">
     <span class="p-data-disclaimer">
-      When the report is available to download, you'll receive an email, stating “<b>Your account info report is now available</b>”. Because this report contains your information, you should be careful about storing, sending, or uploading it to any other services.
+      <b>A download link</b> will be sent to you when the report is available for download. Because this report contains your information, you should be careful about storing, sending, or uploading it to any other services.
     </span>
   </div>
 </SlidingMenu>
@@ -191,14 +197,13 @@ async function submitTwoFA () {
   align-items: center;
   text-align: center;
   font-size: 1.2rem;
+  width: 100%;
 }
-
 .fa-solid {
   font-size: 2.5rem;
   margin-right: 10px;
   padding-left:1rem;
 } 
-
 .file-icon {
   display: flex;
   align-items: center;
@@ -207,6 +212,11 @@ async function submitTwoFA () {
   padding-bottom: 1rem;
   padding-left: 2rem;
   padding-right: 2rem;
+}
+.requested-data{
+  opacity: 0.7;
+  font-size: 1rem;
+  text-align: center;
 }
 .QR2fa {
   width: 150px;

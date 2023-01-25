@@ -1,14 +1,24 @@
 <script>
+import { createEventDispatcher } from "svelte";
 import { room_id, roomStorage } from "$lib/stores/room";
 
 $: currentChat = ($roomStorage || {})[$room_id] || undefined;
-$: console.log(currentChat);
+
+const dispatch = createEventDispatcher();
+
+const onClickEvent = () => {
+  if (currentChat !== undefined) dispatch("click");
+}
 
 </script>
 
 
 <!-- Chat Info Section -->
-<div class="chat-info d-flex">
+<div
+  class="chat-info d-flex user-select-none"
+  class:has-chat={currentChat}
+  on:click={onClickEvent} on:keydown
+>
   <div class="d-flex flex-row">
     {#if currentChat !== undefined}
 
@@ -38,6 +48,10 @@ $: console.log(currentChat);
   height: var(--top-bar-height);
   background-color: var(--primary);
   border-left: 0.1rem solid var(--primary-shadow);
+}
+
+.chat-info.has-chat:hover {
+  cursor: pointer;
 }
 
 .chat-info > .flex-row {

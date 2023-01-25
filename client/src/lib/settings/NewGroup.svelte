@@ -136,6 +136,7 @@ const createGroup = async () => {
     <div class="mb-3">
       <label for="groupPhoto" class="form-label">Group Photo</label>
       <input class="form-control" type="file" id="groupPhoto" bind:files={photoUpload} on:change={setGroupPhoto}>
+      <span>Only JPG/PNG files are supported.</span>
     </div>
 
     <div class="form-floating mb-3">

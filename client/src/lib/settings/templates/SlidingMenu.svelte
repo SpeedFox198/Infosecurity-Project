@@ -12,8 +12,7 @@ export let title;
 <div class="settings-section" class:display class:right>
   <div class="section-title d-flex flex-row align-items-center p-2">
     <div class="d-flex">
-      <button class="back d-flex align-items-center" type="button" disabled={!display} on:click>
-        <!-- TODO(UI)(SpeedFox198): rounded-circle, onhover ?? -->
+      <button class="back d-flex align-items-center justify-content-center rounded-circle" type="button" disabled={!display} on:click>
         <i class="fa-solid fa-arrow-left fs-5"></i>
       </button>
     </div>
@@ -38,7 +37,7 @@ export let title;
   left: -100%;
   right: initial;
   z-index: 1;
-  background-color: var(--primary-light);
+  background-color: var(--white);
   overflow-x: hidden;
   transition: 0.15s;
 }
@@ -67,7 +66,13 @@ export let title;
 .back {
   background-color: inherit;
   border: 0;
-  color: var(--grey);
+  width: 3rem;
+  height: 3rem;
+  color: var(--grey); 
+}
+
+.back:hover {
+  background-color: var(--primary-highlight);
 }
 
 .content {

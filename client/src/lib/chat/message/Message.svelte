@@ -62,7 +62,9 @@ function selectMsg() {
     <div class="bubble">
 
       {#if !$selectMode}
-        <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis rounded-circle"></i></button>
+        <button class="options" type="button" on:click={selectOption}>
+          <i class="fa-solid fa-ellipsis"></i>
+        </button>
       {/if}
 
       {#if !msg.sent && msg.avatar}
@@ -73,17 +75,6 @@ function selectMsg() {
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
           <img src={msg.path} alt="">
         </div>
-        <!-- <div class="virustotal-score">
-          <div class="percent">
-            <svg>
-              <circle cx="33" cy="33" r="30"></circle>
-              <circle cx="33" cy="33" r="30" style="--percent: 30"></circle>
-            </svg>
-            <div class="number">
-              <span>30/100</span>
-            </div>
-          </div>
-        </div>   -->
       {/if}
 
       {#if msg.type === "video"}
@@ -117,13 +108,13 @@ function selectMsg() {
     </div>
   </div>
 </div>
-<div class="malware-message">
+<!-- <div class="malware-message">
   <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe. (This option can be disabled in the settings)</p>
-</div>
+</div> -->
 
 
 <style>
-.malware-message {
+/* .malware-message {
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -132,15 +123,15 @@ function selectMsg() {
   text-align: center;
   width: 82%;
   height: auto;
-  background-color: rgba(251, 238, 238, 0.1);
+  background-color: var(--white);
 
-  border-color: red;
+  border-color: var(--red);
   border-style: solid;
   border-width: 2px;
   border-radius: 20px;
 
   font-size: 1rem;
-  color: rgb(255, 0, 0);
+  color: var(--red);
 
 }
 
@@ -148,7 +139,7 @@ function selectMsg() {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-}
+} */
 
 .message {
   padding: 0 3rem;
@@ -179,7 +170,7 @@ function selectMsg() {
 }
 
 .bubble-container {
-  max-width: 65%;
+  max-width: 35rem;
   margin-top: 0.4rem;
   margin-bottom: 0.07rem;
 }
@@ -193,7 +184,7 @@ function selectMsg() {
 }
 
 .bubble {
-  background-color: var(--grey);
+  background-color: var(--white);
   text-align: left;
   padding: 0.5rem 0.6rem 0.65rem 0.8rem;
   border-radius: 0 1.3rem 1.3rem 0.7rem;
@@ -227,8 +218,8 @@ function selectMsg() {
   width: 0;
   height: 0;
   border-bottom: 10px solid transparent;
-  border-right: 10px solid var(--grey);
-  color: var(--grey);
+  border-right: 10px solid var(--white);
+  color: var(--white);
 }
 
 .sent .tail {
@@ -255,7 +246,7 @@ function selectMsg() {
 }
 
 .sent .time {
-  color: var(--grey);
+  color: var(--white);
 }
 
 .hidden {
@@ -283,14 +274,16 @@ span {
   color: var(--grey);
 }
 
-.fa-ellipsis {
-  background-color: var(--grey);
-  box-shadow: 0px 0px 5px 4px var(--grey);
+.options > i {
+  border-radius: 0 100%;
+  background-color: var(--white);
+  box-shadow: -4px 0px 0px 5px var(--white), 4px 0px 0px 5px var(--white);
 }
 
-.sent .fa-ellipsis {
+.sent .options > i {
+  border-radius: 0 100%;
   background-color: var(--primary);
-  box-shadow: 0px 0px 5px 4px var(--primary);
+  box-shadow: -4px 0px 0px 5px var(--primary), 4px 0px 0px 5px var(--primary);
 }
 
 

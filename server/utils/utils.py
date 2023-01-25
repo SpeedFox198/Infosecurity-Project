@@ -1,4 +1,6 @@
+import asyncio
 import os
+import shutil
 import time
 from datetime import datetime
 from uuid import uuid4
@@ -7,7 +9,7 @@ from aiofiles import open as async_open
 from werkzeug.utils import secure_filename
 
 
-def to_unix(timestamp:datetime) -> int:
+def to_unix(timestamp: datetime) -> int:
     """
     Convert datetime object to unix time format
 
@@ -52,3 +54,8 @@ async def save_file_directory(directory: str, filename: str, data: bytes):
 async def save_file(destination: str, data: bytes):
     async with async_open(destination, "wb") as file:
         await file.write(data)
+
+
+async def remove_tree_directory(path: str):
+    await asyncio.sleep(0)
+    shutil.rmtree(path)
