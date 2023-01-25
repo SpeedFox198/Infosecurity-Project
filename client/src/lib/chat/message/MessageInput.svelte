@@ -7,6 +7,7 @@ import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import 'filepond/dist/filepond.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+
 const dispatch = createEventDispatcher();
 
 // Register the plugins
@@ -146,7 +147,7 @@ async function onSend(event) {
   z-index: 30;
   bottom: 0;
   height: var(--bottom-bar-height);
-  max-width: calc(100vw - var(--side-bar-length));
+  max-width: 100%;
   background-color: var(--grey);
   border-left: 0.1rem solid var(--grey-shadow);
 }

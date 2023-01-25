@@ -62,7 +62,7 @@ function selectMsg() {
     <div class="bubble">
 
       {#if !$selectMode}
-        <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis"></i></button>
+        <button class="options" type="button" on:click={selectOption}><i class="fa-solid fa-ellipsis rounded-circle"></i></button>
       {/if}
 
       {#if !msg.sent && msg.avatar}
@@ -282,6 +282,17 @@ span {
 .sent .options {
   color: var(--grey);
 }
+
+.fa-ellipsis {
+  background-color: var(--grey);
+  box-shadow: 0px 0px 5px 4px var(--grey);
+}
+
+.sent .fa-ellipsis {
+  background-color: var(--primary);
+  box-shadow: 0px 0px 5px 4px var(--primary);
+}
+
 
 .bubble:hover .options, .tail:hover ~ .bubble .options {
   display: block;

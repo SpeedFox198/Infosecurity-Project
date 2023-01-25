@@ -17,6 +17,7 @@ export const room_id = (() => {
  *     type: string;
  *     encrypted: boolean;
  *     is_admin: boolean;
+ *     icon: string;
  *   },
  *   ...
  * }

@@ -10,6 +10,8 @@ import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
 
+import Welcome from "$lib/chat/Welcome.svelte";
+import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
@@ -21,6 +23,8 @@ export let socket;
 export let getRoomMsgs;
 
 let currentUser = $page.data.user
+let displayRoomInfo = false;
+$: roomInfoLength = displayRoomInfo ? "25rem" : "0rem";
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -357,17 +361,13 @@ async function removeMsg(message_id, room_id) {
 
 
 <!-- Right Section -->
-<div class="d-flex flex-column flex-grow-1 right-section">
+<div class="d-flex flex-column right-section" style:--chat-info-length={roomInfoLength}>
 
-  <!-- Room Info Section -->
-  <div class="top-right">
-    <div class="temp">
-      <!-- TODO(high)(SpeedFox198): Display Group info -->
-    </div>
-  </div>
+  <!-- Chat Info Section -->
+  <ChatInfo/>
 
   <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
-  {#if currentUser.public_key && currentUser.public_key.length !== 0}
+  {#if currentUser.public_key && currentUser.public_key.length > 0}
     <E2EE/>
   {/if}
 
@@ -383,27 +383,16 @@ async function removeMsg(message_id, room_id) {
       <MessageInput on:message={sendMsg}/>
     {/if}
   {:else}
-    <div class="">
-      <!-- TODO(UI)(SpeedFox198): add welcome page? lol -->
-    </div>
+    <!-- Welcome page -->
+    <Welcome {currentUser}/>
   {/if}
 </div>
 
 
 <style>
 .right-section {
+  width: calc(100vw - var(--side-bar-length) - var(--chat-info-length));
   position: relative;
   overflow-y: hidden;
-}
-
-.temp {  /*TODO(UI)(SpeedFox198): remove this extra temp style when not needed */
-  height: var(--top-bar-height);
-}
-
-.top-right {
-  height: var(--top-bar-height);
-  width: calc(100vw - var(--side-bar-length));
-  background-color: var(--primary);
-  border-left: 0.1rem solid var(--primary-shadow);
 }
 </style>
