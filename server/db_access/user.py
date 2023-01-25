@@ -11,6 +11,7 @@ async def get_user_details(user_id: str) -> tuple:
                 User.username,
                 User.email,
                 User.avatar,
+                User.public_key,
                 User.dark_mode,
                 User.malware_scan,
                 User.friends_only,

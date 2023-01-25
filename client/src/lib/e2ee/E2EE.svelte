@@ -82,12 +82,14 @@ async function initKeys() {
 
 encryption.encryptMessage = async message => {
   const key = await getRoomKey();
+  if (key === undefined) return;
   return await e2ee.encryptMessage(message, key);
 }
 
 
 encryption.decryptMessage = async message => {
   const key = await getRoomKey();
+  if (key === undefined) return;
   return await e2ee.decryptMessage(message, key);
 }
 
@@ -96,6 +98,7 @@ async function getRoomKey() {
   let key = $roomKeys[$room_id];
   if (key === undefined) {
     key = await createAndSaveRoomKey($room_id, $user_id);
+    if (key === undefined) return;
   }
   return await e2ee.importRoomKey(key);
 }
@@ -115,6 +118,10 @@ async function createAndSaveRoomKey(room_id, user_id) {
 
   // Derive room key
   const key = await deriveRoomKey(pubKey);
+
+  if (key === undefined) {
+    service.authUser(() => createAndSaveRoomKey(room_id, user_id));
+  }
 
   // Upload room key to google drive
   saveRoomKey(room_id, key);
@@ -157,7 +164,9 @@ async function getNewMasterKey() {
 
 
 async function deriveRoomKey(userPubKey) {
-  const privKey = await e2ee.importPrivateKey($masterKey.privKey);
+  const storedKey = $masterKey.privKey;
+  if (storedKey === undefined) return;
+  const privKey = await e2ee.importPrivateKey(storedKey);
   const pubKey = await e2ee.importPublickey(userPubKey);
   const roomKey = await e2ee.deriveSecretKey(privKey, pubKey);;
   return await e2ee.exportRoomKey(roomKey);

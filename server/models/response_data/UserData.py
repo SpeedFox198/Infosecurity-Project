@@ -8,6 +8,7 @@ class UserData:
     username: str
     email: str
     avatar: str | None
+    public_key: str | None
     dark_mode: bool
     malware_scan: bool
     friends_only: bool

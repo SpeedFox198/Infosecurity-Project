@@ -34,4 +34,3 @@ class User(Base):
     online = Column(Boolean)
 
     devices = relationship("Device", back_populates="user")
-

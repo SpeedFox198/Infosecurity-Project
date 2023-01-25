@@ -118,7 +118,13 @@ async function sendMsg(event) {
 
   // Encrypt message before sending
   if ($roomStorage[$room_id].encrypted) {
-    msg.content = await encryption.encryptMessage(content);
+    const encryptedContent = await encryption.encryptMessage(content);
+    if (encryptedContent === undefined) {
+      // continue: flash error pls sign in message
+      return;
+    }
+    msg.content = encryptedContent;
+    // continue: encrypt file if exists
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
@@ -360,7 +366,11 @@ async function removeMsg(message_id, room_id) {
     </div>
   </div>
 
-  <!-- <E2EE/> -->
+  <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
+  {#if currentUser.public_key && currentUser.public_key.length !== 0}
+    <E2EE/>
+  {/if}
+
   {#if $room_id}
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs}/>
