@@ -38,7 +38,8 @@ class AuthedUser(AuthUser):
                 self._malware_scan,
                 self._friends_only,
                 self._censor,
-                self._twofa_status
+                self._google_account,
+                self._disappearing
             ) = user_details
 
             self._resolved = True
@@ -94,7 +95,7 @@ class AuthedUser(AuthUser):
         return self._censor
 
     @property
-    async def google_account(self):
+    async def google_account(self) -> bool:
         await self._resolve()
         return self._google_account
 
