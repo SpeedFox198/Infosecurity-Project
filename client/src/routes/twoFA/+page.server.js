@@ -29,7 +29,6 @@ export const actions = {
             }
         }
       
-        event.cookies.delete("session")
         //throw redirect(302, "/")
         throw redirect(
           302,
