@@ -75,42 +75,56 @@ async def delete_2fa():
         return {"message": "2FA not enabled"}, 400
 
 
-@settings_bp.get("/get-account-information")
+@settings_bp.get("/account-information")
 @login_required
 async def get_account_information():
     
     async with async_session() as session:
         # get user details
-        user_results = await get_user_details(current_user.user_id)
+        user_results = await get_user_details(await current_user.user_id)
 
         # get device details
         statement = sa.select(Device)\
             .where(Device.user_id == await current_user.user_id)\
             .order_by(sa.desc(Device.time))
         results = await session.execute(statement)
-        device_results = results.mappings().all()
-    
+        device_results = results.scalars().all()
+        
+        device_json_list = []
+        for device in device_results:
+            device_json_list.append(
+                {
+                    "device_id": device.device_id,
+                    "time": device.time,
+                    "location": device.location,
+                    "os": device.os,
+                    "browser": device.browser,
+                }
+            )
+
     # convert all data into json format
-    user_json = json.loads(json.dumps(user_results, indent=4, default=str))
-    device_json = json.loads(json.dumps(device_results, indent=4, default=str))
+    user_json = json.dumps(user_results, indent=4, default=str)
+    device_json = json.dumps(device_json_list, indent=4, default=str)
 
     # write to json file
     with open("account_data.json", "w") as outfile:
-        outfile.write(user_json)
+        outfile.write(user_json + "\n")
     
     with open("account_data.json", "a") as outfile:
-        outfile.append(device_json)
+        outfile.write(device_json)
     
     # write to html file
     html_template = await render_template("account_data.html", 
-                                username=user_json['username'], 
-                                email=user_json['email'], 
-                                first_name=user_json['first_name'], 
-                                last_name=user_json['last_name'], 
-                                twofa_status=user_json['twofa_status'], 
-                                device_id=device_json['device_id'], 
-                                device_name=device_json['device_name'], 
-                                device_type=device_json['device_type'])
+                                username=user_results[0], 
+                                email=user_results[1], 
+                                avatar=user_results[2], 
+                                malware_scan=user_results[5],
+                                friends_only=user_results[6],
+                                censor=user_results[7],
+                                twofa_status=user_results[8],
+                                disappearing=user_results[9],
+                                device_list=device_json_list
+                                )
 
     with open("account_data.html", "w") as outfile:
         outfile.write(html_template)
@@ -126,8 +140,9 @@ async def get_account_information():
     # directory = os.path.join(os.getcwd(), f"media/exports/{await current_user.user_id}/account_data.zip")
 
     # crafting the link
-    url_serialiser = await current_app.config["url_serialiser"]
-    email = user_json['email']
+    url_serialiser = current_app.config["url_serialiser"]
+    email = user_results[1]
+    print(email)
     token = url_serialiser.dumps(email)
     link = f"https://localhost:8443/api/{token}/{await current_user.user_id}/account_data.zip"
 
@@ -141,3 +156,4 @@ async def get_account_information():
                                     link=link
                                     )
     gmail_send(email, subject, message)
+    return {"message" : "Getting account report"}
