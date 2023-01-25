@@ -7,7 +7,7 @@ $: currentChat = ($roomStorage || {})[$room_id] || undefined;
 
 
 <!-- Chat Info Section -->
-<div class="chat-info d-flex">
+<div class="chat-info d-flex user-select-none" on:click on:keydown>
   <div class="d-flex flex-row">
     {#if currentChat !== undefined}
 
@@ -37,6 +37,10 @@ $: currentChat = ($roomStorage || {})[$room_id] || undefined;
   height: var(--top-bar-height);
   background-color: var(--primary);
   border-left: 0.1rem solid var(--primary-shadow);
+}
+
+.chat-info:hover {
+  cursor: pointer;
 }
 
 .chat-info > .flex-row {
