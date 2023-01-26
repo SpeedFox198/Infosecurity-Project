@@ -161,9 +161,12 @@ async def get_account_information():
     subject = "Your Bubbles Account - Requested Account Report"
     date_requested = datetime.date.today()
     expiry_date = date_requested + datetime.timedelta(days=30)
+    print(date_requested)
+    print(expiry_date)
+    print(link)
     message = await render_template("requested_data.html",
-                                    date_requested=date_requested,
-                                    expiry_date=expiry_date,
+                                    date_requested=str(date_requested),
+                                    expiry_date=str(expiry_date),
                                     link=link
                                     )
     gmail_send(email, subject, message)
