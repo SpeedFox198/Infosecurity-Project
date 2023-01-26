@@ -9,6 +9,13 @@ export let displayChatDetails;
 export let closeChatDetails;
 export let animateHideChatDetails;
 
+const disappearingText = {
+  "off": "Off",
+  "24h": "24 hours",
+  "7d": "7 days",
+  "30d": "30 days"
+};
+
 let disappearing;
 let displayNone = true;
 let _displayDisappearing = false;
@@ -77,7 +84,7 @@ function setDisappearing () {
         </ChatSettings>
         {#if currentChat.type === "direct" || currentChat.is_admin}
           <ChatSettings icon="stopwatch" name="Disappearing Messages" arrow on:click={toggleDisappearing}>
-            {"Off"}
+            {disappearingText[currentChat.disappearing]}
           </ChatSettings>
         {/if}
       </div>
