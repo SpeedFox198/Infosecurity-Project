@@ -18,7 +18,7 @@ from db_access.device import add_logged_in_device, remove_logged_in_device
 from db_access.failed_attempt import delete_failed_attempt
 from db_access.globals import async_session
 from db_access.otp import create_otp, delete_otp, get_otp
-from db_access.user import get_user_details, insert_user_by_google
+from db_access.user import get_user_details, insert_user_by_google, reset_password_with_email, get_user_id
 from google_authenticator import get_google_oauth_flow
 from models import AuthedUser, User
 from models.general.BrowsingData import BrowsingData
@@ -250,16 +250,11 @@ async def reset_password(data: ResetPasswordBody):
     hashed_password = pw_hash(data.password)
 
     # Replace password
-    async with async_session() as session:
-        update_statement = sa.update(User).where(User.email == email).values(password=hashed_password)
-        await session.execute(update_statement)
-        # Get user_id from email
-        user_id = sa.select(User.user_id).where(User.email == email)
-        # Remove any lockouts and failed attempts
-        await delete_lockout(user_id)
-        await delete_failed_attempt(user_id)
-        await session.commit()
-        return {"message": "Password reset"}, 200
+    await reset_password_with_email(email, hashed_password)
+    user_id = await get_user_id(email)
+    await delete_lockout(user_id)
+    await delete_failed_attempt(user_id)
+    return {"message": "Password reset"}, 200
 
 
 @auth_bp.post("/google-callback")
