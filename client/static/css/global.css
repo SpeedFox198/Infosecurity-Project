@@ -6,8 +6,12 @@
 body {
   font-family: "Open Sans", "Segoe UI", sans-serif;
   color: var(--black);
+  scrollbar-color: var(--scrollbar-color) #00000000;
 }
 
+* {
+  scrollbar-width: thin;
+}
 
 /* Scroll bar styles */
 ::-webkit-scrollbar {
@@ -23,7 +27,6 @@ body {
   background: var(--scrollbar-color);
   border-radius: 0.6rem;
 }
-
 
 /* Image wrappers for unstreched constant ratio image displays */
 .img-wrapper {

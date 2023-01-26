@@ -1,39 +1,39 @@
 :root {
-    /* Colours */
-    --black: #202223;
+  /* Colours */
+  --black: #202223;
 
-    --grey-dark: #54585b;
+  --grey-dark: #54585b;
 
-    --grey-shadow: #d2d7e8;
-    --grey: #e1e5f2;
+  --grey-shadow: #d2d7e8;
+  --grey: #e1e5f2;
 
-    --grey-light-shadow: #eff1f5;
-    --grey-light: #f7f8fb;
+  --grey-light-shadow: #eff1f5;
+  --grey-light: #f7f8fb;
 
-    --white-shadow: #f2f2f2;
-    --white: #ffffff;
+  --white-shadow: #f2f2f2;
+  --white: #ffffff;
 
-    --primary-dark: #022b3a;
+  --primary-dark: #022b3a;
 
-    --primary-shadow: #1a6f80;
-    --primary: #1f7a8c;
-    --primary-highlight: #298a9d;
+  --primary-shadow: #1a6f80;
+  --primary: #1f7a8c;
+  --primary-highlight: #298a9d;
 
-    --primary-light-shadow: #b1cfed;
-    --primary-light: #bfdbf7;
+  --primary-light-shadow: #b1cfed;
+  --primary-light: #bfdbf7;
 
-    --red: #ed2d1c;
+  --red: #ed2d1c;
 
-    --orange: #eaa121;
+  --orange: #eaa121;
 
-    /* Highlight */
-    --highlight-primary: #1f7a8c2e;
+  /* Highlight */
+  --highlight-primary: #1f7a8c2e;
 
-    /* Misc */
-    --side-bar-length: 25rem;
-    --top-bar-height: 3.5rem;
-    --bottom-bar-height: 3.5rem;
+  /* Misc */
+  --side-bar-length: 25rem;
+  --top-bar-height: 3.5rem;
+  --bottom-bar-height: 3.5rem;
 
-    /* Scrollbar */
-    --scrollbar-color: #54585b49;
+  /* Scrollbar */
+  --scrollbar-color: #54585b49;
 }

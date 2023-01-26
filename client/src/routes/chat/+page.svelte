@@ -81,7 +81,6 @@ const openChatDetails = () => {
     on:load={() => appLoaded = true}
   />
   <ChatDetails {socket} {displayChatDetails} {closeChatDetails} {animateHideChatDetails}/>
-
 </main>
 
 
