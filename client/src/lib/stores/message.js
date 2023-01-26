@@ -128,7 +128,9 @@ export const allMsgs = (() => {
   async function initRooms(rooms) {
     update(storage => {
       for (let i=0; i < rooms.length; i++) {
-        storage[rooms[i]] = [];
+        if (storage[rooms[i]] === undefined) {
+          storage[rooms[i]] = [];
+        }
       }
       return storage;
     });

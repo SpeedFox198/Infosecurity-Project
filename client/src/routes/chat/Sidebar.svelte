@@ -75,8 +75,9 @@ onMount(() => {
     
 
     // Initialise rooms
-    roomList.set(newRoomList);           // Set list of room_id
-    roomStorage.set(newRoomStorage);     // Set collection of rooms
+    roomList.set(newRoomList);          // Set list of room_id
+    roomStorage.set(newRoomStorage);    // Set collection of rooms
+    allMsgs.initRooms(newRoomList)      // Add new room to storage
   })
 })
 </script>

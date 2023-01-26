@@ -23,7 +23,7 @@ const logoutUser = async () => {
 
 <div class="d-flex top-left">
   <div class="nav-height d-flex flex-row align-items-center w-100">
-    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle h-100 p-2">
+    <img src={ currentUser.avatar || "default.png" } alt="avatar" class="rounded-circle h-100 p-2 user-select-none">
     <div class="input-group flex-grow p-2 h-100">
       <span class="input-group-text search-icon h-100">
         <i class="fa-solid fa-magnifying-glass"></i>

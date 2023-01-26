@@ -91,8 +91,13 @@ async function submitTwoFA () {
 </script>
 
 <SlidingMenu title="Settings" display={displaySettings} on:click={toggleSettings} right={false}>
-  <div class="">
-    Profile things here...
+  <div class="profile-section d-flex flex-row align-items-center p-1">
+    <div class="profile p-1">
+      <div class="img-wrapper img-1-1">
+        <img class="rounded-circle p-2" src={currentUser.avatar} alt="">
+      </div>
+    </div>
+    <div class="ms-2 fs-4 user-select-none">{currentUser.username}</div>
   </div>
   <div class="d-flex flex-column">
     <Option name="General Settings" icon="gear" on:click={toggleGeneral}/>
@@ -183,6 +188,13 @@ async function submitTwoFA () {
 </SlidingMenu>
 
 <style>
+.profile-section:hover {
+  background-color: var(--grey-light);
+}
+.profile {
+  width: 5rem;
+}
+
 .p-data {
   display: flex;
   flex-direction: column;

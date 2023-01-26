@@ -141,6 +141,7 @@ async def send_message(sid, data: dict):
         "user_id": message.user_id,
         "time": to_unix(message.time),
         "content": message.content,
+        "encrypted": message.encrypted
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
@@ -534,6 +535,37 @@ async def set_disappearing(sid: str, data: dict):
 
     # Send room_ids that client belongs to
     await sio.emit("group_invite", rooms, to=sid)
+
+
+# @sio.event
+# async def block_user(sid: str, data: dict):
+
+#     disappearing = data["disappearing"]
+#     room_id = data["room_id"]
+
+#     # Get user from session
+#     current_user = await get_user(sid)
+#     user_id = await current_user.user_id
+
+#     rooms = await get_room(user_id)
+
+#     exists = False
+#     for room in rooms:
+#         if (
+#             room_id == room["room_id"] and
+#             (room["type"] == "direct" or room["is_admin"] == True)
+#         ):
+#             exists = True
+#             room["disappearing"] = disappearing
+#             break
+
+#     if not exists:
+#         return
+
+#     await db_update_disappearing(disappearing, room_id)
+
+#     # Send room_ids that client belongs to
+#     await sio.emit("group_invite", rooms, to=sid)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:
