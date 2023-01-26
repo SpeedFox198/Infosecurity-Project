@@ -107,7 +107,6 @@ async def has_disappearing(user_id: str) -> bool:
 
 
 async def get_existing_room(relationship: list[str, str] | tuple[str, str]) -> Room | None:
-    print("\n\nChecking existing room...\n\n")
     async with async_session() as session:
         subquery = sa.select(Membership.room_id).where(
             Membership.user_id.in_(relationship)
@@ -115,7 +114,6 @@ async def get_existing_room(relationship: list[str, str] | tuple[str, str]) -> R
             .having(sa.func.count(Membership.room_id) == 2)\
             .alias("membership_room_id")
 
-        print(subquery)
         statement = sa.select(Room).join(subquery, Room.room_id == subquery.c.room_id).where(
             (Room.type == "direct")
         )
