@@ -30,7 +30,7 @@ async def get_lockout(user_id: str) -> Lockout | None:
             return lockout
 
 
-# Delete lockout
+# Delete lockout by user_id
 async def delete_lockout(user_id: str) -> None:
     async with async_session() as session:
         statement = sa.delete(Lockout).where(Lockout.user_id == user_id)

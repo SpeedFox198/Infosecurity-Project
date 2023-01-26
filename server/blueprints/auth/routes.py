@@ -18,7 +18,7 @@ from db_access.device import add_logged_in_device, remove_logged_in_device
 from db_access.failed_attempt import delete_failed_attempt
 from db_access.globals import async_session
 from db_access.otp import create_otp, delete_otp, get_otp
-from db_access.user import get_user_details, insert_user_by_google
+from db_access.user import get_user_details, insert_user_by_google, reset_password_with_email, get_user_id
 from google_authenticator import get_google_oauth_flow
 from models import AuthedUser, User
 from models.general.BrowsingData import BrowsingData
@@ -35,7 +35,7 @@ from models.response_data import UserData
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.twoFA import get_2fa
 from models.request_data import TwoFABody
-from db_access.backup_codes import get_2fa_backup_codes
+from db_access.backup_codes import get_2fa_backup_codes, delete_2fa_backup_codes 
 from utils.logging import log_info, log_warning, log_exception
 from .functions import (
     generate_otp,
@@ -137,13 +137,13 @@ async def login(data: LoginBody):
     locked_out_user = await get_lockout(existing_user.user_id)
 
     if locked_out_user:
-        if (datetime.datetime.now() - locked_out_user.lockout) < datetime.timedelta(minutes=5):
+        if (datetime.datetime.now() - locked_out_user.lockout) < datetime.timedelta(minutes=30):
             await log_warning(
                 f"User {existing_user.username} has failed to log in due to account lockout using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
             )
             return invalid_cred_response
 
-        await delete_lockout(locked_out_user.user_id)
+        await delete_lockout(existing_user.user_id)
 
     if not pw_verify(existing_user.password, data.password):
         return await evaluate_failed_attempts(existing_user, invalid_cred_response, browser_data)
@@ -196,28 +196,31 @@ async def two_fa(data: TwoFABody):
 @auth_bp.post("/backupcode")
 @validate_request(BackupCodeBody)
 async def backupcode(data: BackupCodeBody):
-    session = auth_session.get("login_session")
-    existing_user = auth_session.get("login_existing_user")
+    user_id = auth_session.get("login_existing_user")
     device_id = str(uuid4())
     browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
                                 await get_location_from_ip(request.remote_addr))
-    backup_code = [(await get_2fa_backup_codes(await current_user.user_id))]
-    #While backup code list is less than the backup code, check if the backup code is in the list
-    counter = 0
-    while len(backup_code) > counter:
-        for i in backup_code:
-            if data.backupcode == i:
-                logged_in_user = existing_user
-                await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-                # TODO(br1ght) re-enable when needed
-                # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
-                login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
-                await log_info(
-                    f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
-                return {"message": "login success"}, 200
-            else:
-                counter += 1
+    async with async_session() as session:
+        existing_user: User = (await session.execute(sa.select(User).where(User.user_id == user_id))).scalars().first()
+    backup_code: list[str] = [
+        bc.code
+        for bc in await get_2fa_backup_codes(existing_user.user_id)
+    ]
+    for i in backup_code:
+        print(i)
+        if data.backupcode == i:
+            #If the backup code is in the list, delete the backup code from the list
+            await delete_2fa_backup_codes(existing_user.user_id, data.backupcode)
+            logged_in_user = existing_user
+            await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
+            # TODO(br1ght) re-enable when needed
+            # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+            login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
+            await log_info(
+                f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+            return {"message": "login success"}, 200
     return {"message": "Invalid backup code"}, 400
+
 
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
@@ -247,16 +250,11 @@ async def reset_password(data: ResetPasswordBody):
     hashed_password = pw_hash(data.password)
 
     # Replace password
-    async with async_session() as session:
-        update_statement = sa.update(User).where(User.email == email).values(password=hashed_password)
-        await session.execute(update_statement)
-        # Get user_id from email
-        user_id = sa.select(User.user_id).where(User.email == email)
-        # Remove any lockouts and failed attempts
-        await delete_lockout(user_id)
-        await delete_failed_attempt(user_id)
-        await session.commit()
-        return {"message": "Password reset"}, 200
+    await reset_password_with_email(email, hashed_password)
+    user_id = await get_user_id(email)
+    await delete_lockout(user_id)
+    await delete_failed_attempt(user_id)
+    return {"message": "Password reset"}, 200
 
 
 @auth_bp.post("/google-callback")

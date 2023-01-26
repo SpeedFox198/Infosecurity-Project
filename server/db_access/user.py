@@ -33,3 +33,21 @@ async def insert_user_by_google(user_id: str, username: str, email: str, avatar:
         except SQLAlchemyError as err:
             await session.rollback()
             raise err
+
+#Reset password with email and replace with new password
+async def reset_password_with_email(email: str, password: str) -> None:
+    async with async_session() as session:
+        statement = sa.update(User).where(User.email == email).values(password=password)
+        try:
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await session.rollback()
+            raise err
+
+#Get user_id from email
+async def get_user_id(email: str) -> str | None:
+    async with async_session() as session:
+        statement = sa.select(User.user_id).where(User.email == email)
+        result = await session.execute(statement)
+        return result.scalar()

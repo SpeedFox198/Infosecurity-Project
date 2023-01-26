@@ -64,7 +64,7 @@ async def evaluate_failed_attempts(existing_user: User,
         lockout_user_email = await get_email(failed_attempt.user_id)
         send_lockout_alert_email(lockout_user_email)
 
-        await log_warning(f"User {existing_user.username} has been locked out for 5 minutes.")
+        await log_warning(f"User {existing_user.username} has been locked out for 30 minutes.")
         return invalid_cred_response
 
 
