@@ -13,7 +13,7 @@
               type="text"
               inputmode="numeric"
               autocomplete="one-time-code"
-              name="otp"
+              name="backupcode"
               class="form-control rounded-3"
               id="floatingInput"
               placeholder="123456"

@@ -39,7 +39,7 @@ async def check_2fa_exists(user_id) -> bool:
             return False
 
 #Delete 2FA
-async def delete_2fa(user_id):
+async def delete_2fa_all(user_id):
     async with async_session() as session:
         statement = sa.delete(models.TwoFA).where(models.TwoFA.user_id == user_id)
         try:

@@ -30,8 +30,18 @@ async def get_2fa_backup_codes(user_id) -> list[BackupCodes] | None:
         else:
             return None
 
-#Delete 2FA backup codes
-async def delete_2fa_backup_codes(user_id):
+#Delete one specific 2FA backup code
+async def delete_2fa_backup_codes(user_id, code):
+    async with async_session() as session:
+        statement = sa.delete(models.BackupCodes).where(models.BackupCodes.user_id == user_id).where(models.BackupCodes.code == code)
+        try:
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await session.rollback()
+            await log_exception(err)
+
+async def delete_2fa_backup_codes_all(user_id):
     async with async_session() as session:
         statement = sa.delete(models.BackupCodes).where(models.BackupCodes.user_id == user_id)
         try:

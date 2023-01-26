@@ -7,7 +7,7 @@ from quart import Blueprint, render_template, current_app
 from quart_schema import validate_request
 from models.request_data import TwoFABody
 from models import Device
-from db_access.twoFA import create_2fa, get_2fa, delete_2fa
+from db_access.twoFA import create_2fa, get_2fa, delete_2fa_all
 from db_access.globals import async_session
 from db_access.user import get_user_details
 from quart_auth import current_user, login_required
@@ -16,7 +16,7 @@ from google_authenticator.google_email_send import gmail_send
 
 from db_access.backup_codes import get_2fa_backup_codes
 from db_access.twoFA import check_2fa_exists
-from db_access.backup_codes import create_2fa_backup_codes
+from db_access.backup_codes import create_2fa_backup_codes, delete_2fa_backup_codes_all
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
@@ -76,7 +76,8 @@ async def google_authenticator(data: TwoFABody):
 @login_required
 async def delete_2fa():
     if await get_2fa_backup_codes(await current_user.user_id):
-        await delete_2fa(await current_user.user_id)
+        await delete_2fa_all(await current_user.user_id)
+        await delete_2fa_backup_codes_all(await current_user.user_id)
         return {"message": "2FA disabled"}, 200
     else:
         return {"message": "2FA not enabled"}, 400
