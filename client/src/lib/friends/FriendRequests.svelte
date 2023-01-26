@@ -41,33 +41,35 @@
 	on:click={toggleFriendRequests}
 	right="false"
 >
-  <div class="mb-4">
+  <div class="req-partition d-flex flex-column">
     <span class="fw-bold fs-4 mx-3">Sent</span>
-    {#each $friendRequestsStore.sent as user (user.user_id)}
-      <Friend friend={user}>
-        <div class="ms-auto">
-          <button type="button" class="btn btn-danger" on:click={cancelSentFriendRequest(user.user_id)}>Cancel</button>
-        </div>
-      </Friend>  
-    {/each}
+    <div class="flex-grow-1 requests">
+      {#each $friendRequestsStore.sent as user (user.user_id)}
+        <Friend friend={user}>
+          <div class="ms-auto">
+            <button type="button" class="btn btn-danger" on:click={cancelSentFriendRequest(user.user_id)}>Cancel</button>
+          </div>
+        </Friend>  
+      {/each}
+    </div>
   </div>
 
-  <div>
-
+  <div class="req-partition d-flex flex-column">
     <span class="fw-bold fs-4 mx-3">Received</span>
-    {#each $friendRequestsStore.received as user (user.user_id)}
-      <Friend friend={user}>
-        <div class="ms-auto">
-          <button type="button" class="circle-btn me-2 pos" on:click={acceptFriendRequest(user.user_id)}>
-            <i class="fa-solid fa-check fs-3"></i>
-          </button>
-          <button type="button" class="circle-btn neg" on:click={cancelReceivedFriendRequest(user.user_id)}>
-            <i class="fa-solid fa-xmark fs-3"></i>
-          </button>
-        </div>
-      </Friend>  
-    {/each}
-    
+    <div class="flex-grow-1 requests">
+      {#each $friendRequestsStore.received as user (user.user_id)}
+        <Friend friend={user}>
+          <div class="ms-auto">
+            <button type="button" class="circle-btn me-2 pos" on:click={acceptFriendRequest(user.user_id)}>
+              <i class="fa-solid fa-check fs-3"></i>
+            </button>
+            <button type="button" class="circle-btn neg" on:click={cancelReceivedFriendRequest(user.user_id)}>
+              <i class="fa-solid fa-xmark fs-3"></i>
+            </button>
+          </div>
+        </Friend>  
+      {/each}
+    </div>
   </div>
 </SlidingMenu>
 
@@ -87,5 +89,13 @@
   .neg {
     background-color: #E10600;
     color: var(--white);
+  }
+  
+  .req-partition {
+    height: 50%;
+  }
+
+  .requests {
+    overflow-y: auto;
   }
 </style>
