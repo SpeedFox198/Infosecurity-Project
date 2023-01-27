@@ -9,7 +9,7 @@ import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
-import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
+import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/data-masking";
 
 import Welcome from "$lib/chat/Welcome.svelte";
 import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
@@ -103,14 +103,27 @@ onMount(async () => {
   });
 });
 
-
 // Send message to room via SocketIO
 async function sendMsg(event) {
   let { content, file, type } = event.detail;
   let messageChanged = false;
+  let isSensitiveImage = false;
 
   if (currentUser.censor) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
+
+    if (type === "image") {
+      isSensitiveImage = await detectSensitiveImage(file);
+    }
+  }
+  
+  if (messageChanged) {
+    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
+  }
+  
+  if (isSensitiveImage) {
+    $flash = {type: 'failure', message: 'Your message was not sent as your image contains sensitive data!'}
+    return
   }
 
   const message_id = getTempId();  // Temporary id for referencing message
@@ -125,10 +138,6 @@ async function sendMsg(event) {
     type // <type> ENUM(image, document, video, text)
   };
 
-  // TODO(high)(SpeedFox198): implement ui for message is masked
-  if (messageChanged) {
-    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
-  }
 
   // Emit message to server and add message to client stores
   let filename = (file || {}).name

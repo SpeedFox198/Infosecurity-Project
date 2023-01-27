@@ -46,8 +46,12 @@ async def connect(sid, environ, auth):
     """ Event when client connects to server """
     current_user = sio_auth_manager.get_user(environ["HTTP_COOKIE"])
 
+    # Check if user_id is valid in database, because there was an integrity error when re-init db
+    if await get_user_details(await current_user.user_id) is None:
+        raise ConnectionRefusedError("Authentication failed")
+
     if not await current_user.is_authenticated:
-        raise ConnectionRefusedError("authentication failed")
+        raise ConnectionRefusedError("Authentication failed")
 
     # Save user session
     await save_user(sid, current_user)
