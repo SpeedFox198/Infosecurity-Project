@@ -17,7 +17,7 @@ import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
-
+import OpenCV from "$lib/opencv/OpenCV.svelte"
 
 // SocketIO instance
 export let socket;
@@ -33,7 +33,9 @@ const flash = getFlash(page)
 
 let currentUser = $page.data.user
 let roomsLoaded = false;
-
+let ocrLoading = false;
+/** @type{HTMLImageElement} */
+let openCvImage;
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -103,6 +105,40 @@ onMount(async () => {
   });
 });
 
+/**
+ * 
+ * @param {HTMLImageElement} imgElement
+ */
+const processImage = (imgElement) => {
+  console.log("OpenCV Image", imgElement)
+  console.log("OpenCV Image width", imgElement.width)
+  console.log("OpenCV Image height", imgElement.height)
+  console.log("OpenCV Image src", imgElement.src)
+  const cvImage = cv.imread(imgElement)
+  let processed = new cv.Mat()
+
+  cv.cvtColor(cvImage, cvImage, cv.COLOR_RGBA2GRAY, 0);
+  cv.GaussianBlur(cvImage, cvImage, new cv.Size(3, 3), 0, 0, cv.BORDER_DEFAULT);
+  cv.threshold(cvImage, cvImage, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+  let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
+  cv.morphologyEx(cvImage, cvImage, cv.MORPH_OPEN, kernel);
+  let invert = new cv.Mat(cvImage.rows, cvImage.cols, cvImage.type(), new cv.Scalar(255));
+  cv.subtract(invert, cvImage, processed);
+
+  cv.cvtColor(processed, processed, cv.COLOR_GRAY2RGB);
+  cv.cvtColor(processed, processed, cv.COLOR_RGB2RGBA);
+
+  const processedData = new Uint8ClampedArray(processed.data)
+  const processedImage = new ImageData(processedData, processed.cols, processed.rows)
+  cvImage.delete()
+  processed.delete()
+  return processedImage
+}
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Send message to room via SocketIO
 async function sendMsg(event) {
   let { content, file, type } = event.detail;
@@ -113,7 +149,19 @@ async function sendMsg(event) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
 
     if (type === "image") {
-      isSensitiveImage = await detectSensitiveImage(file);
+      // TODO show message loading animation or something while sending
+      ocrLoading = true
+      console.log("File from filepond", file)
+      const imageUrl = URL.createObjectURL(file)
+      openCvImage.src = imageUrl
+      
+      await sleep(200) // Hacky way to let the image src set bc somehow processImage will be faster than the image loading
+      
+      const processedImage = processImage(openCvImage)
+      console.log(processedImage)
+      isSensitiveImage = await detectSensitiveImage(processedImage);
+      URL.revokeObjectURL(imageUrl)
+      ocrLoading = false
     }
   }
   
@@ -155,7 +203,6 @@ async function sendMsg(event) {
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
-
 
 async function getUser(user_id) {
   const url = `https://localhost:8443/api/user/details/${user_id}`;
@@ -409,6 +456,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Welcome page -->
     <Welcome {currentUser}/>
   {/if}
+  <OpenCV bind:openCv={openCvImage} />
 </div>
 
 
