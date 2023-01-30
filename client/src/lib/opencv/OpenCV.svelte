@@ -21,7 +21,6 @@
   <img src="" alt="" bind:this={openCv}>
   <canvas id="openCvCanvas" bind:this={canvas}></canvas>
 </div>
-<!-- Add canvas -->
 
 <svelte:head>
   {#if mounted}

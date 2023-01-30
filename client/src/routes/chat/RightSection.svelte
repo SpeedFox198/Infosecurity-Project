@@ -144,7 +144,6 @@ async function sendMsg(event) {
     if (type === "image") {
       // TODO show message loading animation or something while sending
       ocrLoading = true
-      console.log("File from filepond", file)
       const imageUrl = URL.createObjectURL(file)
       openCvImage.src = imageUrl
       
