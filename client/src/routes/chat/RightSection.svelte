@@ -9,7 +9,7 @@ import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
-import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/data-masking";
+import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
 
 import Welcome from "$lib/chat/Welcome.svelte";
 import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
@@ -17,7 +17,7 @@ import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
-import OpenCV from "$lib/opencv/OpenCV.svelte"
+import OpenCV, { processImage } from "$lib/opencv/OpenCV.svelte"
 
 // SocketIO instance
 export let socket;
@@ -107,27 +107,6 @@ onMount(async () => {
   });
 });
 
-/**
- * 
- * @param {HTMLImageElement} imgElement
- */
-const processImage = async (imgElement) => {
-  const cvImage = cv.imread(imgElement)
-  let processed = new cv.Mat()
-
-  cv.cvtColor(cvImage, cvImage, cv.COLOR_RGBA2GRAY, 0);
-  cv.GaussianBlur(cvImage, cvImage, new cv.Size(3, 3), 0, 0, cv.BORDER_DEFAULT);
-  cv.threshold(cvImage, cvImage, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
-  let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
-  cv.morphologyEx(cvImage, cvImage, cv.MORPH_OPEN, kernel);
-  let invert = new cv.Mat(cvImage.rows, cvImage.cols, cvImage.type(), new cv.Scalar(255));
-  cv.subtract(invert, cvImage, processed);
-
-  cv.imshow(openCvCanvas.id, processed)
-  cvImage.delete()
-  processed.delete()
-}
-
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -149,7 +128,7 @@ async function sendMsg(event) {
       
       await sleep(200) // Hacky way to let the image src set before processImage bc race condition
       
-      await processImage(openCvImage)
+      await processImage(openCvImage, openCvCanvas)
       isSensitiveImage = await detectSensitiveImage(openCvCanvas);
       URL.revokeObjectURL(imageUrl)
       ocrLoading = false

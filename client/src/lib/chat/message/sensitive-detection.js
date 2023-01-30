@@ -22,7 +22,7 @@ export const cleanSensitiveMessage = async (message) => {
 
 /**
  * 
- * @param {File | Blob | HTMLCanvasElement} image 
+ * @param {File | Blob | HTMLImageElement | HTMLCanvasElement} image 
  * @returns {Promise<boolean>} result whether is it sensitive
  */
 export const detectSensitiveImage = async (image) => {
