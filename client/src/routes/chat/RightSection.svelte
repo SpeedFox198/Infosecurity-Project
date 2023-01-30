@@ -36,6 +36,7 @@ let roomsLoaded = false;
 let ocrLoading = false;
 /** @type{HTMLImageElement} */
 let openCvImage;
+let openCvCanvas;
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -109,11 +110,7 @@ onMount(async () => {
  * 
  * @param {HTMLImageElement} imgElement
  */
-const processImage = (imgElement) => {
-  console.log("OpenCV Image", imgElement)
-  console.log("OpenCV Image width", imgElement.width)
-  console.log("OpenCV Image height", imgElement.height)
-  console.log("OpenCV Image src", imgElement.src)
+const processImage = async (imgElement) => {
   const cvImage = cv.imread(imgElement)
   let processed = new cv.Mat()
 
@@ -125,14 +122,9 @@ const processImage = (imgElement) => {
   let invert = new cv.Mat(cvImage.rows, cvImage.cols, cvImage.type(), new cv.Scalar(255));
   cv.subtract(invert, cvImage, processed);
 
-  cv.cvtColor(processed, processed, cv.COLOR_GRAY2RGB);
-  cv.cvtColor(processed, processed, cv.COLOR_RGB2RGBA);
-
-  const processedData = new Uint8ClampedArray(processed.data)
-  const processedImage = new ImageData(processedData, processed.cols, processed.rows)
+  cv.imshow(openCvCanvas.id, processed)
   cvImage.delete()
   processed.delete()
-  return processedImage
 }
 
 async function sleep(ms) {
@@ -155,11 +147,10 @@ async function sendMsg(event) {
       const imageUrl = URL.createObjectURL(file)
       openCvImage.src = imageUrl
       
-      await sleep(200) // Hacky way to let the image src set bc somehow processImage will be faster than the image loading
+      await sleep(200) // Hacky way to let the image src set before processImage bc race condition
       
-      const processedImage = processImage(openCvImage)
-      console.log(processedImage)
-      isSensitiveImage = await detectSensitiveImage(processedImage);
+      await processImage(openCvImage)
+      isSensitiveImage = await detectSensitiveImage(openCvCanvas);
       URL.revokeObjectURL(imageUrl)
       ocrLoading = false
     }
@@ -456,7 +447,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Welcome page -->
     <Welcome {currentUser}/>
   {/if}
-  <OpenCV bind:openCv={openCvImage} />
+  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} />
 </div>
 
 

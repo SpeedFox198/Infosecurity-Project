@@ -43,7 +43,6 @@ export const detectSensitiveImage = async (image) => {
 
   const recognizeResults = await ocrWorker.recognize(image)
   const data = recognizeResults.data.text
-  console.log(data)
   
   await ocrWorker.terminate()
 
@@ -51,6 +50,5 @@ export const detectSensitiveImage = async (image) => {
     return data.match(pattern)
   })
   
-  console.log("Sensitive?", isSensitive)
   return isSensitive
 }

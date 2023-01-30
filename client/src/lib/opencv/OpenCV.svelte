@@ -4,6 +4,7 @@
   let mounted = false
   let opencvLoaded = false 
   export let openCv
+  export let canvas
 
   const loadOpenCV = () => {
     opencvLoaded = true
@@ -16,7 +17,10 @@
   })
 </script>
 
-<img src="" alt="" bind:this={openCv} class="d-none">
+<div class="d-none">
+  <img src="" alt="" bind:this={openCv}>
+  <canvas id="openCvCanvas" bind:this={canvas}></canvas>
+</div>
 <!-- Add canvas -->
 
 <svelte:head>
