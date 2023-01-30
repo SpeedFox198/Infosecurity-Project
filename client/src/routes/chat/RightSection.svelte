@@ -34,8 +34,9 @@ const flash = getFlash(page)
 let currentUser = $page.data.user
 let roomsLoaded = false;
 let ocrLoading = false;
-/** @type{HTMLImageElement} */
+/** @type {HTMLImageElement} */
 let openCvImage;
+/** @type {HTMLCanvasElement} */
 let openCvCanvas;
 
 onMount(async () => {
