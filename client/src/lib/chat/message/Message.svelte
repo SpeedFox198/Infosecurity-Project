@@ -109,7 +109,7 @@ function selectMsg() {
   </div>
 </div>
 <!-- <div class="malware-message">
-  <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe. (This option can be disabled in the settings)</p>
+  <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe.</p>
 </div> -->
 
 
