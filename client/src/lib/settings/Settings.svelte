@@ -39,6 +39,19 @@ async function toggleDevices () {
   invalidate("app:devices");
 }
 
+async function sendDataRequest () {
+  const response = await fetch("https://localhost:8443/api/settings/account-information", {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    method: "GET"
+  });
+  if (response.ok) {
+    toggleFilesRequested();
+  }
+}
+
 async function enableTwoFA () {
   const response = await fetch("https://localhost:8443/api/settings/twofa_secretgenerate", {
     headers: {
@@ -55,7 +68,7 @@ async function enableTwoFA () {
 }
 
 async function disableTwoFA () {
-  await fetch("https://localhost:8443/api/settings/twofa-delete", {
+  const response = await fetch("https://localhost:8443/api/settings/twofa-delete", {
     headers: {
       "Content-Type": "application/json"
     },
@@ -170,7 +183,9 @@ async function submitTwoFA () {
   </div>
   <hr>
   {#if (displayFilesRequested)}
-  <button class="btn req-data" on:click={toggleFilesRequested}><i class="fa-solid fa-file"></i>Request personal data</button>
+  <form action="" on:submit={sendDataRequest}>
+    <button class="btn req-data"><i class="fa-solid fa-file"></i>Request personal data</button>
+  </form>
   {:else}
   <div><p class="requested-data">Report sent. It will be sent to your email shortly.</p></div>
   {/if}
