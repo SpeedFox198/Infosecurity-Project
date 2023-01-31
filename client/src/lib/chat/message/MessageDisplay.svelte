@@ -9,9 +9,11 @@ import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs } from "$lib/stores/select";
 
 import Message from "$lib/chat/message/Message.svelte";
+import LoadingMessage from "$lib/chat/LoadingMessage.svelte";
 
 
 export let getRoomMsgs;
+export let ocrLoading;
 
 $: roomMsgs = ($allMsgs || {})[$room_id] || [];
 
@@ -72,6 +74,10 @@ function selectMsg(message_id, user_id_) {
       selected={$selectedMsgs.has(messageInfo.message_id)}
       select={() => selectMsg(messageInfo.message_id, messageInfo.user_id)}/>
   {/each}
+  
+  {#if ocrLoading}
+    <LoadingMessage />
+  {/if}
 
   <!-- Anchor page to bottom when at bottom -->
   <div id="anchor"></div>
