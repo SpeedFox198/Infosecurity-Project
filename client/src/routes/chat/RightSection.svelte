@@ -267,15 +267,24 @@ async function addMsg(data, filename, newly_received) {
     delete prevMsg.corner;
     await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
   }
-
-  // Send hash to virus total for newly received files
-  console.log(newly_received, file)
-  if (newly_received && file) {
-    const hash = await digestMessage(file);
-    console.log("hashed", hash)
-    socket.emit("scan_hash", { message_id, hash });
+  
+  console.log("newly received?", newly_received)
+  if (newly_received) {
+    const urlRegex = /(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z]{2,256})(\.[a-z]{2,6})/g
+    const urls = msg.content.match(urlRegex)
+    if (urls) {
+      urls.forEach((url) => {
+        socket.emit("check_safe_url", { url, message_id }) 
+      })
+    }
   }
 
+  // Send hash to virus total for newly received files
+  if (newly_received && file) {
+    const hash = await digestMessage(file);
+    socket.emit("scan_hash", { message_id, hash });
+  }
+  
   await msgStorage.updateMsg(msg, message_id);
   await allMsgs.addMsg({ user_id: user_id_, message_id }, room_id);
 }

@@ -105,11 +105,11 @@ function selectMsg() {
       </div>
     </div>
   </div>
-  {#if msg.malicious}
+  {#if msg.malicious && !msg.sent}
     <div class="malware-message d-flex align-items-center">
       <div class="rounded-pill py-1 px-2 mx-3">
         <i class="fa-solid fa-circle-exclamation me-1"></i>
-        We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe.
+        We have detected malware in this message. Do not click links or open attachments if you are unsure they are safe.
       </div>
     </div>
   {/if}

@@ -78,7 +78,7 @@ async def db_remove_messages(messages: list[str], room_id: str, user_id: str) ->
     return messages
 
 
-async def db_get_room_id_of_message(message_id: str):
+async def db_get_room_id_of_message(message_id: str) -> str:
     async with async_session() as session:
         statement = sa.select(Message.room_id).where(Message.message_id == message_id)
         return (await session.execute(statement)).scalar()
