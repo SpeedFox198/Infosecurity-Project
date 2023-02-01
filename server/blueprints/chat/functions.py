@@ -138,23 +138,3 @@ async def save_group_icon(room_id: str, group_icon_name: str, group_icon: bytes)
     os.makedirs(icon_base_path)
     saved_group_icon_name = await secure_save_file(icon_base_path, group_icon_name, group_icon)
     return os.path.join(icon_base_path, saved_group_icon_name)
-
-
-async def scan_urls(message: Message):
-    url_regex = r'(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z]{2,256})(\.[a-z]{2,6})'
-    urls = [
-        "".join(matches)
-        for matches in
-        re.findall(url_regex, message.content)
-    ]
-    if urls:
-        for url in urls:
-            try:
-                data_id = await upload_url(url)
-                url_id = await get_url_analysis(data_id)
-                results = URLResultData(**await get_url_report(url_id))
-            except VirusTotalError:
-                continue
-
-            if results.malicious > 0 or results.suspicious > 0:
-                message.malicious_url = True
