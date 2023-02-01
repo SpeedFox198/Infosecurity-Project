@@ -69,7 +69,8 @@ onMount(async () => {
 
   socket.on("receive_message", async data => {
     count.nextExtra(data.room_id);  // Increase count of received messages
-    addMsg(data);                   // Add message to storage
+    addMsg(data, undefined, true);  // Add message to storage
+    // newly_received is hacky, cuz rn no read receipt
   });
 
 
@@ -238,7 +239,7 @@ async function getMediaPath(room_id, message_id) {
 }
 
 
-async function addMsg(data, filename) {
+async function addMsg(data, filename, newly_received) {
   const roomMsgs = $allMsgs[data.room_id] || [];
   let prevInfo, prev_id;
   if (roomMsgs.length) {
@@ -248,12 +249,17 @@ async function addMsg(data, filename) {
 
   if (filename) data.filename = filename;
 
-  const { user_id_, message_id, msg, room_id } = await formatMsg(data, prev_id);
+  const { user_id_, message_id, msg, room_id, file } = await formatMsg(data, prev_id);
 
   if (prev_id === user_id_) {
     let prevMsg = $msgStorage[prevInfo.message_id];
     delete prevMsg.corner;
     await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
+  }
+
+  // Send hash to virus total for newly received files
+  if (newly_received && file) {
+    //
   }
 
   await msgStorage.updateMsg(msg, message_id);
@@ -299,20 +305,20 @@ async function addMsgBatch(data) {
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
   const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path } = data;
-  const room_id = room_id__ || room_id_
+  const room_id = room_id__ || room_id_;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
   let msg;
 
   // Check if previous message is sent by same user
-  if (prev_id && prev_id === user_id_){
+  if (prev_id && prev_id === user_id_) {
 
     // Continuous messages have no avatar
     msg = { sent, time, content, reply_to, type, corner };
 
   } else {
-    
+
     // New message from user has avatar and username
     let user = $allUsers[user_id_];
     if (!user) user = await getUser(user_id_);
@@ -328,6 +334,7 @@ async function formatMsg(data, prev_id, room_id_) {
   }
 
   // If message contains media, get media path
+  let file;
   if (type !== "text") {
     if (filename) {  // If filename is defined, means sent by user, display loading.gif
       msg.path = path || "/loading.gif";
@@ -336,7 +343,7 @@ async function formatMsg(data, prev_id, room_id_) {
       if (encrypted) {
         const iv = content.split(SEPARATOR)[2];
         if (type === "image") {
-          getEncryptedImage(msg.path, message_id, iv);
+          file = getEncryptedImage(msg.path, message_id, iv);
           // msg.path = "/loading.gif";
         } else if (type === "document") {
           // TODO(high)(SpeedFox198): decrypt document?
@@ -345,13 +352,14 @@ async function formatMsg(data, prev_id, room_id_) {
     }
   }
 
-  return { user_id_, message_id, msg, room_id };
+  return { user_id_, message_id, msg, room_id, file };
 }
 
 
 async function getEncryptedImage(path, message_id, iv) {
   const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
   setImagePathFromBlob(message_id, file);
+  return file;
 }
 
 
@@ -371,8 +379,8 @@ async function _getEncryptedFile(path, decryptFunction, iv) {
 async function setImagePathFromBlob(message_id, file) {
   const msg = $msgStorage[message_id];
   if (msg === undefined) {
-    setTimeout(() => setImagePathFromBlob(message_id, file), 300);
-    return;
+    await sleep(300);
+    setImagePathFromBlob(message_id, file);
   }
   msg.path = URL.createObjectURL(file);
   msgStorage.updateMsg(msg, message_id);
