@@ -52,6 +52,7 @@
   
   .warn {
     background-color: yellow;
+    color: black;
   }
   
   .remove-btn {

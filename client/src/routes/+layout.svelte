@@ -11,26 +11,30 @@
   }
   
   $: if ($flash) {
+    // Auto remove flash if user does not click x
     setTimeout(removeFlash, flashTimeout)
   }
   
-  const alertClass = {
-    "success": "pos",
-    "failure": "neg",
-    "warning": "warn"
-  }
-  
-  const alertType = {
-    "success": "Success",
-    "failure": "Error",
-    "warning": "Warning"
+  const alert = {
+    "success": {
+      type: "Success",
+      class: "pos"
+    },
+    "failure": {
+      type: "Error",
+      class: "neg"
+    },
+    "warning": {
+      type: "Warning",
+      class: "warn"
+    }
   }
 </script>
 
 {#if $flash}
   <Toast 
-    alertClass={alertClass[$flash.type]}
-    alertType={alertType[$flash.type]}
+    alertClass={alert[$flash.type].class}
+    alertType={alert[$flash.type].type}
     message={$flash.message}
     on:click={removeFlash}
   />
