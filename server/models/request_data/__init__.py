@@ -8,3 +8,4 @@ from .TwoFABody import TwoFABody
 from .GroupMetadataBody import GroupMetadataBody
 from .BackupCodeBody import BackupCodeBody
 from .SearchUserBody import SearchUserBody
+from .ScanURLBody import ScanURLBody
