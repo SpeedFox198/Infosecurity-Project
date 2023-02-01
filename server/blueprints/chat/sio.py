@@ -330,7 +330,10 @@ async def create_group(sid: str, data: dict):
         rooms = await get_room(user_id)
         for user_sid in user_sids:
             for room in rooms:
-                sio.enter_room(user_sid, room["room_id"])
+                try:
+                    sio.enter_room(user_sid, room["room_id"])
+                except KeyError:
+                    continue
 
             # Send room_ids that client belongs to
             await sio.emit(GROUP_INVITE, rooms, to=user_sid)

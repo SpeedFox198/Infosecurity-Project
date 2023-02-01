@@ -65,7 +65,14 @@ onMount(() => {
 
       <div class="section px-4 pb-2 mb-3">
         <div class="img-wrapper img-1-1">
-          <img class="rounded-circle p-4" src={currentChat.icon} alt="">
+          <img
+            class="rounded-circle p-4" alt=""
+            src={
+              (currentChat.icon || "").startsWith("media/") ?
+              `https://localhost:8443/api/${currentChat.icon}` :
+              currentChat.icon
+            }
+          >
         </div>
         <div class="d-flex flex-row justify-content-center">
           <span class="chat-name fs-5 user-select-none">{currentChat.name}</span>
