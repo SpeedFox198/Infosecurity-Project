@@ -22,7 +22,7 @@ let filePondDisplay = false;
 
 const toggleFilePondOn = () => {
   filePondDisplay = !filePondDisplay;
-}
+};
 
 // a reference to the component, used to call FilePond methods
 let pond;

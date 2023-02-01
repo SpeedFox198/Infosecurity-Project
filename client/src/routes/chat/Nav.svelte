@@ -18,7 +18,7 @@ const logoutUser = async () => {
   })
 
   location.replace("/")
-}
+};
 </script>
 
 <div class="d-flex top-left">

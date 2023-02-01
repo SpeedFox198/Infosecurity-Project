@@ -7,7 +7,7 @@ from db_access.globals import async_session
 from db_access.message import db_get_room_messages, db_remove_messages
 from db_access.room import db_update_disappearing
 from db_access.sio import (add_sio_connection, get_existing_room,
-                           get_sid_from_sio_connection, has_disappearing,
+                           get_sids_from_sio_connection, has_disappearing,
                            have_public_key, have_relationship,
                            remove_friend_request, remove_sio_connection,
                            set_online_status)
@@ -97,13 +97,13 @@ async def disconnect(sid):
     current_user = await get_user(sid)
     current_user_id = await current_user.user_id
 
+    await remove_sio_connection(sid, current_user_id)
+
+    await set_online_status(current_user_id, False)
     # ignore the fact that we emit event to all rooms including groups
     # cuz we running out of time
     for room_id in sio.rooms(sid):
-        sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=room_id)
-
-    await set_online_status(current_user_id, False)
-    await remove_sio_connection(sid, current_user_id)
+        await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=room_id)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -298,16 +298,17 @@ async def create_group(sid, data):
 
     # Emit event to update users they have been added to group
     for user_id in (group_metadata.users + [await current_user.user_id]):
-        user_sid = await get_sid_from_sio_connection(user_id)
-        if user_sid is None:
+        user_sids = await get_sids_from_sio_connection(user_id)
+        if not user_sids:
             continue
 
         rooms = await get_room(user_id)
-        for room in rooms:
-            sio.enter_room(user_sid, room["room_id"])
+        for user_sid in user_sids:
+            for room in rooms:
+                sio.enter_room(user_sid, room["room_id"])
 
-        # Send room_ids that client belongs to
-        await sio.emit(GROUP_INVITE, rooms, to=user_sid)
+            # Send room_ids that client belongs to
+            await sio.emit(GROUP_INVITE, rooms, to=user_sid)
 
 
 @sio.event
@@ -354,8 +355,8 @@ async def send_friend_request(sid: str, data: dict):
         await session.commit()
 
     await sio.emit(FRIEND_REQUEST_SENT, data=recipient_id, to=sid)
-    recipient_sid = await get_sid_from_sio_connection(recipient_id)
-    if recipient_sid:
+    recipient_sids = await get_sids_from_sio_connection(recipient_id)
+    for recipient_sid in recipient_sids:
         await sio.emit(FRIEND_REQUESTS_UPDATE, to=recipient_sid)
 
 
@@ -380,8 +381,8 @@ async def cancel_sent_friend_request(sid: str, data: dict):
     await remove_friend_request(await current_user.user_id, recipient_id)
     await sio.emit(FRIEND_REQUESTS_UPDATE, data=recipient_id, to=sid)
 
-    recipient_sid = await get_sid_from_sio_connection(recipient_id)
-    if recipient_sid:
+    recipient_sids = await get_sids_from_sio_connection(recipient_id)
+    for recipient_sid in recipient_sids:
         await sio.emit(FRIEND_REQUESTS_UPDATE, data=recipient_id, to=recipient_sid)
 
 
@@ -410,8 +411,8 @@ async def accept_friend_request(sid: str, data: dict):
 
     await sio.emit(FRIEND_REQUESTS_UPDATE, to=sid)
 
-    sender_sid = await get_sid_from_sio_connection(sender_id)
-    if sender_sid:
+    sender_sids = await get_sids_from_sio_connection(sender_id)
+    for sender_sid in sender_sids:
         await sio.emit(FRIEND_REQUESTS_UPDATE, to=sender_sid)
 
 
@@ -436,8 +437,8 @@ async def cancel_received_friend_request(sid: str, data: dict):
     await remove_friend_request(sender_id, await current_user.user_id)
     await sio.emit(FRIEND_REQUESTS_UPDATE, to=sid)
 
-    sender_sid = await get_sid_from_sio_connection(sender_id)
-    if sender_sid:
+    sender_sids = await get_sids_from_sio_connection(sender_id)
+    for sender_sid in sender_sids:
         await sio.emit(FRIEND_REQUESTS_UPDATE, to=sender_sid)
 
 
@@ -470,8 +471,8 @@ async def remove_friend(sid: str, data: dict):
         await session.commit()
 
     await sio.emit(FRIEND_REMOVED, to=sid)
-    ex_friend_sid = await get_sid_from_sio_connection(friend_user_id)
-    if ex_friend_sid:
+    ex_friend_sids = await get_sids_from_sio_connection(friend_user_id)
+    for ex_friend_sid in ex_friend_sids:
         await sio.emit(FRIEND_REMOVED, to=ex_friend_sid)
 
 
@@ -525,15 +526,15 @@ async def message_friend(sid: str, data: dict):
     await sio.emit(MESSAGE_FRIEND_SUCCESS, to=sid)
     
     for user_id in relationship:
-        user_sid = await get_sid_from_sio_connection(user_id)
-        if user_sid is None:
+        user_sids = await get_sids_from_sio_connection(user_id)
+        if not user_sids:
             continue
 
-        rooms = await get_room(user_id)
-        for room in rooms:
-            sio.enter_room(user_sid, room["room_id"])
+        sio.enter_room(user_sid, new_room.room_id)
 
-        await sio.emit(ROOMS_JOINED, rooms, to=user_sid)
+        rooms = await get_room(user_id)
+        for user_sid in user_sids:
+            await sio.emit(ROOMS_JOINED, rooms, to=user_sid)
 
 
 @sio.event
@@ -583,9 +584,11 @@ async def block_user(sid: str, data: dict):
         return
 
     # offline user from blocked user
-    blocked_user_sid = await get_sid_from_sio_connection(block_id)
-    await sio.emit(USER_OFFLINE)
+    blocked_user_sids = await get_sids_from_sio_connection(block_id)
+    for blocked_user_sid in blocked_user_sids: 
+        await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
     # update user blocked status
+    # await sio.emit("", {}, to=current_user_id)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

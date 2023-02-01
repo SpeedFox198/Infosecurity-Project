@@ -2,12 +2,12 @@
 export let icon;
 export let name;
 export let red;
-export let good;
-export let bad;
+export let green;
+export let orange;
 export let arrow;
 if (!red) red = false;
-if (!good) good = false;
-if (!bad) bad = false;
+if (!green) green = false;
+if (!orange) orange = false;
 if (!arrow) arrow = false;
 </script>
 
@@ -15,8 +15,8 @@ if (!arrow) arrow = false;
 <div
   class="option d-flex flex-column user-select-none p-3"
   class:red
-  class:good
-  class:bad
+  class:green
+  class:orange
   on:click
   on:keydown>
 
@@ -67,11 +67,11 @@ if (!arrow) arrow = false;
   color: var(--red);
 }
 
-.good, .good .icon, .good .text {
+.green, .green .icon, .green .text {
   color: var(--primary);
 }
 
-.bad, .bad .icon, .bad .text {
+.orange, .orange .icon, .orange .text {
   color: var(--orange);
 }
 </style>

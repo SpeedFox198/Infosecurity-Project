@@ -84,14 +84,14 @@ encryption.encryptMessage = async message => {
   const key = await getRoomKey();
   if (key === undefined) return;
   return await e2ee.encryptMessage(message, key);
-}
+};
 
 
 encryption.decryptMessage = async message => {
   const key = await getRoomKey();
   if (key === undefined) return;
   return await e2ee.decryptMessage(message, key);
-}
+};
 
 
 async function getRoomKey() {
