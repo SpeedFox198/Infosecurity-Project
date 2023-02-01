@@ -28,6 +28,7 @@ export let openChatDetails;
 
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 
+const SEPARATOR = ";";
 const dispatch = createEventDispatcher();
 const flash = getFlash(page)
 
@@ -158,7 +159,7 @@ async function sendMsg(event) {
 
 
   // Emit message to server and add message to client stores
-  let filename = (file || {}).name
+  let filename = (file || {}).name;
   await addMsg(msg, filename);
 
   // Encrypt message before sending
@@ -172,7 +173,9 @@ async function sendMsg(event) {
 
     // Encrypt file if exists
     if (file) {
-
+      const { encrypted: encryptedFile, iv } = await encryption.encryptFile(file);
+      file = encryptedFile;
+      msg.content += SEPARATOR + iv;
     }
   }
   socket.emit("send_message", { message: msg, file, filename });
@@ -302,7 +305,7 @@ async function formatMsg(data, prev_id, room_id_) {
 
   // Check if previous message is sent by same user
   if (prev_id && prev_id === user_id_){
-    
+
     // Continuous messages have no avatar
     msg = { sent, time, content, reply_to, type, corner };
 
@@ -329,8 +332,9 @@ async function formatMsg(data, prev_id, room_id_) {
     } else {
       ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id, message_id));
       if (encrypted) {
+        const iv = content.split(SEPARATOR)[2];
         if (type === "image") {
-          getEncryptedImage(msg.path, message_id);
+          getEncryptedImage(msg.path, message_id, iv);
           // msg.path = "/loading.gif";
         } else if (type === "document") {
           // TODO(high)(SpeedFox198): decrypt document?
@@ -343,15 +347,15 @@ async function formatMsg(data, prev_id, room_id_) {
 }
 
 
-async function getEncryptedImage(path, message_id) {
-  const file = await _getEncryptedFile(path, encryption.decryptImage);
+async function getEncryptedImage(path, message_id, iv) {
+  const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
   const msg = $msgStorage[message_id];
   msg.path = URL.createObjectURL(file);
   msgStorage.updateMsg(msg, message_id);
 }
 
 
-async function _getEncryptedFile(path, decryptFunction) {
+async function _getEncryptedFile(path, decryptFunction, iv) {
   let content;
   try {
     const response = await fetch(path, { method: "POST", credentials: "include" });
@@ -360,7 +364,7 @@ async function _getEncryptedFile(path, decryptFunction) {
   } catch (error) {
     console.error(error);
   }
-  return await decryptFunction(content);
+  return await decryptFunction(content, iv);
 }
 
 

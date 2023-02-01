@@ -141,8 +141,7 @@ async function _encodeFile(file) {
  * @returns {Promise<string>} encrypted data and IV separated by a separator
  */
 async function _encrypt(data, key) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await SubtleCrypto.encrypt({ name: AES_MODE, iv }, key, data);
+  const { encrypted, iv } = await _encryptRaw(data, key);
   return encode(encrypted) + SEPARATOR + encode(iv);
 }
 
@@ -159,6 +158,20 @@ async function _decrypt(ciphertext, key) {
   iv = decode(iv);
   encrypted = decode(encrypted);
   return _decryptRaw(encrypted, key, iv);
+}
+
+
+/**
+ * Encrypts data using key
+ * 
+ * @param {ArrayBuffer} data data to be encrypted
+ * @param {CryptoKey} key key used for encryption
+ * @returns {Promise<{ encrypted: ArrayBuffer; iv: ArrayBuffer; }>} encrypted data and IV separated by a separator
+ */
+async function _encryptRaw(data, key) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await SubtleCrypto.encrypt({ name: AES_MODE, iv }, key, data);
+  return { encrypted, iv };
 }
 
 
@@ -200,6 +213,20 @@ async function decryptMessage(ciphertext, key) {
 
 
 /**
+ * Encrypts file using key
+ * 
+ * @param {Blob} file Blob file object to be encrypted
+ * @param {CryptoKey} key key used for decryption
+ * @returns {Promise<{ encrypted: Blob; iv: string; }>} encrypted file and Base64 string of IV
+ */
+async function encryptFile(file, key) {
+  file = await _encodeFile(file);
+  const { encrypted, iv } = await _encryptRaw(file, key);
+  return { encrypted: new Blob([encrypted]), iv: encode(iv) };
+}
+
+
+/**
  * Decrypts encrypted file using key
  * 
  * @param {Blob} encryptedFile Blob file object
@@ -220,12 +247,11 @@ async function decryptFile(encryptedFile, key, iv, mimeType) {
  * 
  * @param {Blob} encryptedImage Blob image file object
  * @param {CryptoKey} key key used for decryption
- * @param {ArrayBuffer} iv iv used for decryption
+ * @param {string} iv Base64 string of iv used for decryption
  * @returns {Promise<Blob>} decrypted image
  */
 async function decryptImage(encryptedImage, key, iv) {
-  iv = decode("yv7K/sr+");  // TODO(high)(SpeedFox198): change the iv from hardcoded
-  return await decryptFile(encryptedImage, key, iv, "image/png");
+  return await decryptFile(encryptedImage, key, decode(iv), "image/png");
 }
 
 
@@ -241,5 +267,6 @@ export const e2ee = {
   deriveSecretKey,
   encryptMessage,
   decryptMessage,
+  encryptFile,
   decryptImage
 };

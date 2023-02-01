@@ -4,7 +4,7 @@ from io import BytesIO
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Group, Media, Membership, Message, Room, User
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from utils import secure_save_file
 
 from .disappearing import DisappearingQueue
@@ -18,7 +18,10 @@ messages_queue_30d = DisappearingQueue(days=30)
 def get_display_dimensions(picture: bytes):
     """ Generates the height and width to display picture """
 
-    image = Image.open(BytesIO(picture))
+    try:
+        image = Image.open(BytesIO(picture))
+    except UnidentifiedImageError:
+        return 400, 400  # TODO(high)(SpeedFox198): remove hardcoded values, check on client side instead
     width = image.width
     height = image.height
     print(f"\n\nwidth: {width}, height: {height}\n\n")

@@ -122,7 +122,7 @@ async def send_message(sid: str, data: dict):
 
     message_data = data["message"]
     file = data.get("file", None)
-    filename = data.get("filename", None)
+    filename = data.get("filename", "")
     height = width = None  # Initialise height and width values
 
     # Get user from session
@@ -181,7 +181,8 @@ async def send_message(sid: str, data: dict):
         "user_id": message.user_id,
         "time": to_unix(message.time),
         "content": message.content,
-        "encrypted": message.encrypted
+        "encrypted": message.encrypted,
+        "type": message.type
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
@@ -192,8 +193,6 @@ async def send_message(sid: str, data: dict):
         "time": to_unix(message.time),
         "filename": filename
     }
-    if filename:
-        data["filename"] = filename
     if height and width:
         data["height"] = height
         data["width"] = width
@@ -225,7 +224,7 @@ async def get_room_messages(sid: str, data: dict):
 # ensure data in correct format, (length of data also?)
 @sio.event
 async def delete_messages(sid: str, data: dict):
-    print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
+    # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
 
     messages = data["messages"]
     room_id = data["room_id"]
