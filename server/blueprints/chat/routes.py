@@ -6,7 +6,7 @@ from security_functions.virustotal import (
     get_url_analysis,
     get_url_report
 )
-from quart_auth import login_required
+from quart_auth import login_required, current_user
 from quart_schema import validate_request
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
@@ -14,15 +14,11 @@ chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 
 @chat_bp.post("/file_upload_and_scan")
 @login_required
-async def upload_and_scan_file():
-    file = await request.files
-    file_id = upload_file(file)
-    file_hash = get_file_analysis(file_id)
+async def scan_file(file_hash):
+    # function receives file hash and sent to virustotal for scanning
+
+    
     score = scan_file_hash(file_hash)
-    print(score) 
+    print(score)
+
     return {"Score": score}
-    # print("\n\n\n")
-    # print(request)
-    # x = await request.files
-    # print("\n\n\n")
-    # return "lol"
