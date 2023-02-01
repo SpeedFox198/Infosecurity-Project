@@ -108,6 +108,15 @@ onMount(async () => {
 
     count.decreaseExtra(room_id, countRemoved);
   });
+
+
+  socket.on("malicious_check", data => {
+    const { message_id, malicious } = data;  // Unpack data
+    const msg = $msgStorage[message_id];
+    console.log("malicious?", malicious)
+    msg.malicious = malicious;
+    msgStorage.updateMsg(msg, message_id);
+  });
 });
 
 
@@ -162,9 +171,9 @@ async function sendMsg(event) {
 
   // Emit message to server and add message to client stores
   let filename = (file || {}).name;
-  msg.path = URL.createObjectURL(file);
+  if (file) msg.path = URL.createObjectURL(file);
   await addMsg(msg, filename);
-  delete msg.path;
+  if (file) delete msg.path;
 
   // Encrypt message before sending
   if ($roomStorage[$room_id].encrypted) {
@@ -184,6 +193,7 @@ async function sendMsg(event) {
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
+
 
 async function getUser(user_id) {
   const url = `https://localhost:8443/api/user/details/${user_id}`;
@@ -259,9 +269,11 @@ async function addMsg(data, filename, newly_received) {
   }
 
   // Send hash to virus total for newly received files
+  console.log(newly_received, file)
   if (newly_received && file) {
-    const digest = await digestMessage(file);
-    console.log(digest);
+    const hash = await digestMessage(file);
+    console.log("hashed", hash)
+    socket.emit("scan_hash", { message_id, hash });
   }
 
   await msgStorage.updateMsg(msg, message_id);
@@ -348,6 +360,7 @@ async function formatMsg(data, prev_id, room_id_) {
           // msg.path = "/loading.gif";
         } else if (type === "document") {
           // TODO(high)(SpeedFox198): decrypt document?
+          file = await getEncryptedDocument(msg.path, message_id, iv);
         }
       }
     }
@@ -361,6 +374,11 @@ async function getEncryptedImage(path, message_id, iv) {
   const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
   setImagePathFromBlob(message_id, file);
   return file;
+}
+
+
+async function getEncryptedDocument(path, message_id, iv) {
+  return await _getEncryptedFile(path, encryption.decryptImage, iv);
 }
 
 

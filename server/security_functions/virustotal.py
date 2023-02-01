@@ -11,10 +11,10 @@ asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 # step 1 upload file to vt api
-async def upload_file(file):
+async def upload_file(file: bytes):
     url = "https://www.virustotal.com/api/v3/files"
 
-    files = {"file": open(file, "rb")}
+    files = {"file": file}
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url,

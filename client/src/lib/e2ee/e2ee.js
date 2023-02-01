@@ -232,13 +232,13 @@ async function encryptFile(file, key) {
  * @param {Blob} encryptedFile Blob file object
  * @param {CryptoKey} key key used for decryption
  * @param {ArrayBuffer} iv iv used for decryption
- * @param {string} mimeType mime type of file
+ * @param {object} options options for the file
  * @returns {Promise<Blob>} decrypted file
  */
-async function decryptFile(encryptedFile, key, iv, mimeType) {
+async function decryptFile(encryptedFile, key, iv, options) {
   let content = await _encodeFile(encryptedFile);
   content = await _decryptRaw(content, key, iv);
-  return new Blob([content], {type: mimeType});
+  return new Blob([content], options);
 }
 
 
@@ -251,7 +251,7 @@ async function decryptFile(encryptedFile, key, iv, mimeType) {
  * @returns {Promise<Blob>} decrypted image
  */
 async function decryptImage(encryptedImage, key, iv) {
-  return await decryptFile(encryptedImage, key, decode(iv), "image/png");
+  return await decryptFile(encryptedImage, key, decode(iv), { type: "image/png" });
 }
 
 
@@ -268,5 +268,6 @@ export const e2ee = {
   encryptMessage,
   decryptMessage,
   encryptFile,
+  decryptFile,
   decryptImage
 };

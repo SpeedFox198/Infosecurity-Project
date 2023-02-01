@@ -90,8 +90,6 @@ function selectMsg() {
         <div class="file-container file-wrapper">
           <i class="fa-solid fa-file"></i>
           <div class="file-info">
-            <div class="file-name">{msg.name}</div>
-            <div class="file-size">{msg.size}</div>
           </div>
         </div>
       {/if}
@@ -107,40 +105,18 @@ function selectMsg() {
       </div>
     </div>
   </div>
+  {#if msg.malicious}
+    <div class="malware-message d-flex align-items-center">
+      <div class="rounded-pill py-1 px-2 mx-3">
+        <i class="fa-solid fa-circle-exclamation me-1"></i>
+        We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe.
+      </div>
+    </div>
+  {/if}
 </div>
-<!-- <div class="malware-message">
-  <p>We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe.</p>
-</div> -->
 
 
 <style>
-/* .malware-message {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 0.5rem;
-  margin-bottom: 3rem;
-  text-align: center;
-  width: 82%;
-  height: auto;
-  background-color: var(--white);
-
-  border-color: var(--red);
-  border-style: solid;
-  border-width: 2px;
-  border-radius: 20px;
-
-  font-size: 1rem;
-  color: var(--red);
-
-}
-
-.malware-message p {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-} */
-
 .message {
   padding: 0 3rem;
   overflow-anchor: none;
@@ -314,5 +290,16 @@ span {
 img {
   border-radius: 1rem;
   background-color: var(--white);
+}
+
+.malware-message {
+  font-size: 0.9rem;
+}
+
+.malware-message > div {
+  /* background-color: var(--white); */
+  color: var(--red);
+  background-color: #ffecec;
+  border: 1.5px solid var(--red);
 }
 </style>

@@ -4,7 +4,7 @@ import socketio
 import sqlalchemy as sa
 from db_access.block import db_get_blocked, db_create_block_entry, db_check_block
 from db_access.globals import async_session
-from db_access.message import db_get_room_messages, db_remove_messages
+from db_access.message import db_get_room_messages, db_remove_messages, db_get_room_id_of_message
 from db_access.room import db_update_disappearing, db_get_room_if_user_verified
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
@@ -18,7 +18,7 @@ from models.request_data import GroupMetadataBody
 from pydantic import ValidationError
 
 from security_functions.ocr import ocr_scan
-from security_functions.virustotal import scan_file_hash
+from security_functions.virustotal import scan_file_hash, upload_file, get_file_analysis
 from socketio.exceptions import ConnectionRefusedError
 from utils import remove_tree_directory, to_unix
 
@@ -198,6 +198,12 @@ async def send_message(sid: str, data: dict):
         data["height"] = height
         data["width"] = width
     await sio.emit(SENT_SUCCESS, data, to=sid)
+
+    # Check virus total if file attached and message not e2ee
+    if message.type != "text" and file and not message.encrypted:
+        file_id  = await upload_file(file)
+        file_hash = await get_file_analysis(file_id)
+        await check_malicious_file(file_hash, message.message_id)
 
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
@@ -584,26 +590,11 @@ async def set_disappearing(sid: str, data: dict):
 @sio.event
 async def scan_hash(sid: str, data: dict):
 
-    file_hash = data["hash"]
+    file_hash = data.get("hash", "")
+    message_id = data.get("message_id", "")
 
-    # Setting malicious flag to false
-    malicious = False
-
-    # Get user from session (jic i need it later on)
-    current_user = await get_user(sid)
-    user_id = await current_user.user_id
-
-    # scan file hash with virustotal
-    score = await scan_file_hash(file_hash)
-    if score > 0:
-        malicious = True
-        await sio.emit("scan_hash", {
-            malicious},
-            to=sid)  # @jabriel idk what this is)
-    else:
-        await sio.emit("scan_hash", {
-            malicious},
-            to=sid)  # @jabriel idk what this is)
+    # TODO(low) screw this (disallow multple on same file idk)
+    await check_malicious_file(file_hash, message_id)
 
 
 @sio.event
@@ -645,6 +636,20 @@ async def delete_client_messages(messages, room_id, skip_sid=None):
         "messages": messages,
         "room_id": room_id
     }, room=room_id, skip_sid=skip_sid)
+
+
+async def check_malicious_file(file_hash, message_id):
+    # Setting malicious flag to false
+    malicious = False
+
+    # scan file hash with virustotal
+    score = await scan_file_hash(file_hash)
+    if score > 0:
+        malicious = True
+
+    room_id = await db_get_room_id_of_message(message_id)
+
+    await sio.emit("malicious_check", {"message_id": message_id, "malicious": malicious}, room=room_id)
 
 
 async def _job_callback(messages):

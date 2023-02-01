@@ -22,15 +22,16 @@ export const getTempId = (() => {
  * Structure:
  * {
  *   <message_id>: {
- *     sent: boolean;      - True if message was sent by current user
- *     time: int;          - Timestamp in unix time format
- *     content: string;    - Content of message
- *     reply_to: string;   - message_id of message being replied to TODO(low)(SpeedFox198): remove when unsused
- *     type: string;       - Type of message
- *     corner?: boolean;   - True if message is last of consecutive messages sent by same user
- *     username?: string;  - Username of user that sent the message
- *     avatar?: string;    - Path to image of avatar of user
- *     path?: string;      - Path to attached media
+ *     sent: boolean;        - True if message was sent by current user
+ *     time: int;            - Timestamp in unix time format
+ *     content: string;      - Content of message
+ *     reply_to: string;     - message_id of message being replied to TODO(low)(SpeedFox198): remove when unsused
+ *     type: string;         - Type of message
+ *     corner?: boolean;     - True if message is last of consecutive messages sent by same user
+ *     username?: string;    - Username of user that sent the message
+ *     avatar?: string;      - Path to image of avatar of user
+ *     path?: string;        - Path to attached media
+ *     malicious?: boolean;  - True if message is malicious
  *   },
  *   ...
  * }
