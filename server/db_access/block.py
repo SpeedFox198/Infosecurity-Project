@@ -1,10 +1,10 @@
 import sqlalchemy as sa
-from sqlalchemy.orm.exc import NoResultFound
 from db_access.globals import async_session
-from models import Block, Membership
+from models import Block, Membership, Room
+from sqlalchemy.orm.exc import NoResultFound
 
 
-async def get_blocked(user_id: str) -> list[Block]:
+async def db_get_blocked(user_id: str) -> list[Block]:
     async with async_session() as session:
 
         # Retrieve blocked rooms
@@ -18,10 +18,10 @@ async def get_blocked(user_id: str) -> list[Block]:
         return blocked
 
 
-async def create_block_entry(user_id: str, block_id: str, room_id: str) -> bool:
+async def db_create_block_entry(user_id: str, block_id: str, room_id: str) -> bool:
     async with async_session() as session:
-        # Retrieve room and membership info of user
-        statement = sa.select(Membership.room_id).join_from(Membership).where(
+        block_verify_statement = sa.select(Block).where((Block.room_id == room_id))
+        membership_verify_statement = sa.select(Membership.room_id).where(
             (Membership.room_id == room_id) &
             (
                 (Membership.user_id == user_id) |
@@ -29,12 +29,34 @@ async def create_block_entry(user_id: str, block_id: str, room_id: str) -> bool:
             )
         )
 
+        room_verify_statement = sa.select(Room.type).where(Room.room_id == room_id)
+
         async with session.begin():
+            entries = (await session.execute(block_verify_statement)).all()
+            if entries:
+                return False
+
+            entries = (await session.execute(membership_verify_statement)).scalars().all()
+            if len(entries) != 2:
+                return False
+
             try:
-                (await session.execute(statement)).one()
+                room_type = (await session.execute(room_verify_statement)).one()
             except NoResultFound:
+                return False
+
+            if room_type[0] != "direct":
                 return False
 
             session.add(Block(user_id, block_id, room_id))
 
     return True
+
+
+async def db_check_block(room_id: str) -> Block | None:
+    async with async_session() as session:
+
+        statement = sa.select(Block).where(Block.room_id == room_id)
+        blocked_room = (await session.execute(statement)).scalar()
+
+        return blocked_room

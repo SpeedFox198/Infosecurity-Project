@@ -2,10 +2,10 @@ import os
 
 import socketio
 import sqlalchemy as sa
-from db_access.block import get_blocked, create_block_entry
+from db_access.block import db_get_blocked, db_create_block_entry, db_check_block
 from db_access.globals import async_session
 from db_access.message import db_get_room_messages, db_remove_messages
-from db_access.room import db_update_disappearing
+from db_access.room import db_update_disappearing, db_get_room_if_user_verified
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
                            have_public_key, have_relationship,
@@ -60,7 +60,7 @@ async def connect(sid, environ, auth):
 
     # Add client to their respective rooms
     rooms = await get_room(current_user_id)
-    blocked = await get_blocked(current_user_id)
+    blocked = await db_get_blocked(current_user_id)
 
     for room in rooms:
         room_id = room["room_id"]
@@ -99,7 +99,12 @@ async def disconnect(sid):
 
     await remove_sio_connection(sid, current_user_id)
 
+    # Only proceed to make user offline if user has 0 sio connection
+    if await get_sids_from_sio_connection(current_user_id):
+        return
+
     await set_online_status(current_user_id, False)
+
     # ignore the fact that we emit event to all rooms including groups
     # cuz we running out of time
     for room_id in sio.rooms(sid):
@@ -108,7 +113,7 @@ async def disconnect(sid):
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
 @sio.event
-async def send_message(sid, data: dict):
+async def send_message(sid: str, data: dict):
     # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
 
     message_data = data["message"]
@@ -120,18 +125,16 @@ async def send_message(sid, data: dict):
     user = await get_user(sid)
     user_id = await user.user_id
 
+    # Get room
+    room = await db_get_room_if_user_verified(message_data["room_id"], user_id)
+    if room is None:  # If room not found, abort adding of message
+        return
+
+    if await db_check_block(room.room_id):
+        return
+
     # Insert object into database
     async with async_session() as session:
-        # Get room
-        statement = sa.select(Room).where(Room.room_id == message_data["room_id"])
-
-        try:
-            async with session.begin():
-                result = (await session.execute(statement)).one()
-        except NoResultFound:
-            return  # If room not found, abort adding of message
-        else:
-            room: Room = result[0]
 
         # Create message object
         message = Message(
@@ -192,7 +195,7 @@ async def send_message(sid, data: dict):
 
 # TODO(medium)(SpeedFox198): authenticate and verify msg (and format)
 @sio.event
-async def get_room_messages(sid, data):
+async def get_room_messages(sid: str, data: dict):
     # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
     room_id = data["room_id"]
     n = data["n"]
@@ -214,7 +217,7 @@ async def get_room_messages(sid, data):
 # ensure user is part of room and is admin
 # ensure data in correct format, (length of data also?)
 @sio.event
-async def delete_messages(sid, data):
+async def delete_messages(sid: str, data: dict):
     print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
 
     messages = data["messages"]
@@ -234,7 +237,7 @@ async def delete_messages(sid, data):
 
 
 @sio.event
-async def create_group(sid, data):
+async def create_group(sid: str, data: dict):
     current_user = await get_user(sid)
     have_group_icon = False
     icon_path = None
@@ -579,7 +582,7 @@ async def block_user(sid: str, data: dict):
     current_user_id = await current_user.user_id
 
     # block user (database)
-    blocked_success = await create_block_entry(current_user_id, block_id, room_id)
+    blocked_success = await db_create_block_entry(current_user_id, block_id, room_id)
     if not blocked_success:
         return
 
@@ -588,7 +591,7 @@ async def block_user(sid: str, data: dict):
     for blocked_user_sid in blocked_user_sids: 
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
     # update user blocked status
-    # await sio.emit("", {}, to=current_user_id)
+    ## await sio.emit("", {}, to=current_user_id)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

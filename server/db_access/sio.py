@@ -23,7 +23,8 @@ async def set_online_status(user_id: str, status: bool) -> None:
 
 async def add_sio_connection(sid: str, user_id: str) -> None:
     async with async_session() as session:
-        session.add(SioConnection(sid, user_id))
+        connection = SioConnection(sid, user_id)
+        session.add(connection)
         await session.commit()
 
 
@@ -80,7 +81,6 @@ async def has_disappearing(user_id: str) -> bool:
             User.user_id == user_id
         )
         result = (await session.execute(statement)).scalar()
-        print("has disappearing", result)
         return bool(result)
 
 
