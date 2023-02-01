@@ -7,7 +7,6 @@ export let msg;
 export let selected;
 export let select;
 
-
 // When msg is undefined, set it to empty object
 beforeUpdate(() => msg = msg || {});
 
@@ -94,7 +93,7 @@ function selectMsg() {
         </div>
       {/if}
 
-      <div class="content-container d-flex">
+      <div class="content-container d-flex" class:blocked={msg.blocked}>
         <div class="flex-grow-1">
           <span class="text-wrap text-break">
             {msg.content}
@@ -107,7 +106,7 @@ function selectMsg() {
   </div>
   {#if msg.malicious}
     <div class="malware-message d-flex align-items-center">
-      <div class="rounded-pill py-1 px-2 mx-3">
+      <div class="rounded-pill py-1 px-2 mx-3 user-select-none">
         <i class="fa-solid fa-circle-exclamation me-1"></i>
         We have detected malware in this document. Do not click links or open attachments if you are unsure they are safe.
       </div>
@@ -138,6 +137,20 @@ function selectMsg() {
 .corner {
   padding-bottom: 0.2rem;
   margin-bottom: 0.6rem;
+}
+
+.content-container.blocked span {
+  color: var(--red);
+  /* text-shadow:
+    0.5px 0.5px 0 var(--red-light-background),
+    0.5px -0.5px 0 var(--red-light-background),
+    -0.5px 0.5px 0 var(--red-light-background),
+    -0.5px -0.5px 0 var(--red-light-background); */
+  text-shadow:
+    0 0 2px var(--red-light-background),
+    0 0 2px var(--red-light-background),
+    0 0 2px var(--red-light-background);
+  font-weight: bold;
 }
 
 .username {
@@ -297,9 +310,8 @@ img {
 }
 
 .malware-message > div {
-  /* background-color: var(--white); */
+  background-color: var(--red-light-background);
   color: var(--red);
-  background-color: #ffecec;
   border: 1.5px solid var(--red);
 }
 </style>

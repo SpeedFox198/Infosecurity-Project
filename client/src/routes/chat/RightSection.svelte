@@ -110,12 +110,20 @@ onMount(async () => {
   });
 
 
-  socket.on("malicious_check", data => {
+  socket.on("malicious_check", async data => {
     const { message_id, malicious } = data;  // Unpack data
     const msg = $msgStorage[message_id];
-    console.log("malicious?", malicious)
     msg.malicious = malicious;
     msgStorage.updateMsg(msg, message_id);
+  });
+
+
+  socket.on("message_blocked", async data => {
+    const { temp_id } = data;  // Unpack data
+    const msg = $msgStorage[temp_id];
+    msg.blocked = true;
+    msgStorage.updateMsg(msg, temp_id);
+    $flash = { type: "failure", message: "Message failed to send. You have been blocked by this user." };
   });
 });
 

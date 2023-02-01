@@ -32,6 +32,7 @@ export const getTempId = (() => {
  *     avatar?: string;      - Path to image of avatar of user
  *     path?: string;        - Path to attached media
  *     malicious?: boolean;  - True if message is malicious
+ *     blocked?: boolean;    - True if message has been blocked
  *   },
  *   ...
  * }

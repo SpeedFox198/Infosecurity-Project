@@ -1,7 +1,7 @@
 <div class="message d-flex sent corner">
   <div class="info-section me-2"></div>
   <div class="bubble-container d-flex justify-content-end flex-shrink-1">
-    <div class="tail"></div>
+    <div class="d-none tail"></div>
     <div class="bubble">
       Sending... This may take a while we are making sure your message is safe to send.
     </div>

@@ -138,7 +138,7 @@ async def send_message(sid: str, data: dict):
     # If room is blocked, block sending of message
     if await db_check_block(room.room_id):
         # TODO(high)(SpeedFox198): handle event on client side
-        await sio.emit(MESSAGE_BLOCKED, {"room_id": room.room_id, "temp_id": message_data["message_id"]}, to=sid)
+        await sio.emit(MESSAGE_BLOCKED, {"temp_id": message_data["message_id"]}, to=sid)
         return
 
     # Insert object into database
