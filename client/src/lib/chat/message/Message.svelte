@@ -293,6 +293,9 @@ span {
 
 .check {
   color: var(--primary);
+  align-self: center;
+  margin: 0 0.5rem;
+  font-size: 20px;
 }
 
 .image-container ~ .content-container > div {
