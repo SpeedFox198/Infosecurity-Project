@@ -3,7 +3,8 @@ import json
 import os
 import datetime
 import sqlalchemy as sa
-from quart import Blueprint, render_template, current_app
+from itsdangerous import SignatureExpired
+from quart import Blueprint, render_template, current_app, send_file
 from quart_schema import validate_request
 from models.request_data import TwoFABody
 from models import Device
@@ -156,7 +157,7 @@ async def get_account_information():
     email = user_results[1]
     print(email)
     token = url_serialiser.dumps(email)
-    link = f"https://localhost:8443/api/{token}/{await current_user.user_id}/account_data.zip"
+    link = f"https://localhost:8443/api/settings/{token}/{await current_user.user_id}/account_data.zip"
 
     # email the link to the user
     subject = "Your Bubbles Account - Requested Account Report"
@@ -172,3 +173,17 @@ async def get_account_information():
                                     )
     gmail_send(email, subject, message)
     return {"message": "Getting account report"}
+
+@settings_bp.get("/<token>/<user_id>/<file_name>")
+async def get_account_report(token: str, user_id: int, file_name: str):
+    url_serialiser = current_app.config["url_serialiser"]
+    try:
+        email = url_serialiser.loads(token, max_age=2592000)
+        print(email)
+        print(user_id)
+        print(file_name)
+        directory = os.path.join(os.getcwd(), f"media/exports/{user_id}/{file_name}")
+        print(directory)
+        return await send_file(directory, as_attachment=True)
+    except SignatureExpired:
+        return {"message": "The link has expired"}, 400
