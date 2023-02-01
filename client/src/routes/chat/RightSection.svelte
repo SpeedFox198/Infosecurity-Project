@@ -326,7 +326,6 @@ async function formatMsg(data, prev_id, room_id_) {
   if (encrypted) {
     msg.content = await encryption.decryptMessage(content);
   }
-
   // If message contains media, get media path
   if (type !== "text") {
     if (filename) {  // If filename is defined, means sent by user, display loading.gif

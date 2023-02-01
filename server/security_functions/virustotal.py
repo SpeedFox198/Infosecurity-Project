@@ -45,7 +45,7 @@ async def get_file_analysis(file_id: str) -> str:
 
 
 # step 3 scan file hash
-async def scan_file_hash(file_hash: str) -> str:
+async def scan_file_hash(file_hash: str) -> int:
     url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
 
     async with aiohttp.ClientSession() as session:
