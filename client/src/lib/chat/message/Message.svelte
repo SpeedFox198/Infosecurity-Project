@@ -2,7 +2,7 @@
 import { beforeUpdate } from "svelte";
 import { selectMode } from "$lib/stores/select";
 
-
+export let blocked;
 export let msg;
 export let selected;
 export let select;
@@ -44,6 +44,7 @@ function selectMsg() {
   class:selected
   class:consecutive={!msg.avatar}
   class:corner={msg.corner}
+  class:not-blocked={!blocked}
   on:click={selectMsg} on:keydown
 >
   {#if $selectMode}
@@ -129,7 +130,7 @@ function selectMsg() {
   background-color: var(--highlight-primary);
 }
 
-.selecting:hover {
+.not-blocked.selecting:hover {
   cursor: pointer;
   background-color: var(--highlight-primary);
 }
@@ -141,11 +142,6 @@ function selectMsg() {
 
 .content-container.blocked span {
   color: var(--red);
-  /* text-shadow:
-    0.5px 0.5px 0 var(--red-light-background),
-    0.5px -0.5px 0 var(--red-light-background),
-    -0.5px 0.5px 0 var(--red-light-background),
-    -0.5px -0.5px 0 var(--red-light-background); */
   text-shadow:
     0 0 2px var(--red-light-background),
     0 0 2px var(--red-light-background),
@@ -276,7 +272,7 @@ span {
 }
 
 
-.bubble:hover .options, .tail:hover ~ .bubble .options {
+.not-blocked .bubble:hover .options, .not-blocked .tail:hover ~ .bubble .options {
   display: block;
 }
 

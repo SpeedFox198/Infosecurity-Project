@@ -89,14 +89,14 @@ main {
   position: relative;
   background-color: var(--white);
   -webkit-animation-name: display-app;
-  -webkit-animation-duration: 0.4s;
+  -webkit-animation-duration: 1s;
   animation-name: display-app;
-  animation-duration: 0.4s;
+  animation-duration: 1s;
 }
 
 @-webkit-keyframes display-app {
   from {
-    top: -2rem;
+    top: -4rem;
     opacity:0;
   }
   to {
@@ -107,7 +107,7 @@ main {
 
 @keyframes display-app {
   from {
-    top: -2rem;
+    top: -4rem;
     opacity:0;
   }
   to{

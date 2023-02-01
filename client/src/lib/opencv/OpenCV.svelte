@@ -23,7 +23,9 @@
 </script>
 
 <script>
-	import { onMount } from "svelte";
+	import { onMount, createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   let mounted = false
   let opencvLoaded = false 
@@ -32,6 +34,7 @@
 
   const loadOpenCV = () => {
     opencvLoaded = true
+    dispatch("load");
     console.log("OpenCV loaded?", opencvLoaded)
   }
   

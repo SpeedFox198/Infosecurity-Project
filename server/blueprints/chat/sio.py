@@ -619,17 +619,19 @@ async def block_user(sid: str, data: dict):
     current_user = await get_user(sid)
     current_user_id = await current_user.user_id
 
-    # block user (database)
+    # Block user (database)
     blocked_success = await db_create_block_entry(current_user_id, block_id, room_id)
     if not blocked_success:
         return
 
-    # offline user from blocked user
+    # Offline user from blocked user
     blocked_user_sids = await get_sids_from_sio_connection(block_id)
     for blocked_user_sid in blocked_user_sids: 
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
-    # update user blocked status
-    # await sio.emit("", {}, to=current_user_id)
+
+    # Update user blocked status
+    await sio.emit(ROOM_BLOCKED, {"room_id": room_id, "block_id": block_id}, room=room_id)
+    sio.close_room(room_id)
 
 
 @sio.event

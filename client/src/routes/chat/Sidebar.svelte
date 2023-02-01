@@ -3,6 +3,7 @@ import { onMount } from 'svelte';
 import { getFlash } from "sveltekit-flash-message/client"
 import { page } from "$app/stores"
 
+import { user_id } from "$lib/stores/user";
 import { room_id, roomStorage, roomList } from '$lib/stores/room';
 import { count } from '$lib/stores/count';
 import { selectedMsgs } from '$lib/stores/select';
@@ -59,11 +60,11 @@ const sendNewGroup = async (event) => {
 onMount(() => {
   socket.on("group_created", async () => {
     $flash = {type: 'success', message: 'Group created!'}
-  })
+  });
   
   socket.on("create_group_error", async (data) => {
     $flash = {type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
-  })
+  });
   
   socket.on("group_invite", async (data) => {
     let newRoomStorage = {};
@@ -78,8 +79,15 @@ onMount(() => {
     roomList.set(newRoomList);          // Set list of room_id
     roomStorage.set(newRoomStorage);    // Set collection of rooms
     allMsgs.initRooms(newRoomList)      // Add new room to storage
-  })
-})
+  });
+
+  socket.on("room_blocked", async data => {
+    const { room_id, block_id } = data;  // Unpack data
+    const room = $roomStorage[room_id];
+    room.blocked = block_id === $user_id ? "blocked" : "blocking";
+    roomStorage.addRoom(room_id, room);
+  });
+});
 </script>
 
 <!-- Left Sidebar -->

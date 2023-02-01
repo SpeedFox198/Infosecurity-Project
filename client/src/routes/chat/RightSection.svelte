@@ -17,6 +17,7 @@ import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
+import BlockingMessage from "$lib/chat/message/BlockingMessage.svelte";
 import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 import OpenCV, { processImage } from "$lib/opencv/OpenCV.svelte"
 
@@ -28,6 +29,7 @@ export let displayChatDetails;
 export let openChatDetails;
 
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
+$: currentRoom = ($roomStorage || {})[$room_id] || {};
 
 const SEPARATOR = ";";
 const dispatch = createEventDispatcher();
@@ -35,6 +37,7 @@ const flash = getFlash(page)
 
 let currentUser = $page.data.user
 let roomsLoaded = false;
+let openCvLoaded = false;
 let ocrLoading = false;
 /** @type {HTMLImageElement} */
 let openCvImage;
@@ -62,8 +65,8 @@ onMount(async () => {
     allMsgs.initRooms(newRoomList);      // Initialise empty arrays for rooms
 
     if (!roomsLoaded) {
-      dispatch("load");
       roomsLoaded = true;
+      dispatchLoadEvent();
     }
   });
 
@@ -130,6 +133,10 @@ onMount(async () => {
 
 const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
 
+
+async function dispatchLoadEvent() {
+  if (roomsLoaded && openCvLoaded) dispatch("load");
+}
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
@@ -507,9 +514,11 @@ async function removeMsg(message_id, room_id) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay {getRoomMsgs} {ocrLoading}/>
+    <MessageDisplay {getRoomMsgs} {ocrLoading} blocked={currentRoom.blocked}/>
 
-    {#if $selectMode}
+    {#if currentRoom.blocked}
+      <BlockingMessage name={currentRoom.name}/>
+    {:else if $selectMode}
       <!-- Select Menu -->
       <SelectMenu on:delete={deleteMsgs}/>
     {:else}
@@ -520,7 +529,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Welcome page -->
     <Welcome {currentUser}/>
   {/if}
-  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} />
+  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} on:load={() => openCvLoaded = true}/>
 </div>
 
 

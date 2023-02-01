@@ -14,6 +14,7 @@ import LoadingMessage from "$lib/chat/LoadingMessage.svelte";
 
 export let getRoomMsgs;
 export let ocrLoading;
+export let blocked;
 
 $: roomMsgs = ($allMsgs || {})[$room_id] || [];
 
@@ -70,6 +71,7 @@ function selectMsg(message_id, user_id_) {
   <!-- Load each message in the room -->
   {#each roomMsgs as messageInfo}
     <Message
+      {blocked}
       msg={$msgStorage[messageInfo.message_id]}
       selected={$selectedMsgs.has(messageInfo.message_id)}
       select={() => selectMsg(messageInfo.message_id, messageInfo.user_id)}/>
