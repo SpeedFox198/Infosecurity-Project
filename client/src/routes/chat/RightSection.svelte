@@ -10,6 +10,7 @@ import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
+import { digestMessage } from "$lib/chat/message/malware-detection";
 
 import Welcome from "$lib/chat/Welcome.svelte";
 import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
@@ -259,7 +260,8 @@ async function addMsg(data, filename, newly_received) {
 
   // Send hash to virus total for newly received files
   if (newly_received && file) {
-    //
+    const digest = await digestMessage(file);
+    console.log(digest);
   }
 
   await msgStorage.updateMsg(msg, message_id);
@@ -342,7 +344,7 @@ async function formatMsg(data, prev_id, room_id_) {
       if (encrypted) {
         const iv = content.split(SEPARATOR)[2];
         if (type === "image") {
-          file = getEncryptedImage(msg.path, message_id, iv);
+          file = await getEncryptedImage(msg.path, message_id, iv);
           // msg.path = "/loading.gif";
         } else if (type === "document") {
           // TODO(high)(SpeedFox198): decrypt document?
@@ -380,6 +382,7 @@ async function setImagePathFromBlob(message_id, file) {
   if (msg === undefined) {
     await sleep(300);
     setImagePathFromBlob(message_id, file);
+    return;
   }
   msg.path = URL.createObjectURL(file);
   msgStorage.updateMsg(msg, message_id);
