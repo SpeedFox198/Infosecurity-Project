@@ -12,7 +12,6 @@ from blueprints.friend import friend_bp
 from blueprints.media import media_bp
 from blueprints.user import user_bp
 from blueprints.settings import settings_bp
-from blueprints.scan import scan_bp
 from db_access.device import get_device
 from itsdangerous import URLSafeTimedSerializer
 from models import AuthedUser
@@ -45,7 +44,6 @@ api_bp.register_blueprint(device_bp)
 api_bp.register_blueprint(user_bp)
 api_bp.register_blueprint(friend_bp)
 api_bp.register_blueprint(settings_bp)
-api_bp.register_blueprint(scan_bp)
 app.register_blueprint(api_bp)
 
 app.secret_key = "L7h5TRk5EHS_ouNHtodgJX4KIb4fDl-JOKCzFnsj_8A"

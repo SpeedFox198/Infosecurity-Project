@@ -14,11 +14,20 @@ from db_access.sio import (add_sio_connection, get_existing_room,
 from db_access.user import get_user_details
 from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
                     Message, Room)
-from models.request_data import GroupMetadataBody
+from models.error import VirusTotalError
+from models.request_data import GroupMetadataBody, ScanURLBody
 from pydantic import ValidationError
 
+from models.response_data import URLResultData
 from security_functions.ocr import ocr_scan
-from security_functions.virustotal import scan_file_hash, upload_file, get_file_analysis
+from security_functions.virustotal import (
+    scan_file_hash,
+    upload_file,
+    get_file_analysis,
+    upload_url,
+    get_url_analysis,
+    get_url_report
+)
 from socketio.exceptions import ConnectionRefusedError
 from utils import remove_tree_directory, to_unix
 
@@ -618,6 +627,31 @@ async def block_user(sid: str, data: dict):
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
     # update user blocked status
     # await sio.emit("", {}, to=current_user_id)
+
+
+@sio.event
+async def check_safe_url(sid: str, data: dict):
+    try:
+        url_request = ScanURLBody(**data)
+    except ValidationError as err:
+        error_list = [error["msg"] for error in err.errors()]
+        error_message = error_list[0]
+        return
+
+    try:
+        data_id = await upload_url(url_request.url)
+        url_id = await get_url_analysis(data_id)
+        results = URLResultData(**await get_url_report(url_id))
+    except VirusTotalError:
+        return
+
+    room_origin = await db_get_room_id_of_message(url_request.message_id)
+
+    if results.malicious > 0 or results.suspicious > 0:
+        await sio.emit("malicious_check", {
+            "message_id": url_request.message_id,
+            "malicious": True
+        }, room=room_origin)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:
