@@ -191,7 +191,8 @@ async def send_message(sid: str, data: dict):
         "room_id": message.room_id,
         "temp_id": message_data["message_id"],
         "time": to_unix(message.time),
-        "filename": filename
+        "filename": filename,
+        "encrypted": message.encrypted
     }
     if height and width:
         data["height"] = height

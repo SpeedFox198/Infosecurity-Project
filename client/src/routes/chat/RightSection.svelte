@@ -74,12 +74,12 @@ onMount(async () => {
 
 
   socket.on("sent_success", async data => {
-    const { message_id, temp_id, time, room_id, filename, height, width } = data;  // Unpack data
+    const { message_id, temp_id, time, room_id, filename, encrypted, height, width } = data;  // Unpack data
 
     count.nextExtra(room_id);  // Increase count of sent messages
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
-    await msgStorage.changeId(temp_id, message_id, room_id, time, filename, height, width);
+    await msgStorage.changeId(temp_id, message_id, room_id, time, filename, height, width, encrypted);
     await allMsgs.changeId(temp_id, message_id, room_id);
   });
 
@@ -108,9 +108,9 @@ onMount(async () => {
   });
 });
 
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
+const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
+
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
@@ -160,7 +160,9 @@ async function sendMsg(event) {
 
   // Emit message to server and add message to client stores
   let filename = (file || {}).name;
+  msg.path = URL.createObjectURL(file);
   await addMsg(msg, filename);
+  delete msg.path;
 
   // Encrypt message before sending
   if ($roomStorage[$room_id].encrypted) {
@@ -296,7 +298,7 @@ async function addMsgBatch(data) {
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted } = data;
+  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path } = data;
   const room_id = room_id__ || room_id_
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
@@ -328,7 +330,7 @@ async function formatMsg(data, prev_id, room_id_) {
   // If message contains media, get media path
   if (type !== "text") {
     if (filename) {  // If filename is defined, means sent by user, display loading.gif
-      msg.path = "/loading.gif";
+      msg.path = path || "/loading.gif";
     } else {
       ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id, message_id));
       if (encrypted) {
@@ -349,9 +351,7 @@ async function formatMsg(data, prev_id, room_id_) {
 
 async function getEncryptedImage(path, message_id, iv) {
   const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
-  const msg = $msgStorage[message_id];
-  msg.path = URL.createObjectURL(file);
-  msgStorage.updateMsg(msg, message_id);
+  setImagePathFromBlob(message_id, file);
 }
 
 
@@ -365,6 +365,17 @@ async function _getEncryptedFile(path, decryptFunction, iv) {
     console.error(error);
   }
   return await decryptFunction(content, iv);
+}
+
+
+async function setImagePathFromBlob(message_id, file) {
+  const msg = $msgStorage[message_id];
+  if (msg === undefined) {
+    setTimeout(() => setImagePathFromBlob(message_id, file), 300);
+    return;
+  }
+  msg.path = URL.createObjectURL(file);
+  msgStorage.updateMsg(msg, message_id);
 }
 
 
