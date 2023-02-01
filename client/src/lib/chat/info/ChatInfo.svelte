@@ -8,7 +8,7 @@ const dispatch = createEventDispatcher();
 
 const onClickEvent = () => {
   if (currentChat !== undefined) dispatch("click");
-}
+};
 
 </script>
 

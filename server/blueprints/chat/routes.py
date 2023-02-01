@@ -22,3 +22,10 @@ async def scan_file(file_hash):
     print(score)
 
     return {"Score": score}
+    print(score) 
+    return {"Score": score}
+    # print("\n\n\n")
+    # print(request)
+    # x = await request.files
+    # print("\n\n\n")
+    # return "lol"

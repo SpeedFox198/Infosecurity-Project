@@ -8,7 +8,7 @@ export let grp;
 export let selectGrp;
 
 // TODO Change to bucket in the future if possible
-const group_icon = `https://localhost:8443/api/${grp.icon}`
+const group_icon = `https://localhost:8443/api/${grp.icon}`;
 
 let selected;
 
@@ -21,7 +21,7 @@ const selectCurrentGroup = () => {
   current = { deselect };
   selected = true;
   selectGrp(grp.room_id);
-}
+};
 </script>
 
 

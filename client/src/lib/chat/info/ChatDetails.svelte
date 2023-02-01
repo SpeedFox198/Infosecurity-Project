@@ -1,4 +1,5 @@
 <script>
+import { onMount } from "svelte";
 import { room_id, roomStorage } from "$lib/stores/room";
 import ChatSettings from "./ChatSettings.svelte";
 import SlidingMenu_ from "./SlidingMenu_.svelte";
@@ -29,9 +30,14 @@ $: displayDisappearing = _displayDisappearing && displayChatDetails;
 const toggleDisappearing = () => _displayDisappearing = !_displayDisappearing;
 
 
-function setDisappearing () {
-  socket.emit("set_disappearing", { disappearing, room_id: $room_id });
-}
+const setDisappearing = () => socket.emit("set_disappearing", { disappearing, room_id: $room_id });
+const blockUser = () => socket.emit("block_user", { block_id: currentChat.user_id, room_id: $room_id });
+
+onMount(() => {
+  socket.on("user_offline", async data => {
+    console.log("offline", data);
+  });
+});
 </script>
 
 
@@ -70,8 +76,8 @@ function setDisappearing () {
         <ChatSettings
           icon={currentChat.encrypted ? "lock" : "unlock"}
           name="Encryption"
-          good={currentChat.encrypted}
-          bad={!currentChat.encrypted}
+          green={currentChat.encrypted}
+          orange={!currentChat.encrypted}
           on:click
         >
           {#if currentChat.type === "group"}
@@ -101,8 +107,7 @@ function setDisappearing () {
 
       <div class="section mb-3">
         {#if currentChat.type === "direct"}
-          <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click/>
-          <ChatSettings icon="trash" name="Delete chat" red on:click/>
+          <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click={blockUser}/>
         {:else}
           <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
         {/if}

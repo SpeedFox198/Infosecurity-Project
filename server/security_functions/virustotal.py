@@ -3,6 +3,8 @@ import aiohttp
 import asyncio
 import urllib.parse
 
+from models.error import VirusTotalError
+
 API_KEY = 'ffe160af23a4fcb04ad18810d61be03b0bd0d7474dfc851dd986f1b41a4fe847'
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -57,7 +59,7 @@ async def scan_file_hash(file_hash: str) -> str:
 
 
 # step 1 send url to vt
-async def upload_url(sent_url: str) -> str:
+async def upload_url(sent_url: str) -> str | VirusTotalError:
     url = "https://www.virustotal.com/api/v3/urls"
 
     payload = urllib.parse.urlencode({"url": sent_url})
@@ -71,13 +73,17 @@ async def upload_url(sent_url: str) -> str:
                                     "content-type": "application/x-www-form-urlencoded"
                                 },
                                 ) as response:
+            if not response.ok:
+                print(response.status)
+                raise VirusTotalError("Error while scanning the URL")
+
             data = await response.json()
             data_id = data['data']['id']
             return data_id
 
 
 # step 2 get analysis
-async def get_url_analysis(data_id: str) -> str:
+async def get_url_analysis(data_id: str) -> str | VirusTotalError:
     url = f"https://www.virustotal.com/api/v3/analyses/{data_id}"
 
     async with aiohttp.ClientSession() as session:
@@ -86,22 +92,30 @@ async def get_url_analysis(data_id: str) -> str:
                                    "accept": "application/json",
                                    "x-apikey": API_KEY
                                }) as response:
+            if not response.ok:
+                print(response.status)
+                raise VirusTotalError("Error while scanning the URL")
+
             data = await response.json()
             url_id = data['meta']['url_info']['id']
             return url_id
 
 
 # step 3 get url report
-async def get_url_report(url_id: str) -> str:
+async def get_url_report(url_id: str) -> dict | VirusTotalError:
     url = f"https://www.virustotal.com/api/v3/urls/{url_id}"
+    headers = {
+        "accept": "application/json",
+        "x-apikey": API_KEY
+    }
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers={
-            "accept": "application/json",
-            "x-apikey": API_KEY
-        }) as response:
+        async with session.get(url, headers=headers) as response:
+            if not response.ok:
+                raise VirusTotalError("Error while scanning the URL")
+
             data = await response.json()
-            score = data['data']['attributes']['last_analysis_stats']['malicious']
+            score = data['data']['attributes']['last_analysis_stats']
             return score
 
 
@@ -127,7 +141,7 @@ async def get_url_report(url_id: str) -> str:
 #     print("File is safe!")
 
 
-# # Test using malicious url
+# Test using malicious url
 # print("Test 3: ")
 # data_id = asyncio.run(upload_url('http://www.csm-testcenter.org/download/malicious/index.html'))
 # url_id = asyncio.run(get_url_analysis(data_id))

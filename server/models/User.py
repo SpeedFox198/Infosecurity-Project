@@ -32,6 +32,6 @@ class User(Base):
     censor = Column(Boolean, default=True)
     google_account = Column(Boolean, default=False)
     disappearing = Column(Boolean, default=False)
-    online = Column(Boolean)
+    online = Column(Boolean, default=False)
 
     devices = relationship("Device", back_populates="user")

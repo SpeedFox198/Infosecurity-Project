@@ -23,30 +23,9 @@ async def set_online_status(user_id: str, status: bool) -> None:
 
 async def add_sio_connection(sid: str, user_id: str) -> None:
     async with async_session() as session:
-        connection_exists_statement = sa.select(SioConnection).where(
-            (SioConnection.user_id == user_id)
-        )
-        connection_exists = (await session.execute(connection_exists_statement)).scalar()
-        if not connection_exists:
-            session.add(SioConnection(sid, user_id))
-            await session.commit()
-            return
-
-        check_diff_sid_statement = sa.select(SioConnection).where(
-            (SioConnection.sid != sid) &
-            (SioConnection.user_id == user_id)
-        )
-        diff_sid_connection: SioConnection | None = (await session.execute(check_diff_sid_statement)).scalar()
-
-        if diff_sid_connection:
-            try:
-                update_sid_statement = sa.update(SioConnection)\
-                    .where(SioConnection.user_id == diff_sid_connection.user_id)\
-                    .values(sid=sid)
-                await session.execute(update_sid_statement)
-                await session.commit()
-            except SQLAlchemyError:
-                await session.rollback()
+        connection = SioConnection(sid, user_id)
+        session.add(connection)
+        await session.commit()
 
 
 async def remove_sio_connection(sid: str, user_id: str) -> None:
@@ -61,10 +40,10 @@ async def remove_sio_connection(sid: str, user_id: str) -> None:
             await session.rollback()
 
 
-async def get_sid_from_sio_connection(user_id: str) -> str | None:
+async def get_sids_from_sio_connection(user_id: str) -> list[str]:
     async with async_session() as session:
         statement = sa.select(SioConnection.sid).where(SioConnection.user_id == user_id)
-        result = (await session.execute(statement)).scalar()
+        result = (await session.execute(statement)).scalars().all()
         return result
 
 
@@ -102,7 +81,6 @@ async def has_disappearing(user_id: str) -> bool:
             User.user_id == user_id
         )
         result = (await session.execute(statement)).scalar()
-        print("has disappearing", result)
         return bool(result)
 
 

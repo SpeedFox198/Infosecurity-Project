@@ -18,6 +18,9 @@ export const room_id = (() => {
  *     encrypted: boolean;
  *     is_admin: boolean;
  *     icon: string;
+ *     user_id?: string;
+ *     blocked?: string;
+ *     "blocked" if current user is blocked by other user or "blocking" if current user is blocking other user
  *   },
  *   ...
  * }
