@@ -289,7 +289,8 @@ async function addMsgBatch(data) {
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id, time, content, reply_to, type, filename, encrypted } = data;
+  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted } = data;
+  const room_id = room_id__ || room_id_
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
@@ -319,14 +320,40 @@ async function formatMsg(data, prev_id, room_id_) {
 
   // If message contains media, get media path
   if (type !== "text") {
-    if (filename) {
+    if (filename) {  // If filename is defined, means sent by user, display loading.gif
       msg.path = "/loading.gif";
     } else {
-      ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id || room_id_, message_id));
+      ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id, message_id));
+      if (encrypted) {
+        getEncryptedImage(msg.path, message_id);
+        // msg.path = "/loading.gif";
+      }
     }
   }
 
   return { user_id_, message_id, msg, room_id };
+}
+
+
+async function getEncryptedImage(path, message_id) {
+  let content;
+  try {
+    const response = await fetch(path, { method: "POST", credentials: "include" });
+
+    if (!response.ok) {
+      throw new Error(message);
+    }
+
+    content = await response.blob();
+
+  } catch (error) {
+    console.error(error);
+  }
+  content = await encryption.decryptImage(content)
+
+  const msg = $msgStorage[message_id];
+  msg.path = URL.createObjectURL(content);
+  msgStorage.updateMsg(msg, message_id);
 }
 
 

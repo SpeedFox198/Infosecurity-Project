@@ -152,14 +152,26 @@ async function _encrypt(data, key) {
  * 
  * @param {string} ciphertext Base64 encoded ciphertext to be decrypted
  * @param {CryptoKey} key key used for decryption
- * @returns {Promise<ArrayBuffer>} encrypted message and IV separated by a separator
+ * @returns {Promise<ArrayBuffer>} decrypted message
  */
 async function _decrypt(ciphertext, key) {
   let [encrypted, iv] = ciphertext.split(SEPARATOR);
   iv = decode(iv);
   encrypted = decode(encrypted);
-  const decrypted = await SubtleCrypto.decrypt({ name: AES_MODE, iv }, key, encrypted);
-  return decrypted;
+  return _decryptRaw(encrypted, key, iv);
+}
+
+
+/**
+ * Decrypts encrypted content using key and iv
+ * 
+ * @param {BufferSource} encrypted string to be decoded
+ * @param {CryptoKey} key key used for decryption
+ * @param {ArrayBuffer} iv iv used for decryption
+ * @returns {Promise<ArrayBuffer>} decrypted content
+ */
+async function _decryptRaw(encrypted, key, iv) {
+  return await SubtleCrypto.decrypt({ name: AES_MODE, iv }, key, encrypted);
 }
 
 
@@ -180,10 +192,25 @@ async function encryptMessage(message, key) {
  * 
  * @param {string} ciphertext Base64 encoded ciphertext to be decrypted
  * @param {CryptoKey} key key used for decryption
- * @returns {Promise<string>} encrypted message and IV separated by a separator
+ * @returns {Promise<string>} decrypted message
  */
 async function decryptMessage(ciphertext, key) {
   return _decodeMessage(await _decrypt(ciphertext, key));
+}
+
+
+/**
+ * Decrypts encrypted image using key
+ * 
+ * @param {Blob} encryptedImage Blob image file object
+ * @param {CryptoKey} key key used for decryption
+ * @returns {Promise<Blob>} decrypted image
+ */
+async function decryptImage(encryptedImage, key) {
+  // TODO(high)(SpeedFox198): change the iv from hardcoded
+  let content = await _encodeFile(encryptedImage)
+  content = await _decryptRaw(content, key, decode("yv7K/sr+"));
+  return new Blob([content], {type: "image/png"});
 }
 
 
@@ -198,5 +225,6 @@ export const e2ee = {
   importRoomKey,
   deriveSecretKey,
   encryptMessage,
-  decryptMessage
+  decryptMessage,
+  decryptImage
 };

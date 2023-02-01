@@ -26,7 +26,7 @@ export let currentUser;
 <style>
 .welcome-page-section {
   background-color: var(--grey);
-  padding-top: 1%;
+  padding-top: 2%;
   padding-bottom: 25%;
 }
 
