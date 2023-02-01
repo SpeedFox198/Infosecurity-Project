@@ -165,11 +165,15 @@ async function sendMsg(event) {
   if ($roomStorage[$room_id].encrypted) {
     const encryptedContent = await encryption.encryptMessage(content);
     if (encryptedContent === undefined) {
-      // continue: flash error pls sign in message
+      $flash = { type: "failure", message: "Please sign in to google to access end-to-end-encrypted chats!" };
       return;
     }
     msg.content = encryptedContent;
-    // continue: encrypt file if exists
+
+    // Encrypt file if exists
+    if (file) {
+
+    }
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
@@ -325,8 +329,12 @@ async function formatMsg(data, prev_id, room_id_) {
     } else {
       ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id, message_id));
       if (encrypted) {
-        getEncryptedImage(msg.path, message_id);
-        // msg.path = "/loading.gif";
+        if (type === "image") {
+          getEncryptedImage(msg.path, message_id);
+          // msg.path = "/loading.gif";
+        } else if (type === "document") {
+          // TODO(high)(SpeedFox198): decrypt document?
+        }
       }
     }
   }
@@ -336,24 +344,23 @@ async function formatMsg(data, prev_id, room_id_) {
 
 
 async function getEncryptedImage(path, message_id) {
+  const file = await _getEncryptedFile(path, encryption.decryptImage);
+  const msg = $msgStorage[message_id];
+  msg.path = URL.createObjectURL(file);
+  msgStorage.updateMsg(msg, message_id);
+}
+
+
+async function _getEncryptedFile(path, decryptFunction) {
   let content;
   try {
     const response = await fetch(path, { method: "POST", credentials: "include" });
-
-    if (!response.ok) {
-      throw new Error(message);
-    }
-
+    if (!response.ok) throw new Error(message);
     content = await response.blob();
-
   } catch (error) {
     console.error(error);
   }
-  content = await encryption.decryptImage(content)
-
-  const msg = $msgStorage[message_id];
-  msg.path = URL.createObjectURL(content);
-  msgStorage.updateMsg(msg, message_id);
+  return await decryptFunction(content);
 }
 
 

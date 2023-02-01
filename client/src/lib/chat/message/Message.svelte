@@ -86,7 +86,7 @@ function selectMsg() {
         </div>
       {/if}
         
-      {#if msg.type === "file"}
+      {#if msg.type === "document"}
         <div class="file-container file-wrapper">
           <i class="fa-solid fa-file"></i>
           <div class="file-info">

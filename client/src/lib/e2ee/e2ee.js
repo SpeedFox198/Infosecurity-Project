@@ -200,17 +200,32 @@ async function decryptMessage(ciphertext, key) {
 
 
 /**
+ * Decrypts encrypted file using key
+ * 
+ * @param {Blob} encryptedFile Blob file object
+ * @param {CryptoKey} key key used for decryption
+ * @param {ArrayBuffer} iv iv used for decryption
+ * @param {string} mimeType mime type of file
+ * @returns {Promise<Blob>} decrypted file
+ */
+async function decryptFile(encryptedFile, key, iv, mimeType) {
+  let content = await _encodeFile(encryptedFile);
+  content = await _decryptRaw(content, key, iv);
+  return new Blob([content], {type: mimeType});
+}
+
+
+/**
  * Decrypts encrypted image using key
  * 
  * @param {Blob} encryptedImage Blob image file object
  * @param {CryptoKey} key key used for decryption
+ * @param {ArrayBuffer} iv iv used for decryption
  * @returns {Promise<Blob>} decrypted image
  */
-async function decryptImage(encryptedImage, key) {
-  // TODO(high)(SpeedFox198): change the iv from hardcoded
-  let content = await _encodeFile(encryptedImage)
-  content = await _decryptRaw(content, key, decode("yv7K/sr+"));
-  return new Blob([content], {type: "image/png"});
+async function decryptImage(encryptedImage, key, iv) {
+  iv = decode("yv7K/sr+");  // TODO(high)(SpeedFox198): change the iv from hardcoded
+  return await decryptFile(encryptedImage, key, iv, "image/png");
 }
 
 
