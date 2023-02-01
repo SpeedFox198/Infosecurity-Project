@@ -44,6 +44,7 @@ async def get_file_analysis(file_id: str) -> str:
             return file_hash
 
 
+# step 3 scan file hash
 async def scan_file_hash(file_hash: str) -> str:
     url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
 

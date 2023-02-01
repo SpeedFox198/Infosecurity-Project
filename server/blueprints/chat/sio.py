@@ -17,6 +17,7 @@ from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
 from models.request_data import GroupMetadataBody
 from pydantic import ValidationError
 from security_functions.ocr import ocr_scan
+from security_functions.virustotal import scan_file_hash
 from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy.orm.exc import NoResultFound
 from utils import remove_tree_directory, to_unix
@@ -578,8 +579,34 @@ async def set_disappearing(sid: str, data: dict):
     await sio.emit(GROUP_INVITE, rooms, to=sid)
 
 
+
 @sio.event
-async def block_user(sid: str, data: dict):
+async def scan_hash(sid: str, data: dict):
+
+    file_hash = data["hash"]
+
+    # Setting malicious flag to false
+    malicious = False
+
+    # Get user from session (jic i need it later on)
+    current_user = await get_user(sid)
+    user_id = await current_user.user_id
+
+    #scan file hash with virustotal
+    score = await scan_file_hash(file_hash)
+    if score > 0:
+        malicious = True
+        await sio.emit("scan_hash", {
+            malicious},
+            to=sid) # @jabriel idk what this is)
+    else:
+        await sio.emit("scan_hash", {
+            malicious},
+            to=sid) # @jabriel idk what this is)
+
+
+# @sio.event
+# async def block_user(sid: str, data: dict):
 
     block_id = data["block_id"]
     room_id = data["room_id"]
