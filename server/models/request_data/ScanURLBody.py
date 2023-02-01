@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator
 
 class ScanURLBody(BaseModel):
     url: str
+    room_id: str
 
     @validator("url")
     def check_url(cls, value):

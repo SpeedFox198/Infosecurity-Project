@@ -10,7 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 media_bp = Blueprint("media", __name__, url_prefix="/media")
 
 
-@media_bp.get("/attachments/<string:room_id>/<string:message_id>/<string:filename>")
+@media_bp.route("/attachments/<string:room_id>/<string:message_id>/<string:filename>", methods=["GET", "POST"])
 @login_required
 async def attachments(room_id: str, message_id: str, filename: str):
     current_user_id = await current_user.user_id
