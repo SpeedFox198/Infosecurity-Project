@@ -1,6 +1,7 @@
 <script>
   import { initFlash } from "sveltekit-flash-message/client"
   import { page } from "$app/stores"
+	import Toast from '$lib/general/Toast.svelte';
   
   const flash = initFlash(page)
   const flashTimeout = 5000
@@ -10,29 +11,32 @@
   }
   
   $: if ($flash) {
+    // Auto remove flash if user does not click x
     setTimeout(removeFlash, flashTimeout)
   }
   
-  const alertType = {
-    "success": "success",
-    "failure": "danger",
-    "warning": "warning"
-
+  const alert = {
+    "success": {
+      type: "Success",
+      class: "pos"
+    },
+    "failure": {
+      type: "Error",
+      class: "neg"
+    },
+    "warning": {
+      type: "Warning",
+      class: "warn"
+    }
   }
-  
 </script>
 
 {#if $flash}
-  <!-- Flash messages-->
-  <div class="alert alert-dismissible flash fade show alert-{alertType[$flash.type]}" role="alert">
-    {$flash.message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" on:click={removeFlash}></button>
-  </div>
+  <Toast 
+    alertClass={alert[$flash.type].class}
+    alertType={alert[$flash.type].type}
+    message={$flash.message}
+    on:click={removeFlash}
+  />
 {/if}
 <slot />
-
-<style>
-  .flash {
-    margin-bottom: 0;
-  }
-</style>

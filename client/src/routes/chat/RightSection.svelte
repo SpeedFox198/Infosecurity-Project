@@ -9,7 +9,7 @@ import { user_id, allUsers } from "$lib/stores/user";
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
-import { cleanSensitiveMessage } from "$lib/chat/message/data-masking";
+import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
 
 import Welcome from "$lib/chat/Welcome.svelte";
 import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
@@ -17,7 +17,7 @@ import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
-
+import OpenCV, { processImage } from "$lib/opencv/OpenCV.svelte"
 
 // SocketIO instance
 export let socket;
@@ -33,7 +33,11 @@ const flash = getFlash(page)
 
 let currentUser = $page.data.user
 let roomsLoaded = false;
-
+let ocrLoading = false;
+/** @type {HTMLImageElement} */
+let openCvImage;
+/** @type {HTMLCanvasElement} */
+let openCvCanvas;
 
 onMount(async () => {
   // Receive from server list of rooms that client belongs to
@@ -103,14 +107,41 @@ onMount(async () => {
   });
 });
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
   let { content, file, type } = event.detail;
   let messageChanged = false;
+  let isSensitiveImage = false;
 
   if (currentUser.censor) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
+
+    if (type === "image") {
+      // TODO show message loading animation or something while sending
+      ocrLoading = true
+      const imageUrl = URL.createObjectURL(file)
+      openCvImage.src = imageUrl
+      
+      await sleep(200) // Hacky way to let the image src set before processImage bc race condition
+      
+      await processImage(openCvImage, openCvCanvas)
+      isSensitiveImage = await detectSensitiveImage(openCvCanvas);
+      URL.revokeObjectURL(imageUrl)
+      ocrLoading = false
+    }
+  }
+  
+  if (messageChanged) {
+    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
+  }
+  
+  if (isSensitiveImage) {
+    $flash = {type: 'failure', message: 'Your message was not sent as your image contains sensitive data!'}
+    return
   }
 
   const message_id = getTempId();  // Temporary id for referencing message
@@ -125,10 +156,6 @@ async function sendMsg(event) {
     type // <type> ENUM(image, document, video, text)
   };
 
-  // TODO(high)(SpeedFox198): implement ui for message is masked
-  if (messageChanged) {
-    $flash = {type: 'warning', message: `Your message has been masked as it contains sensitive data!`}
-  }
 
   // Emit message to server and add message to client stores
   let filename = (file || {}).name
@@ -146,7 +173,6 @@ async function sendMsg(event) {
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
-
 
 async function getUser(user_id) {
   const url = `https://localhost:8443/api/user/details/${user_id}`;
@@ -387,7 +413,7 @@ async function removeMsg(message_id, room_id) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay {getRoomMsgs}/>
+    <MessageDisplay {getRoomMsgs} {ocrLoading}/>
 
     {#if $selectMode}
       <!-- Select Menu -->
@@ -400,6 +426,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Welcome page -->
     <Welcome {currentUser}/>
   {/if}
+  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} />
 </div>
 
 

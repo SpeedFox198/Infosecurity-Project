@@ -1,0 +1,2 @@
+class VirusTotalError(Exception):
+    pass
