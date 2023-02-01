@@ -15,3 +15,4 @@ from .TwoFA import TwoFA
 from .OTP import OTP
 from .BackupCodes import BackupCodes
 from .SioConnection import SioConnection
+from .Block import Block
