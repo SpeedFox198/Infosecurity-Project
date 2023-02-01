@@ -94,6 +94,20 @@ encryption.decryptMessage = async message => {
 };
 
 
+encryption.encryptFile = async image => {
+  const key = await getRoomKey();
+  if (key === undefined) return;
+  return await e2ee.encryptFile(image, key);
+}
+
+
+encryption.decryptImage = async (image, iv) => {
+  const key = await getRoomKey();
+  if (key === undefined) return;
+  return await e2ee.decryptImage(image, key, iv);
+}
+
+
 async function getRoomKey() {
   let key = $roomKeys[$room_id];
   if (key === undefined) {

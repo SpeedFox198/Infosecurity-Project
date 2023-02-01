@@ -16,10 +16,10 @@ from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
                     Message, Room)
 from models.request_data import GroupMetadataBody
 from pydantic import ValidationError
+
 from security_functions.ocr import ocr_scan
 from security_functions.virustotal import scan_file_hash
 from socketio.exceptions import ConnectionRefusedError
-from sqlalchemy.orm.exc import NoResultFound
 from utils import remove_tree_directory, to_unix
 
 from .functions import (delete_expired_messages, get_room, messages_queue_7d,
@@ -123,7 +123,7 @@ async def send_message(sid: str, data: dict):
 
     message_data = data["message"]
     file = data.get("file", None)
-    filename = data.get("filename", None)
+    filename = data.get("filename", "")
     height = width = None  # Initialise height and width values
 
     # Get user from session
@@ -174,7 +174,6 @@ async def send_message(sid: str, data: dict):
     elif room.disappearing == "30d":
         await messages_queue_30d.add_disappearing_messages(message.message_id)
 
-
     # Forward messages to other clients in same room
     await sio.emit(RECEIVE_MESSAGE, {
         "message_id": message.message_id,
@@ -182,7 +181,8 @@ async def send_message(sid: str, data: dict):
         "user_id": message.user_id,
         "time": to_unix(message.time),
         "content": message.content,
-        "encrypted": message.encrypted
+        "encrypted": message.encrypted,
+        "type": message.type
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
@@ -191,10 +191,9 @@ async def send_message(sid: str, data: dict):
         "room_id": message.room_id,
         "temp_id": message_data["message_id"],
         "time": to_unix(message.time),
-        "filename": filename
+        "filename": filename,
+        "encrypted": message.encrypted
     }
-    if filename:
-        data["filename"] = filename
     if height and width:
         data["height"] = height
         data["width"] = width
@@ -226,7 +225,7 @@ async def get_room_messages(sid: str, data: dict):
 # ensure data in correct format, (length of data also?)
 @sio.event
 async def delete_messages(sid: str, data: dict):
-    print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
+    # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
 
     messages = data["messages"]
     room_id = data["room_id"]
@@ -541,10 +540,13 @@ async def message_friend(sid: str, data: dict):
         if not user_sids:
             continue
 
-        sio.enter_room(user_sid, new_room.room_id)
-
         rooms = await get_room(user_id)
+
         for user_sid in user_sids:
+            try:
+                sio.enter_room(user_sid, new_room.room_id)
+            except KeyError:
+                continue
             await sio.emit(ROOMS_JOINED, rooms, to=user_sid)
 
 
@@ -579,7 +581,6 @@ async def set_disappearing(sid: str, data: dict):
     await sio.emit(GROUP_INVITE, rooms, to=sid)
 
 
-
 @sio.event
 async def scan_hash(sid: str, data: dict):
 
@@ -592,21 +593,21 @@ async def scan_hash(sid: str, data: dict):
     current_user = await get_user(sid)
     user_id = await current_user.user_id
 
-    #scan file hash with virustotal
+    # scan file hash with virustotal
     score = await scan_file_hash(file_hash)
     if score > 0:
         malicious = True
         await sio.emit("scan_hash", {
             malicious},
-            to=sid) # @jabriel idk what this is)
+            to=sid)  # @jabriel idk what this is)
     else:
         await sio.emit("scan_hash", {
             malicious},
-            to=sid) # @jabriel idk what this is)
+            to=sid)  # @jabriel idk what this is)
 
 
-# @sio.event
-# async def block_user(sid: str, data: dict):
+@sio.event
+async def block_user(sid: str, data: dict):
 
     block_id = data["block_id"]
     room_id = data["room_id"]
@@ -625,7 +626,7 @@ async def scan_hash(sid: str, data: dict):
     for blocked_user_sid in blocked_user_sids: 
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
     # update user blocked status
-    ## await sio.emit("", {}, to=current_user_id)
+    # await sio.emit("", {}, to=current_user_id)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:
@@ -655,8 +656,12 @@ async def _job_callback(messages):
 
 async def job_disappear_messages_24h():
     await messages_queue_24h.check_disappearing_messages(_job_callback)
+
+
 async def job_disappear_messages_7d():
     await messages_queue_7d.check_disappearing_messages(_job_callback)
+
+
 async def job_disappear_messages_30d():
     await messages_queue_30d.check_disappearing_messages(_job_callback)
 

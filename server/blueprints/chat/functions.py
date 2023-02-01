@@ -1,10 +1,15 @@
 import os
+import re
 from io import BytesIO
 
 import sqlalchemy as sa
 from db_access.globals import async_session
 from models import Group, Media, Membership, Message, Room, User
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
+
+from models.error import VirusTotalError
+from models.response_data import URLResultData
+from security_functions.virustotal import upload_url, get_url_analysis, get_url_report
 from utils import secure_save_file
 
 from .disappearing import DisappearingQueue
@@ -18,7 +23,10 @@ messages_queue_30d = DisappearingQueue(days=30)
 def get_display_dimensions(picture: bytes):
     """ Generates the height and width to display picture """
 
-    image = Image.open(BytesIO(picture))
+    try:
+        image = Image.open(BytesIO(picture))
+    except UnidentifiedImageError:
+        return 400, 400  # TODO(high)(SpeedFox198): remove hardcoded values, check on client side instead
     width = image.width
     height = image.height
     print(f"\n\nwidth: {width}, height: {height}\n\n")
@@ -29,7 +37,7 @@ def get_display_dimensions(picture: bytes):
     else:
         width = 400
 
-    height = round(width*ratio, 3)
+    height = round(width * ratio, 3)
 
     if height > 440:
         height = 440
@@ -130,3 +138,23 @@ async def save_group_icon(room_id: str, group_icon_name: str, group_icon: bytes)
     os.makedirs(icon_base_path)
     saved_group_icon_name = await secure_save_file(icon_base_path, group_icon_name, group_icon)
     return os.path.join(icon_base_path, saved_group_icon_name)
+
+
+async def scan_urls(message: Message):
+    url_regex = r'(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z]{2,256})(\.[a-z]{2,6})'
+    urls = [
+        "".join(matches)
+        for matches in
+        re.findall(url_regex, message.content)
+    ]
+    if urls:
+        for url in urls:
+            try:
+                data_id = await upload_url(url)
+                url_id = await get_url_analysis(data_id)
+                results = URLResultData(**await get_url_report(url_id))
+            except VirusTotalError:
+                continue
+
+            if results.malicious > 0 or results.suspicious > 0:
+                message.malicious_url = True

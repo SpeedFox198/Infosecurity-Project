@@ -28,6 +28,7 @@ export let openChatDetails;
 
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 
+const SEPARATOR = ";";
 const dispatch = createEventDispatcher();
 const flash = getFlash(page)
 
@@ -73,12 +74,12 @@ onMount(async () => {
 
 
   socket.on("sent_success", async data => {
-    const { message_id, temp_id, time, room_id, filename, height, width } = data;  // Unpack data
+    const { message_id, temp_id, time, room_id, filename, encrypted, height, width } = data;  // Unpack data
 
     count.nextExtra(room_id);  // Increase count of sent messages
 
     // Update time and temp_id to message_id for both msgStorage and allMsgs
-    await msgStorage.changeId(temp_id, message_id, room_id, time, filename, height, width);
+    await msgStorage.changeId(temp_id, message_id, room_id, time, filename, height, width, encrypted);
     await allMsgs.changeId(temp_id, message_id, room_id);
   });
 
@@ -107,9 +108,9 @@ onMount(async () => {
   });
 });
 
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
+const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
+
 
 // Send message to room via SocketIO
 async function sendMsg(event) {
@@ -158,18 +159,26 @@ async function sendMsg(event) {
 
 
   // Emit message to server and add message to client stores
-  let filename = (file || {}).name
+  let filename = (file || {}).name;
+  msg.path = URL.createObjectURL(file);
   await addMsg(msg, filename);
+  delete msg.path;
 
   // Encrypt message before sending
   if ($roomStorage[$room_id].encrypted) {
     const encryptedContent = await encryption.encryptMessage(content);
     if (encryptedContent === undefined) {
-      // continue: flash error pls sign in message
+      $flash = { type: "failure", message: "Please sign in to google to access end-to-end-encrypted chats!" };
       return;
     }
     msg.content = encryptedContent;
-    // continue: encrypt file if exists
+
+    // Encrypt file if exists
+    if (file) {
+      const { encrypted: encryptedFile, iv } = await encryption.encryptFile(file);
+      file = encryptedFile;
+      msg.content += SEPARATOR + iv;
+    }
   }
   socket.emit("send_message", { message: msg, file, filename });
 }
@@ -289,7 +298,8 @@ async function addMsgBatch(data) {
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id, time, content, reply_to, type, filename, encrypted } = data;
+  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path } = data;
+  const room_id = room_id__ || room_id_
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
@@ -297,7 +307,7 @@ async function formatMsg(data, prev_id, room_id_) {
 
   // Check if previous message is sent by same user
   if (prev_id && prev_id === user_id_){
-    
+
     // Continuous messages have no avatar
     msg = { sent, time, content, reply_to, type, corner };
 
@@ -316,17 +326,55 @@ async function formatMsg(data, prev_id, room_id_) {
   if (encrypted) {
     msg.content = await encryption.decryptMessage(content);
   }
-
   // If message contains media, get media path
   if (type !== "text") {
-    if (filename) {
-      msg.path = "/loading.gif";
+    if (filename) {  // If filename is defined, means sent by user, display loading.gif
+      msg.path = path || "/loading.gif";
     } else {
-      ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id || room_id_, message_id));
+      ({ path: msg.path, height: msg.height, width: msg.width } = await getMediaPath(room_id, message_id));
+      if (encrypted) {
+        const iv = content.split(SEPARATOR)[2];
+        if (type === "image") {
+          getEncryptedImage(msg.path, message_id, iv);
+          // msg.path = "/loading.gif";
+        } else if (type === "document") {
+          // TODO(high)(SpeedFox198): decrypt document?
+        }
+      }
     }
   }
 
   return { user_id_, message_id, msg, room_id };
+}
+
+
+async function getEncryptedImage(path, message_id, iv) {
+  const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
+  setImagePathFromBlob(message_id, file);
+}
+
+
+async function _getEncryptedFile(path, decryptFunction, iv) {
+  let content;
+  try {
+    const response = await fetch(path, { method: "POST", credentials: "include" });
+    if (!response.ok) throw new Error(message);
+    content = await response.blob();
+  } catch (error) {
+    console.error(error);
+  }
+  return await decryptFunction(content, iv);
+}
+
+
+async function setImagePathFromBlob(message_id, file) {
+  const msg = $msgStorage[message_id];
+  if (msg === undefined) {
+    setTimeout(() => setImagePathFromBlob(message_id, file), 300);
+    return;
+  }
+  msg.path = URL.createObjectURL(file);
+  msgStorage.updateMsg(msg, message_id);
 }
 
 

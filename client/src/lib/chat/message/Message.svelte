@@ -73,7 +73,7 @@ function selectMsg() {
 
       {#if msg.type === "image"}
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
-          <img src={msg.path} alt="">
+          <img src={msg.path} alt="" on:load={() => URL.revokeObjectURL((this || {}).src)}>
         </div>
       {/if}
 
@@ -86,7 +86,7 @@ function selectMsg() {
         </div>
       {/if}
         
-      {#if msg.type === "file"}
+      {#if msg.type === "document"}
         <div class="file-container file-wrapper">
           <i class="fa-solid fa-file"></i>
           <div class="file-info">
@@ -293,6 +293,9 @@ span {
 
 .check {
   color: var(--primary);
+  align-self: center;
+  margin: 0 0.5rem;
+  font-size: 20px;
 }
 
 .image-container ~ .content-container > div {
