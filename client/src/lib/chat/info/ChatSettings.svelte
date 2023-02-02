@@ -1,16 +1,11 @@
 <script>
-export let icon;
-export let name;
-export let red;
-export let green;
-export let orange;
-export let arrow;
-export let unclickable;
-if (!red) red = false;
-if (!green) green = false;
-if (!orange) orange = false;
-if (!arrow) arrow = false;
-if (!unclickable) unclickable = false;
+export let icon = false;
+export let name = false;
+export let red = false;
+export let green = false;
+export let orange = false;
+export let arrow = false;
+export let unclickable = false;
 </script>
 
 
