@@ -9,6 +9,7 @@ export let toggleFriends;
 export let roomSearchInput
 
 const logoutUser = async () => {
+  localStorage.clear();
   await fetch("https://localhost:8443/api/auth/logout", {
     method: "POST",
     credentials: "include",

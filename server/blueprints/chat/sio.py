@@ -623,7 +623,7 @@ async def block_user(sid: str, data: dict):
 
     # Update user blocked status
     await sio.emit(ROOM_BLOCKED, {"room_id": room_id, "block_id": block_id}, room=room_id)
-    sio.close_room(room_id)
+    await sio.close_room(room_id)
 
 
 @sio.event
