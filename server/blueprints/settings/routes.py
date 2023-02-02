@@ -3,7 +3,8 @@ import json
 import os
 import datetime
 import sqlalchemy as sa
-from quart import Blueprint, render_template, current_app
+from itsdangerous import SignatureExpired
+from quart import Blueprint, render_template, current_app, send_file
 from quart_schema import validate_request
 from models.request_data import TwoFABody
 from models import Device
@@ -89,6 +90,17 @@ async def get_account_information():
     async with async_session() as session:
         # get user details
         user_results = await get_user_details(await current_user.user_id)
+        user_results_dict = {
+            "username": user_results[0],
+            "email": user_results[1],
+            "avatar": user_results[2],
+            "dark_mode": user_results[4],
+            "malware_scan": user_results[5],
+            "friends_only": user_results[6],
+            "censor": user_results[7],
+            "google_account": user_results[8],
+            "disappearing_messages": user_results[9]
+        }
 
         # get device details
         statement = sa.select(Device) \
@@ -110,17 +122,19 @@ async def get_account_information():
             )
 
     # convert all data into json format
-    user_json = json.dumps(user_results, indent=4, default=str)
+    user_json = json.dumps(user_results_dict, indent=4, default=str)
     device_json = json.dumps(device_json_list, indent=4, default=str)
 
     export_path = f"media/exports/{await current_user.user_id}"
     os.makedirs(export_path, exist_ok=True)
     # write to json file
     with open(export_path + "/account_data.json", "w") as outfile:
-        outfile.write(user_json + "\n")
-
-    with open(export_path + "/account_data.json", "a") as outfile:
+        outfile.write("Your account information\n")
+        outfile.write(user_json + "\n\n")
+        outfile.write("Your device information\n")
         outfile.write(device_json)
+
+    # with open(export_path + "/account_data.json", "a") as outfile:
 
     # write to html file
     html_template = await render_template("account_data.html",
@@ -156,7 +170,7 @@ async def get_account_information():
     email = user_results[1]
     print(email)
     token = url_serialiser.dumps(email)
-    link = f"https://localhost:8443/api/{token}/{await current_user.user_id}/account_data.zip"
+    link = f"https://localhost:8443/api/settings/{token}/{await current_user.user_id}/account_data.zip"
 
     # email the link to the user
     subject = "Your Bubbles Account - Requested Account Report"
@@ -172,3 +186,17 @@ async def get_account_information():
                                     )
     gmail_send(email, subject, message)
     return {"message": "Getting account report"}
+
+@settings_bp.get("/<token>/<user_id>/<file_name>")
+async def get_account_report(token: str, user_id: int, file_name: str):
+    url_serialiser = current_app.config["url_serialiser"]
+    try:
+        email = url_serialiser.loads(token, max_age=2592000)
+        print(email)
+        print(user_id)
+        print(file_name)
+        directory = os.path.join(os.getcwd(), f"media/exports/{user_id}/{file_name}")
+        print(directory)
+        return await send_file(directory, as_attachment=True)
+    except SignatureExpired:
+        return {"message": "The link has expired"}, 400
