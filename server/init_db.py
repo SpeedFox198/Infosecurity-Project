@@ -106,7 +106,7 @@ async def add_users(session):
     return alice, bob, clarence
 
 
-async def get_messages(session, room_ids, alice, bob, clarence):
+async def add_messages(session, room_ids, alice, bob, clarence):
     """" Load pre made messages """
     read = read_from_file(PATH_MESSAGES)
 
@@ -117,7 +117,9 @@ async def get_messages(session, room_ids, alice, bob, clarence):
         user_id = {"alice": alice, "bob": bob, "clarence": clarence}[user]
         room_id = room_ids[int(room) - 1]
         msg = Message(user_id, room_id, content)
+        msg_status = MessageStatus(msg.message_id, room_id)
         msg.time = datetime.now() + timedelta(seconds=17 * i - back_to_the_future)
+        msg.status = msg_status
         messages.append(msg)
 
     async with session.begin():
@@ -137,7 +139,7 @@ async def main():
         alice, bob, clarence = await add_users(session)
         await add_friends(session, alice.user_id, bob.user_id, clarence.user_id)
         await add_memberships(session, room_ids, alice.user_id, bob.user_id, clarence.user_id)
-        await get_messages(session, room_ids, alice.user_id, bob.user_id, clarence.user_id)
+        await add_messages(session, room_ids, alice.user_id, bob.user_id, clarence.user_id)
 
     print("Database initialised! :)")
 
