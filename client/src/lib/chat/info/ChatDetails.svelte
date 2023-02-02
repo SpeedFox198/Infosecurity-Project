@@ -1,6 +1,9 @@
 <script>
 import { onMount } from "svelte";
+import { getFlash } from "sveltekit-flash-message/client"
 import { room_id, roomStorage } from "$lib/stores/room";
+import { selectedMsgs } from "$lib/stores/select";
+import { page } from "$app/stores"
 import ChatSettings from "./ChatSettings.svelte";
 import SlidingMenu_ from "./SlidingMenu_.svelte";
 
@@ -9,6 +12,8 @@ export let socket;
 export let displayChatDetails;
 export let closeChatDetails;
 export let animateHideChatDetails;
+
+const flash = getFlash(page);
 
 const disappearingText = {
   "off": "Off",
@@ -27,11 +32,19 @@ $: hide = animateHideChatDetails && !displayChatDetails;
 $: displayDisappearing = _displayDisappearing && displayChatDetails;
 
 
-const toggleDisappearing = () => _displayDisappearing = !_displayDisappearing;
-
-
 const setDisappearing = () => socket.emit("set_disappearing", { disappearing, room_id: $room_id });
 const blockUser = () => socket.emit("block_user", { block_id: currentChat.user_id, room_id: $room_id });
+const unblockUser = () => socket.emit("unblock_user", { block_id: currentChat.user_id, room_id: $room_id });
+
+function toggleDisappearing() {
+  if (currentChat.blocked) {
+    const action = currentChat.disappearing === "off" ? "on" : "off";
+    const status = currentChat.blocked === "blocking" ? "this user is" : "you have been";
+    $flash = { type: "failure", message: `You can't turn ${action} disappearing messages as ${status} blocked.` };
+    return;
+  }
+  _displayDisappearing = !_displayDisappearing;
+}
 
 onMount(() => {
   socket.on("user_offline", async data => {
@@ -114,7 +127,13 @@ onMount(() => {
 
       <div class="section mb-3">
         {#if currentChat.type === "direct"}
-          <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click={blockUser}/>
+          {#if currentChat.blocked === "blocking"}
+            <ChatSettings icon="ban" name="Unblock {currentChat.name}" green on:click={unblockUser}/>
+          {:else if currentChat.blocked === "blocked"}
+            <ChatSettings icon="ban" name="You have been blocked by {currentChat.name}" red unclickable/>
+          {:else}
+            <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click={()=>{blockUser();selectedMsgs.clear();}}/>
+          {/if}
         {:else}
           <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
         {/if}

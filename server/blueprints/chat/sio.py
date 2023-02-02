@@ -2,10 +2,12 @@ import os
 
 import socketio
 import sqlalchemy as sa
-from db_access.block import db_get_blocked, db_create_block_entry, db_check_block
+from db_access.block import (db_check_block, db_create_block_entry,
+                             db_delete_block_entry, db_get_blocked)
 from db_access.globals import async_session
-from db_access.message import db_get_room_messages, db_remove_messages, db_get_room_id_of_message
-from db_access.room import db_update_disappearing, db_get_room_if_user_verified
+from db_access.message import (db_get_room_id_of_message, db_get_room_messages,
+                               db_remove_messages)
+from db_access.room import db_get_room_if_user_verified, db_update_disappearing
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
                            have_public_key, have_relationship,
@@ -16,26 +18,20 @@ from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
                     Message, Room)
 from models.error import VirusTotalError
 from models.request_data import GroupMetadataBody, ScanURLBody
-from pydantic import ValidationError
-
 from models.response_data import URLResultData
+from pydantic import ValidationError
 from security_functions.ocr import ocr_scan
-from security_functions.virustotal import (
-    scan_file_hash,
-    upload_file,
-    get_file_analysis,
-    upload_url,
-    get_url_analysis,
-    get_url_report
-)
+from security_functions.virustotal import (get_file_analysis, get_url_analysis,
+                                           get_url_report, scan_file_hash,
+                                           upload_file, upload_url)
 from socketio.exceptions import ConnectionRefusedError
 from utils import remove_tree_directory, to_unix
 
+from .events import *
 from .functions import (delete_expired_messages, get_room, messages_queue_7d,
                         messages_queue_24h, messages_queue_30d, save_file,
                         save_group_icon)
 from .sio_auth_manager import SioAuthManager
-from .events import *
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -92,7 +88,7 @@ async def connect(sid, environ, auth):
         if room_is_blocked:
             continue
 
-        sio.enter_room(sid, room_id)
+        enter_room(sid, room_id)
 
         # Inform other online users that current user is online
         # Only emit event to direct messages rooms
@@ -330,9 +326,7 @@ async def create_group(sid: str, data: dict):
         rooms = await get_room(user_id)
         for user_sid in user_sids:
             for room in rooms:
-                try:
-                    sio.enter_room(user_sid, room["room_id"])
-                except KeyError:
+                if enter_room(user_sid, room["room_id"]):
                     continue
 
             # Send room_ids that client belongs to
@@ -561,9 +555,7 @@ async def message_friend(sid: str, data: dict):
         rooms = await get_room(user_id)
 
         for user_sid in user_sids:
-            try:
-                sio.enter_room(user_sid, new_room.room_id)
-            except KeyError:
+            if enter_room(user_sid, new_room.room_id):
                 continue
             await sio.emit(ROOMS_JOINED, rooms, to=user_sid)
 
@@ -626,12 +618,42 @@ async def block_user(sid: str, data: dict):
 
     # Offline user from blocked user
     blocked_user_sids = await get_sids_from_sio_connection(block_id)
-    for blocked_user_sid in blocked_user_sids: 
+    for blocked_user_sid in blocked_user_sids:
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
 
     # Update user blocked status
     await sio.emit(ROOM_BLOCKED, {"room_id": room_id, "block_id": block_id}, room=room_id)
     sio.close_room(room_id)
+
+
+@sio.event
+async def unblock_user(sid: str, data: dict):
+
+    block_id = data["block_id"]
+    room_id = data["room_id"]
+
+    # Get user from session
+    current_user = await get_user(sid)
+    current_user_id = await current_user.user_id
+
+    # Block user (database)
+    blocked_success = await db_delete_block_entry(current_user_id, block_id, room_id)
+    if not blocked_success:
+        return
+
+    # Online user from blocked user
+    blocked_user_sids = await get_sids_from_sio_connection(block_id)
+    current_user_sids = await get_sids_from_sio_connection(current_user_id)
+
+    for blocked_user_sid in blocked_user_sids:
+        await sio.emit(USER_ONLINE, {"user_id": current_user_id}, to=blocked_user_sid)
+        enter_room(blocked_user_sid, room_id)
+    for current_user_sid in current_user_sids:
+        await sio.emit(USER_ONLINE, {"user_id": current_user_id}, to=current_user_sid)
+        enter_room(current_user_sid, room_id)
+
+    # Update user blocked status
+    await sio.emit(ROOM_UNBLOCKED, {"room_id": room_id}, room=room_id)
 
 
 @sio.event
@@ -667,6 +689,15 @@ async def save_user(sid: str, user: AuthedUser) -> None:
 async def get_user(sid: str) -> AuthedUser | None:
     """ Returns user object from sio session """
     return (await sio.get_session(sid)).get(SIO_SESSION_USER_KEY, None)
+
+
+def enter_room(sid: str, room: str) -> bool:
+    """ Attempts to enter sid into room, returns True if failed to enter """
+    try:
+        sio.enter_room(sid, room)
+    except KeyError:
+        return True
+    return False
 
 
 async def delete_client_messages(messages, room_id, skip_sid=None):

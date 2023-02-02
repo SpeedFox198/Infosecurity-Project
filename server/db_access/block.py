@@ -53,6 +53,30 @@ async def db_create_block_entry(user_id: str, block_id: str, room_id: str) -> bo
     return True
 
 
+async def db_delete_block_entry(user_id: str, block_id: str, room_id: str) -> bool:
+    async with async_session() as session:
+        verify_statement = sa.select(Block).where(
+            (Block.user_id == user_id) &
+            (Block.block_id == block_id) &
+            (Block.room_id == room_id)
+        )
+
+        delete_statement = sa.delete(Block).where(
+            (Block.user_id == user_id) &
+            (Block.block_id == block_id) &
+            (Block.room_id == room_id)
+        )
+
+        async with session.begin():
+            try:
+                (await session.execute(verify_statement)).one()
+            except NoResultFound:
+                return False
+
+            await session.execute(delete_statement)
+
+    return True
+
 async def db_check_block(room_id: str) -> Block | None:
     async with async_session() as session:
 

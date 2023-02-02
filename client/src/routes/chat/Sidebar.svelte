@@ -87,6 +87,13 @@ onMount(() => {
     room.blocked = block_id === $user_id ? "blocked" : "blocking";
     roomStorage.addRoom(room_id, room);
   });
+
+  socket.on("room_unblocked", async data => {
+    const { room_id } = data;  // Unpack data
+    const room = $roomStorage[room_id];
+    delete room.blocked;
+    roomStorage.addRoom(room_id, room);
+  });
 });
 </script>
 

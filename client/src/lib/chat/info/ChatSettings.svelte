@@ -5,10 +5,12 @@ export let red;
 export let green;
 export let orange;
 export let arrow;
+export let unclickable;
 if (!red) red = false;
 if (!green) green = false;
 if (!orange) orange = false;
 if (!arrow) arrow = false;
+if (!unclickable) unclickable = false;
 </script>
 
 
@@ -17,6 +19,7 @@ if (!arrow) arrow = false;
   class:red
   class:green
   class:orange
+  class:unclickable
   on:click
   on:keydown>
 
@@ -47,6 +50,10 @@ if (!arrow) arrow = false;
 .option:hover {
   cursor: pointer;
   background-color: var(--grey-light);
+}
+
+.unclickable:hover {
+  cursor: default;
 }
 
 .option:focus {

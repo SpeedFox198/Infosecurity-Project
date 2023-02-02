@@ -283,7 +283,6 @@ async function addMsg(data, filename, newly_received) {
     await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
   }
   
-  console.log("newly received?", newly_received)
   if (newly_received) {
     const urlRegex = /(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z]{2,256})(\.[a-z]{2,6})/g
     const urls = msg.content.match(urlRegex)
@@ -516,7 +515,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs} {ocrLoading} blocked={currentRoom.blocked}/>
 
-    {#if currentRoom.blocked}
+    {#if currentRoom.blocked === "blocking"}
       <BlockingMessage name={currentRoom.name}/>
     {:else if $selectMode}
       <!-- Select Menu -->
@@ -529,7 +528,7 @@ async function removeMsg(message_id, room_id) {
     <!-- Welcome page -->
     <Welcome {currentUser}/>
   {/if}
-  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} on:load={() => openCvLoaded = true}/>
+  <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} on:load={()=>{openCvLoaded=true;dispatchLoadEvent();}}/>
 </div>
 
 
