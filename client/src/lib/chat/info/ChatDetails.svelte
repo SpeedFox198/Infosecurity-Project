@@ -135,7 +135,11 @@ onMount(() => {
             <ChatSettings icon="ban" name="Block {currentChat.name}" red on:click={()=>{blockUser();selectedMsgs.clear();}}/>
           {/if}
         {:else}
-          <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click/>
+          {#if currentChat.is_admin}
+            <ChatSettings icon="trash" name="Delete Group" red on:click={null}/>
+          {:else}
+            <ChatSettings icon="arrow-right-from-bracket" name="Exit Group" red on:click={null}/>
+          {/if}
         {/if}
       </div>
 

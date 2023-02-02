@@ -507,7 +507,7 @@ async function removeMsg(message_id, room_id) {
   <ChatInfo on:click={openChatDetails}/>
 
   <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
-  {#if currentUser.public_key && currentUser.public_key.length > 0}
+  {#if currentUser.e2ee}
     <E2EE/>
   {/if}
 

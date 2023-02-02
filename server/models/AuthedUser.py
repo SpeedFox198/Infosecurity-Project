@@ -12,6 +12,7 @@ class AuthedUser(AuthUser):
         self._username = None
         self._email = None
         self._avatar = None
+        self._e2ee = None
         self._public_key = None
         self._dark_mode = None
         self._malware_scan = None
@@ -27,12 +28,13 @@ class AuthedUser(AuthUser):
             except (ValueError, AttributeError):
                 self._user_id, self._device_id = ("",)*2
 
-            user_details = await get_user_details(self._user_id) or ("",) * 10
+            user_details = await get_user_details(self._user_id) or ("",) * 11
 
             (
                 self._username,
                 self._email,
                 self._avatar,
+                self._e2ee,
                 self._public_key,
                 self._dark_mode,
                 self._malware_scan,
@@ -68,6 +70,11 @@ class AuthedUser(AuthUser):
     async def avatar(self) -> str:
         await self._resolve()
         return self._avatar
+
+    @property
+    async def e2ee(self) -> str:
+        await self._resolve()
+        return self._e2ee
 
     @property
     async def public_key(self) -> str:

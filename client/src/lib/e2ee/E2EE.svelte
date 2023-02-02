@@ -41,6 +41,9 @@ async function initKeys() {
       // Create new keys
       const newMasterKey = await getNewMasterKey();
 
+      // Upload publicKey to server
+      uploadPublicKey(newMasterKey.pubKey);
+
       // Upload masterKey file to gdrive
       service.uploadJSONFile(MASTER_KEY_FILE_NAME, newMasterKey);
 
@@ -77,6 +80,29 @@ async function initKeys() {
   // When all keys initiated successfully,
   // set flag to true to prevent multiple calls
   keysInited = true;
+}
+
+
+async function uploadPublicKey(public_key) {
+  try {
+    const response = await fetch(
+      "https://localhost:8443/api/chat/upload-public-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ public_key })
+      }
+    );
+    if (!response.ok) {
+      setTimeout(() => uploadPublicKey(public_key), 100);
+      return;
+    }
+  } catch (err) {
+    setTimeout(() => uploadPublicKey(public_key), 100);
+    return;
+  }
 }
 
 

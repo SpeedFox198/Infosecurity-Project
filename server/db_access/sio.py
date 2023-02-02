@@ -66,9 +66,9 @@ async def remove_friend_request(sender_user_id: str, recipient_user_id: str) -> 
         await session.commit()
 
 
-async def have_public_key(user_id: str) -> bool:
+async def have_e2ee_enabled(user_id: str) -> bool:
     async with async_session() as session:
-        statement = sa.select(User.public_key).where(
+        statement = sa.select(User.e2ee).where(
             User.user_id == user_id
         )
         result = (await session.execute(statement)).scalar()

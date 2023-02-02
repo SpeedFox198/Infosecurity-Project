@@ -26,6 +26,7 @@ class User(Base):
     password = Column(VARCHAR(255))
     avatar = Column(VARCHAR(255))
     public_key = Column(CHAR(88))
+    e2ee = Column(Boolean, default=False)
     dark_mode = Column(Boolean, default=False)
     malware_scan = Column(Boolean, default=True)
     friends_only = Column(Boolean, default=True)

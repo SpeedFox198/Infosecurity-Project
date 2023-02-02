@@ -10,7 +10,7 @@ from db_access.message import (db_get_room_id_of_message, db_get_room_messages,
 from db_access.room import db_get_room_if_user_verified, db_update_disappearing
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
-                           have_public_key, have_relationship,
+                           have_e2ee_enabled, have_relationship,
                            remove_friend_request, remove_sio_connection,
                            set_online_status)
 from db_access.user import get_user_details
@@ -527,7 +527,7 @@ async def message_friend(sid: str, data: dict):
     async with async_session() as session:
         default_disappearing_option = "30d"
 
-        if (await have_public_key(await current_user.user_id)) and (await have_public_key(friend_user_id)):
+        if (await have_e2ee_enabled(await current_user.user_id)) and (await have_e2ee_enabled(friend_user_id)):
             new_room = Room(disappearing="off", encrypted=True)
         else:
             new_room = Room(disappearing="off")

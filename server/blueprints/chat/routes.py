@@ -1,31 +1,17 @@
+from db_access.user import set_user_public_key
 from quart import Blueprint, request
-from security_functions.virustotal import (
-    upload_file,
-    get_file_analysis,
-    scan_file_hash,
-    get_url_analysis,
-    get_url_report
-)
 from quart_auth import login_required, current_user
 from quart_schema import validate_request
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
 
 
-@chat_bp.post("/file_upload_and_scan")
+@chat_bp.post("/upload-public-key")
 @login_required
-async def scan_file(file_hash):
-    # function receives file hash and sent to virustotal for scanning
+async def scan_file():
+    data = await request.get_json()
+    public_key = data.get("public_key", "")
+    user_id = await current_user.user_id
+    await set_user_public_key(user_id, public_key)
 
-    
-    score = scan_file_hash(file_hash)
-    print(score)
-
-    return {"Score": score}
-    print(score) 
-    return {"Score": score}
-    # print("\n\n\n")
-    # print(request)
-    # x = await request.files
-    # print("\n\n\n")
-    # return "lol"
+    return { "message": "Public key uploaded" }
