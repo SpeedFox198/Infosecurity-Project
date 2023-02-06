@@ -29,7 +29,6 @@ class Message(Base):
     content = Column(VARCHAR(2000))
     reply_to = Column(CHAR(36))
     type = Column(ENUM("image", "document", "video", "text"))
-
     encrypted = Column(BOOLEAN, default=False)
 
     status = relationship("MessageStatus", back_populates="message", uselist=False, lazy="joined")

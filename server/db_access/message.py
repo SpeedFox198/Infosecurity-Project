@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import Disappearing, Media, Membership, Message, Room
+from models import Disappearing, Media, Membership, Message, Room, MessageStatus
 from utils import to_unix
 
 
@@ -13,12 +13,16 @@ async def db_get_room_messages(room_id: str, limit: int, offset: int) -> list[di
             Message.time,
             Message.content,
             Message.type,
-            Message.encrypted
+            Message.encrypted,
+            MessageStatus.received,
+            MessageStatus.malicious
+        ).join(
+            Message.status
         ).where(
             Message.room_id == room_id
         ).order_by(Message.time.desc()).limit(limit).offset(offset)
 
-        result: list[Message] = (await session.execute(statement)).all()
+        result: list = (await session.execute(statement)).all()
 
     # Create list of messages represented in JSON in reverse order
     room_messages = [{
@@ -27,7 +31,9 @@ async def db_get_room_messages(room_id: str, limit: int, offset: int) -> list[di
         "time": to_unix(result[i].time),
         "content": result[i].content,
         "type": result[i].type,
-        "encrypted": result[i].encrypted
+        "encrypted": result[i].encrypted,
+        "received": result[i].received,
+        "malicious": result[i].malicious
     } for i in range(len(result) - 1, -1, -1)]
 
     return room_messages
@@ -82,3 +88,22 @@ async def db_get_room_id_of_message(message_id: str) -> str:
     async with async_session() as session:
         statement = sa.select(Message.room_id).where(Message.message_id == message_id)
         return (await session.execute(statement)).scalar()
+
+
+async def set_messages_as_received(message_ids: list[str]) -> None:
+
+    async with async_session() as session:
+        statement = sa.update(MessageStatus).where(
+            MessageStatus.message_id.in_(message_ids)
+        ).values(received=True)
+        await session.execute(statement)
+        await session.commit()
+
+
+async def set_message_as_malicious(message_id: str) -> None:
+    async with async_session() as session:
+        statement = sa.update(MessageStatus).where(
+            MessageStatus.message_id == message_id
+        ).values(malicious=True)
+        await session.execute(statement)
+        await session.commit()
