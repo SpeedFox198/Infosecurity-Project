@@ -17,14 +17,14 @@ export const actions = {
   twoFA: async (event) => {
         const data = await event.request.formData()
         const twoFA = data.get("twoFA")
-        console.log(twoFA)
         const response = await fetch("https://127.0.0.1:8443/api/auth/2fa", {   
             method: "POST",
             credentials: "include",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Cookie": event.request.headers.get("cookie")
+                "Cookie": event.request.headers.get("cookie"),
+                "User-Agent": event.request.headers.get("User-Agent")
             },
             body: JSON.stringify({"twofacode": twoFA})
         });  

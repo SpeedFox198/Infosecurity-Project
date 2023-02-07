@@ -2,9 +2,12 @@ import pyotp
 import json
 import os
 import datetime
+
 import sqlalchemy as sa
 from itsdangerous import SignatureExpired
-from quart import Blueprint, render_template, current_app, send_file
+import qrcode
+import qrcode.image.svg
+from quart import Blueprint, render_template, current_app, send_file, Response
 from quart_schema import validate_request
 from models.request_data import TwoFABody
 from models import Device
@@ -52,8 +55,7 @@ async def google_secret():
 @validate_request(TwoFABody)
 async def google_authenticator(data: TwoFABody):
     # Check if 2FA is already enabled
-    if (await get_2fa_backup_codes(await current_user.user_id)):
-        print("Checkpoint No")
+    if await get_2fa_backup_codes(await current_user.user_id):
         return {"message": "2FA already enabled"}, 400
     else:
         twoFA_code = await get_2fa(await current_user.user_id)
@@ -67,7 +69,6 @@ async def google_authenticator(data: TwoFABody):
                 bc.code
                 for bc in await get_2fa_backup_codes(await current_user.user_id)
             ]
-            print("Checkpoint Yes")
             return {"message": "2FA enabled", "backup_codes": backup_codes}, 200
         else:
             return {"message": "Invalid 2FA code"}, 400
@@ -168,7 +169,6 @@ async def get_account_information():
     # crafting the link
     url_serialiser = current_app.config["url_serialiser"]
     email = user_results[1]
-    print(email)
     token = url_serialiser.dumps(email)
     link = f"https://localhost:8443/api/settings/{token}/{await current_user.user_id}/account_data.zip"
 
@@ -176,9 +176,6 @@ async def get_account_information():
     subject = "Your Bubbles Account - Requested Account Report"
     date_requested = datetime.date.today()
     expiry_date = date_requested + datetime.timedelta(days=30)
-    print(date_requested)
-    print(expiry_date)
-    print(link)
     message = await render_template("requested_data.html",
                                     date_requested=str(date_requested),
                                     expiry_date=str(expiry_date),
@@ -187,16 +184,32 @@ async def get_account_information():
     gmail_send(email, subject, message)
     return {"message": "Getting account report"}
 
-@settings_bp.get("/<token>/<user_id>/<file_name>")
-async def get_account_report(token: str, user_id: int, file_name: str):
+
+@settings_bp.get("/<string:token>/<string:user_id>/<string:file_name>")
+async def get_account_report(token: str, user_id: str, file_name: str):
     url_serialiser = current_app.config["url_serialiser"]
     try:
         email = url_serialiser.loads(token, max_age=2592000)
-        print(email)
-        print(user_id)
-        print(file_name)
         directory = os.path.join(os.getcwd(), f"media/exports/{user_id}/{file_name}")
-        print(directory)
         return await send_file(directory, as_attachment=True)
     except SignatureExpired:
         return {"message": "The link has expired"}, 400
+
+
+@settings_bp.get("/2fa/qr-code/<string:secret_token>")
+@login_required
+async def two_fa_qr_code(secret_token: str):
+    otp_link = pyotp.totp.TOTP(secret_token).provisioning_uri(name=await current_user.username,
+                                                              issuer_name='Bubbles')
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+        image_factory=qrcode.image.svg.SvgImage
+    )
+    qr.add_data(otp_link)
+    qr.make(fit=True)
+
+    img = qr.make_image()
+    return Response(img.to_string(), mimetype="image/svg+xml")
