@@ -619,8 +619,13 @@ async def block_user(sid: str, data: dict):
 
     # Offline user from blocked user
     blocked_user_sids = await get_sids_from_sio_connection(block_id)
+    current_user_sids = await get_sids_from_sio_connection(current_user_id)
+
     for blocked_user_sid in blocked_user_sids:
         await sio.emit(USER_OFFLINE, {"user_id": current_user_id}, to=blocked_user_sid)
+
+    for current_user_sid in current_user_sids:
+        await sio.emit(USER_OFFLINE, {"user_id": block_id}, to=current_user_sid)
 
     # Update user blocked status
     await sio.emit(ROOM_BLOCKED, {"room_id": room_id, "block_id": block_id}, room=room_id)
@@ -649,8 +654,11 @@ async def unblock_user(sid: str, data: dict):
     for blocked_user_sid in blocked_user_sids:
         await sio.emit(USER_ONLINE, {"user_id": current_user_id}, to=blocked_user_sid)
         enter_room(blocked_user_sid, room_id)
+
+    blocked_user_is_online = len(blocked_user_sids) > 0
     for current_user_sid in current_user_sids:
-        await sio.emit(USER_ONLINE, {"user_id": current_user_id}, to=current_user_sid)
+        if blocked_user_is_online:
+            await sio.emit(USER_ONLINE, {"user_id": block_id}, to=current_user_sid)
         enter_room(current_user_sid, room_id)
 
     # Update user blocked status
