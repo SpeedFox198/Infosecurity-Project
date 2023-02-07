@@ -56,7 +56,7 @@ async def connect(sid, environ, auth):
     current_user_id = await current_user.user_id
 
     # Check if user_id is valid in database, because there was an integrity error when re-init db
-    if await get_user_details(await current_user.user_id) is None:
+    if await get_user_details(current_user_id) is None:
         raise ConnectionRefusedError("Authentication failed")
 
     if not await current_user.is_authenticated:
@@ -81,6 +81,7 @@ async def connect(sid, environ, auth):
             if room_id == blocked_room.room_id:
                 blocked_status = "blocking" if current_user_id == blocked_room.user_id else "blocked"
                 room["blocked"] = blocked_status
+                room["online"] = False
                 room_is_blocked = True
                 break
 

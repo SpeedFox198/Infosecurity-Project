@@ -4,8 +4,7 @@ export const encryption = {};
 
 
 <script>
-// TODO(mid)(SpeedFox198): change ../google/ to $lib/google/
-import GDrive, { service } from "../google/GDrive.svelte";
+import GDrive, { service } from "$lib/google/GDrive.svelte";
 import { masterKey, roomKeys } from "$lib/stores/key";
 import { room_id } from "$lib/stores/room";
 import { user_id } from "$lib/stores/user";

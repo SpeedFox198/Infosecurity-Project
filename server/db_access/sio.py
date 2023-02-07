@@ -97,3 +97,11 @@ async def get_existing_room(relationship: list[str, str] | tuple[str, str]) -> R
         )
         result: Room | None = (await session.execute(statement)).one_or_none()
         return result
+
+
+async def db_clear_sio_connections():
+    """ Clears all entries of SocketIO connections from database """
+    statement = sa.delete(SioConnection)
+    async with async_session() as session:
+        async with session.begin():
+            await session.execute(statement)

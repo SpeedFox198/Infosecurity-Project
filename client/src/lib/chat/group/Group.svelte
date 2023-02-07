@@ -36,9 +36,12 @@ const selectCurrentGroup = () => {
       {#if !grp.icon.startsWith("media/")}
         <img class="rounded-circle" src={grp.icon} alt="Group Icon">
       {:else}
-        <img class="rounded-circle" src={ group_icon } alt="Group Icon">
+        <img class="rounded-circle" src={group_icon} alt="Group Icon">
       {/if}
     </div>
+    {#if grp.type === "direct"}
+      <div class="d-block status rounded-circle" class:offline={!grp.online}></div>
+    {/if}
   </div>
   <div class="d-flex align-items-center">
     <span>{grp.name}</span>
@@ -48,6 +51,7 @@ const selectCurrentGroup = () => {
 
 <style>
 .group {
+  background-color: var(--white);
   border-bottom: 0.1rem solid var(--white-shadow);
 }
 
@@ -61,7 +65,49 @@ const selectCurrentGroup = () => {
 }
 
 .icon {
+  position: relative;
   height: 4.5rem;
   width: 4.5rem;
+}
+
+.status {
+  position: absolute;
+  bottom: calc(0.5rem - 4px);
+  right: calc(0.5rem - 4px);
+  width: 18px;
+  height: 18px;
+  background-color: var(--primary);
+  border: 3px solid var(--white);
+}
+
+.group.unselected:hover .status {
+  border-color: var(--grey-light);
+}
+
+.group.selected .status {
+  border-color: var(--grey-light-shadow);
+}
+
+.offline {
+  background-color: var(--grey-dark);
+}
+
+.offline::after {
+  content: "";
+  display: block;
+  margin: auto;
+  margin-top: 5px;
+  width: 8px;
+  height: 2px;
+  background-color: var(--white);
+  border-radius: 50rem;
+}
+
+.group.unselected:hover .offline {
+  border-color: var(--grey-light);
+}
+
+.group.selected .offline {
+  border-color: var(--grey-light-shadow);
 }
 </style>

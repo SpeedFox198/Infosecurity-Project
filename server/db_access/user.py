@@ -59,3 +59,11 @@ async def set_user_public_key(user_id: str, public_key: str):
         statement = sa.update(User).where(User.user_id == user_id).values(public_key=public_key)
         await session.execute(statement)
         await session.commit()
+
+
+async def db_reset_all_users_online_status():
+    """ Resets all users' online status to offline """
+    statement = sa.update(User).where(User.online == True).values(online = False)
+    async with async_session() as session:
+        async with session.begin():
+            await session.execute(statement)

@@ -13,6 +13,8 @@ from blueprints.media import media_bp
 from blueprints.user import user_bp
 from blueprints.settings import settings_bp
 from db_access.device import get_device
+from db_access.sio import db_clear_sio_connections
+from db_access.user import db_reset_all_users_online_status
 from itsdangerous import URLSafeTimedSerializer
 from models import AuthedUser
 from quart import Quart
@@ -95,13 +97,23 @@ async def invalid_schema(*_):
 
 @app.before_serving
 async def startup():
+    # Start task of checking and deleting of disappearing messages
     await messages_queue_24h.init_from_db()
     await task_disappear_messages(scheduler)
+
+    # Make all users offline
+    await db_reset_all_users_online_status()
+    await db_clear_sio_connections()
 
 
 @app.after_serving
 async def finish():
+    # End task of checking and deleting of disappearing messages
     scheduler.shutdown()
+
+    # Make all users offline
+    await db_reset_all_users_online_status()
+    await db_clear_sio_connections()
 
 
 # The SocketIO app

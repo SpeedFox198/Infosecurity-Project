@@ -5,9 +5,7 @@ from models import SioConnection
 
 
 async def main():
-    statement = sa.delete(SioConnection).where(
-        (SioConnection.sid != "") & (SioConnection.user_id != "")
-    )
+    statement = sa.delete(SioConnection)
     async with async_session() as session:
         async with session.begin():
             await session.execute(statement)

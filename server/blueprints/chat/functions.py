@@ -89,7 +89,7 @@ async def get_room(user_id: str):
         # Retrieve additional room details for UI
         for room in rooms:
             if room["type"] == "direct":
-                statement = sa.select(User.username, User.avatar, User.user_id).where(
+                statement = sa.select(User.username, User.avatar, User.user_id, User.online).where(
                     User.user_id == sa.select(Membership.user_id).where(
                         (Membership.room_id == room["room_id"]) &
                         (Membership.user_id != user_id)
@@ -97,6 +97,7 @@ async def get_room(user_id: str):
                 )
                 result = (await session.execute(statement)).one()
                 room["user_id"] = result[2]  # Indicate which other user is in this direct chat
+                room["online"] = result[3]   # Indicate whether other user is online
             elif room["type"] == "group":
                 statement = sa.select(Group.name, Group.icon).where(Group.room_id == room["room_id"])
                 result = (await session.execute(statement)).one()
