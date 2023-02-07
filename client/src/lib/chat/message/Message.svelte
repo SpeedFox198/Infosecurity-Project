@@ -22,7 +22,7 @@ hours = hours ? hours : 12;
 
 const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
 // Find last segment of file path to get file name
-$: msgFileName = msg && msg.path && msg.path.substring(msg.path.lastIndexOf('/') + 1)
+$: msgFileName = msg?.path?.substring(msg.path.lastIndexOf('/') + 1)
 
 
 // Selecting message logic
