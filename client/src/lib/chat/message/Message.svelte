@@ -73,7 +73,7 @@ function selectMsg() {
 
       {#if msg.type === "image"}
         <div class="image-container img-wrapper" style="height: {msg.height}px; width: {msg.width}px;">
-          <img src={msg.path} alt="" on:load={() => URL.revokeObjectURL((this || {}).src)}>
+          <img src={msg.path} alt="" on:load={() => URL.revokeObjectURL(this?.src)}>
         </div>
       {/if}
 

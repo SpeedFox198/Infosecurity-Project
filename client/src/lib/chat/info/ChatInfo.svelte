@@ -2,7 +2,7 @@
 import { createEventDispatcher } from "svelte";
 import { room_id, roomStorage } from "$lib/stores/room";
 
-$: currentChat = ($roomStorage || {})[$room_id] || undefined;
+$: currentChat = $roomStorage?.[$room_id] || undefined;
 
 const dispatch = createEventDispatcher();
 

@@ -19,6 +19,7 @@ export const room_id = (() => {
  *     is_admin: boolean;
  *     icon: string;
  *     user_id?: string;
+ *     online?: boolean;
  *     blocked?: string;
  *     "blocked" if current user is blocked by other user or "blocking" if current user is blocking other user
  *   },
@@ -35,7 +36,23 @@ export const roomStorage = (() => {
     });
   }
 
-  return { subscribe, set, addRoom };
+  /**
+   * Update online status of user
+   * @param {string} user_id user id of user that went offline
+   * @param {boolean} status True if user is online
+   */
+  async function updateOnlineStatus(user_id, status) {
+    update(storage => {
+      Object.keys(storage).forEach(room_id => {
+        if (storage[room_id].user_id === user_id) {
+          storage[room_id].online = status;
+        }
+      });
+      return storage;
+    });
+  }
+
+  return { subscribe, set, addRoom, updateOnlineStatus };
 })();
 
 

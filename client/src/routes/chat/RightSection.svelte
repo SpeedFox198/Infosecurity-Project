@@ -29,7 +29,7 @@ export let displayChatDetails;
 export let openChatDetails;
 
 $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
-$: currentRoom = ($roomStorage || {})[$room_id] || {};
+$: currentRoom = $roomStorage?.[$room_id] || {};
 
 const SEPARATOR = ";";
 const dispatch = createEventDispatcher();
@@ -185,7 +185,7 @@ async function sendMsg(event) {
 
 
   // Emit message to server and add message to client stores
-  let filename = (file || {}).name;
+  let filename = file?.name;
   if (file) msg.path = URL.createObjectURL(file);
   await addMsg(msg, filename);
   if (file) delete msg.path;

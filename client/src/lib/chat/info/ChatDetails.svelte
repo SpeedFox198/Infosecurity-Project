@@ -26,7 +26,7 @@ let disappearing;
 let displayNone = true;
 let _displayDisappearing = false;
 
-$: currentChat = ($roomStorage || {})[$room_id] || {};
+$: currentChat = $roomStorage?.[$room_id] || {};
 $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 150);
 $: hide = animateHideChatDetails && !displayChatDetails;
 $: displayDisappearing = _displayDisappearing && displayChatDetails;
@@ -47,9 +47,8 @@ function toggleDisappearing() {
 }
 
 onMount(() => {
-  socket.on("user_offline", async data => {
-    console.log("offline", data);
-  });
+  socket.on("user_online", async data => roomStorage.updateOnlineStatus(data.user_id, true));
+  socket.on("user_offline", async data => roomStorage.updateOnlineStatus(data.user_id, false));
 });
 </script>
 

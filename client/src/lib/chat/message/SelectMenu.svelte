@@ -7,7 +7,7 @@ const dispatch = createEventDispatcher();
 
 $: num = $selectedMsgs.size;
 $: singular = num === 1;
-$: currentRoom = ($roomStorage || {})[$room_id] || {};
+$: currentRoom = $roomStorage?.[$room_id] || {};
 
 $: invisible = $counterNotSent &&
   (

@@ -16,7 +16,7 @@ export let getRoomMsgs;
 export let ocrLoading;
 export let blocked;
 
-$: roomMsgs = ($allMsgs || {})[$room_id] || [];
+$: roomMsgs = $allMsgs?.[$room_id] || [];
 
 let display;
 let autoScroll = true;
