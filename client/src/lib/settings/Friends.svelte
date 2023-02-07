@@ -22,7 +22,7 @@
   }
 </script>
 
-<SlidingMenu title="Friends" display={displayFriends} on:click={toggleFriends} right={false}>
+<SlidingMenu title="Friends" display={displayFriends} on:click={toggleFriends}>
 	<Option name="All" icon="user-group" on:click={toggleFriendsList} />
 	<Option name="Pending Requests" icon="shield" on:click={toggleFriendRequests}>
     <div class="d-flex align-items-center ms-auto me-4">

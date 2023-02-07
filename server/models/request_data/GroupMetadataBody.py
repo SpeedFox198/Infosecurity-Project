@@ -30,7 +30,8 @@ class GroupMetadataBody(BaseModel):
 
     @validator("disappearing")
     def check_disappearing(cls, value):
-        if value not in ("off", "24h", "7d", "30d"):
+        # TODO(low)(SpeedFox198): remove demo values
+        if value not in ("off", "5s", "15s", "24h", "7d", "30d"):
             raise ValueError("Invalid disappearing messages option.")
 
         return value

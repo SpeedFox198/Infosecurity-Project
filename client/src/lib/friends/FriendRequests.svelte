@@ -39,7 +39,6 @@
 	title="Friend Requests"
 	display={displayFriendRequests}
 	on:click={toggleFriendRequests}
-	right="false"
 >
   <div class="req-partition d-flex flex-column">
     <span class="fw-bold fs-4 mx-3">Sent</span>

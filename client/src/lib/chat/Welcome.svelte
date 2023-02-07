@@ -3,7 +3,7 @@ export let currentUser;
 </script>
 
 
-<div class="welcome-page-section d-flex flex-column flex-grow-1 align-items-center justify-content-center">
+<div class="welcome-page-section d-flex flex-column flex-grow-1 align-items-center justify-content-center user-select-none">
   <img class="logo mb-3" src="/with-text.svg" alt="Bubbles">
 
   <!-- <div class="mx-2">Your privacy is our priority.</div> -->

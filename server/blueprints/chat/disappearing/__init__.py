@@ -1,1 +1,1 @@
-from .disappearing import DisappearingQueue
+from .disappearing import DisappearingQueue, DemoDisappearingQueue

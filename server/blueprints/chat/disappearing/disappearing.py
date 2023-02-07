@@ -62,11 +62,10 @@ class DisappearingQueue(PeekQueue):
         return deleted
 
 
-    # TODO(medium)(SpeedFox198): Add time paramater?
     async def add_disappearing_messages(self, message_id:str):
 
         # Create new record of message to disappear
-        record = Disappearing(message_id, self.days)
+        record = Disappearing(message_id, days=self.days)
 
         async with async_session() as session:
             async with session.begin():
@@ -93,3 +92,28 @@ class DisappearingQueue(PeekQueue):
         if self.has_expired_messages:
             expired = await self.delete_disappearing_messages()
             await callback(expired)
+
+
+class DemoDisappearingQueue(DisappearingQueue):
+    """
+    Demo Disappearing Queue that supports time in seconds
+    Temp class created for the sake of demo purposes
+    """
+
+    def __init__(self, data: list = None, maxsize: int = 0, seconds: int = None) -> None:
+        if seconds is None:
+            seconds = 1
+        self.seconds = seconds
+        super().__init__(data, maxsize)
+
+
+    async def add_disappearing_messages(self, message_id:str):
+
+        # Create new record of message to disappear
+        record = Disappearing(message_id, seconds=self.seconds)
+
+        async with async_session() as session:
+            async with session.begin():
+                session.add(record)
+
+        self.put(record)

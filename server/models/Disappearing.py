@@ -8,7 +8,7 @@ from sqlalchemy import CHAR, TIMESTAMP, Column, ForeignKey
 class Disappearing(Base):
     __tablename__ = "disappearing"
 
-    def __init__(self, message_id:str, days:int) -> None:
+    def __init__(self, message_id:str, **kwargs) -> None:
         """
         Creates a record for disappearing messages
 
@@ -23,7 +23,7 @@ class Disappearing(Base):
             weeks(int): Number of weeks the message remains before it disappears
         """
         self.message_id = message_id
-        self.time = datetime.now() + timedelta(days=days)
+        self.time = datetime.now() + timedelta(**kwargs)
 
     message_id = Column(CHAR(36), ForeignKey(Message.message_id), primary_key=True)
     time = Column(TIMESTAMP())

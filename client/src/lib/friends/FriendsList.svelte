@@ -55,7 +55,7 @@ onMount(async () => {
 </script>
 
 
-<SlidingMenu title="Friends List" display={displayFriendsList} on:click={toggleFriendsList} right={false}>
+<SlidingMenu title="Friends List" display={displayFriendsList} on:click={toggleFriendsList}>
   {#each $friends as friend (friend.user_id)}
     <div class="friend d-flex py-2 user-select-none align-items-center">
       <div class="icon p-2">

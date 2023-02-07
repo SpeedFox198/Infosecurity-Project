@@ -84,7 +84,7 @@
   
 </script>
 
-<SlidingMenu title="Add A Friend" display={displayAddFriend} on:click={toggleAddFriend} right={false}>
+<SlidingMenu title="Add A Friend" display={displayAddFriend} on:click={toggleAddFriend}>
   <div class="m-3">
     <form on:submit={searchUser}>
       <div class="input-group mb-3">

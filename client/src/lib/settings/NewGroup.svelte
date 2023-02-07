@@ -20,7 +20,8 @@ let photoPreview;
 let groupName = "";
 let disappearing;
 let selectedFriends = [];
-let disappearingOptions = ["off", "24h", "7d", "30d"]
+// TODO(low)(SpeedFox198): remove demo values
+let disappearingOptions = ["off", "5s", "15s", "24h", "7d", "30d"]
 
 $: currentFriends = $friends.filter(friend => friend.username
                                                 .toLowerCase()
@@ -82,7 +83,7 @@ const createGroup = async () => {
 </script>
 
 
-<SlidingMenu title="Add Group Members" display={displayNewGroup} on:click={toggleNewGroup} right={false}>
+<SlidingMenu title="Add Group Members" display={displayNewGroup} on:click={toggleNewGroup}>
   <div class="input-group">
     <input
      type="search"
@@ -125,7 +126,7 @@ const createGroup = async () => {
   </div>
 </SlidingMenu>
 
-<SlidingMenu title="Customize group" display={ displayCustomizeGroup } on:click={ toggleCustomizeGroup } right={false}>
+<SlidingMenu title="Customize group" display={ displayCustomizeGroup } on:click={ toggleCustomizeGroup }>
   <div class="m-3">
 
     {#if showPhoto}
@@ -160,6 +161,9 @@ const createGroup = async () => {
          aria-label="Select the duration of disappearing messages"
          >
           <option value="off" selected>Off</option>
+          <!-- TODO(low)(SpeedFox198): remove demo values -->
+          <option value="5s">5 Seconds</option>
+          <option value="15s">15 Seconds</option>
           <option value="24h">1 Day</option>
           <option value="7d">1 Week</option>
           <option value="30d">1 Month</option>

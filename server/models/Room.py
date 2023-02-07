@@ -31,7 +31,8 @@ class Room(Base):  # TODO(high)(SpeedFox198): change disappearing to 3 options (
         self.encrypted = encrypted
 
     room_id = Column(CHAR(36), primary_key=True)
-    disappearing = Column(ENUM("off", "24h", "7d", "30d"))
+    # TODO(low)(SpeedFox198): remove 5 seconds and 15 seconds
+    disappearing = Column(ENUM("off", "24h", "7d", "30d", "5s", "15s"))
     type = Column(ENUM("direct", "group"))
 
     encrypted = Column(BOOLEAN, default=False)

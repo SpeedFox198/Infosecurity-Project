@@ -6,7 +6,8 @@ from db_access.block import (db_check_block, db_create_block_entry,
                              db_delete_block_entry, db_get_blocked)
 from db_access.globals import async_session
 from db_access.message import (db_get_room_id_of_message, db_get_room_messages,
-                               db_remove_messages, set_messages_as_received, set_message_as_malicious)
+                               db_remove_messages, set_message_as_malicious,
+                               set_messages_as_received)
 from db_access.room import db_get_room_if_user_verified, db_update_disappearing
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
@@ -15,7 +16,7 @@ from db_access.sio import (add_sio_connection, get_existing_room,
                            set_online_status)
 from db_access.user import get_user_details
 from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
-                    Message, Room, MessageStatus)
+                    Message, MessageStatus, Room)
 from models.error import VirusTotalError
 from models.request_data import GroupMetadataBody, ScanURLBody
 from models.response_data import URLResultData
@@ -28,7 +29,8 @@ from socketio.exceptions import ConnectionRefusedError
 from utils import remove_tree_directory, to_unix
 
 from .events import *
-from .functions import (delete_expired_messages, get_room, messages_queue_7d,
+from .functions import (delete_expired_messages, get_room, messages_queue_5s,
+                        messages_queue_7d, messages_queue_15s,
                         messages_queue_24h, messages_queue_30d, save_file,
                         save_group_icon)
 from .sio_auth_manager import SioAuthManager
@@ -175,7 +177,12 @@ async def send_message(sid: str, data: dict):
             )
 
     # If room has disappearing messages enabled
-    if room.disappearing == "24h":
+    # TODO(low)(SpeedFox198): remove demo values
+    if room.disappearing == "5s":
+        await messages_queue_5s.add_disappearing_messages(message.message_id)
+    elif room.disappearing == "15s":
+        await messages_queue_15s.add_disappearing_messages(message.message_id)
+    elif room.disappearing == "24h":
         await messages_queue_24h.add_disappearing_messages(message.message_id)
     elif room.disappearing == "7d":
         await messages_queue_7d.add_disappearing_messages(message.message_id)
@@ -754,6 +761,14 @@ async def _job_callback(messages):
         await delete_client_messages(messages, room_id)
 
 
+async def job_disappear_messages_5s():
+    await messages_queue_5s.check_disappearing_messages(_job_callback)
+
+
+async def job_disappear_messages_15s():
+    await messages_queue_15s.check_disappearing_messages(_job_callback)
+
+
 async def job_disappear_messages_24h():
     await messages_queue_24h.check_disappearing_messages(_job_callback)
 
@@ -771,7 +786,9 @@ async def job_disappear_messages_30d():
 # 3 different timings == 3 different queues
 async def task_disappear_messages(scheduler):
     """ Task to run scheduled checking for disappearing of messages """
-    scheduler.add_job(job_disappear_messages_24h, "interval", seconds=3)
-    scheduler.add_job(job_disappear_messages_7d, "interval", hours=3)
-    scheduler.add_job(job_disappear_messages_30d, "interval", hours=5)
+    scheduler.add_job(job_disappear_messages_5s, "interval", seconds=3)
+    scheduler.add_job(job_disappear_messages_15s, "interval", seconds=5)
+    scheduler.add_job(job_disappear_messages_24h, "interval", hours=2)
+    scheduler.add_job(job_disappear_messages_7d, "interval", hours=4)
+    scheduler.add_job(job_disappear_messages_30d, "interval", hours=6)
     scheduler.start()

@@ -4,17 +4,20 @@ from io import BytesIO
 
 import sqlalchemy as sa
 from db_access.globals import async_session
-from models import Group, Media, Membership, Message, Room, User
-from PIL import Image, UnidentifiedImageError
-
+from models import Group, Media, Membership, Message, MessageStatus, Room, User
 from models.error import VirusTotalError
 from models.response_data import URLResultData
-from security_functions.virustotal import upload_url, get_url_analysis, get_url_report
+from PIL import Image, UnidentifiedImageError
+from security_functions.virustotal import (get_url_analysis, get_url_report,
+                                           upload_url)
 from utils import secure_save_file
 
-from .disappearing import DisappearingQueue
+from .disappearing import DemoDisappearingQueue, DisappearingQueue
 
 # Create and get a queue disappearing messages
+# TODO(low)(SpeedFox198): remove demo values
+messages_queue_5s = DemoDisappearingQueue(seconds=5)
+messages_queue_15s = DemoDisappearingQueue(seconds=15)
 messages_queue_24h = DisappearingQueue(days=1)
 messages_queue_7d = DisappearingQueue(days=7)
 messages_queue_30d = DisappearingQueue(days=30)
@@ -117,6 +120,10 @@ async def delete_expired_messages(messages):
 
         statement = sa.delete(Media).where(Media.message_id.in_(filter_ids))
         await session.execute(statement)
+
+        statement = sa.delete(MessageStatus).where(MessageStatus.message_id.in_(messages))
+        await session.execute(statement)
+
         statement = sa.delete(Message).where(Message.message_id.in_(filter_ids))
         await session.execute(statement)
 

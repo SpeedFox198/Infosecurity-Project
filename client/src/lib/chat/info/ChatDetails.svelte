@@ -17,6 +17,8 @@ const flash = getFlash(page);
 
 const disappearingText = {
   "off": "Off",
+  "5s": "5 seconds",
+  "15s": "15 seconds",
   "24h": "24 hours",
   "7d": "7 days",
   "30d": "30 days"
@@ -68,7 +70,7 @@ onMount(() => {
         </button>
       </div>
       <div class="d-flex">
-        <div class="ms-4 fs-5 fw-bold user-select-none">{"Contact"} Info</div>
+        <div class="ms-4 fs-5 fw-bold user-select-none">{currentChat.type === "direct" ? "User" : "Group"} Info</div>
       </div>
     </div>
 
@@ -151,7 +153,6 @@ onMount(() => {
   title="Disappearing Messages"
   display={displayDisappearing}
   on:click={toggleDisappearing}
-  right="false"
 >
   <div class="d-flex flex-column p-4">
     <div class="mb-3" style="color: var(--primary);">
@@ -161,6 +162,8 @@ onMount(() => {
     <form on:submit|preventDefault={setDisappearing}>
       {#each [
         { value: "off", text: "Off" },
+        { value: "5s", text: "5 seconds" },
+        { value: "15s", text: "15 seconds" },
         { value: "24h", text: "24 hours" },
         { value: "7d", text: "7 days" },
         { value: "30d", text: "30 days" }

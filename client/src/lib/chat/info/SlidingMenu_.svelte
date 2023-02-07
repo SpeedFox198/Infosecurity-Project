@@ -1,15 +1,13 @@
 <script>
 export let display;
-export let right;
 export let title;
 </script>
 
 <!--
   Template for sliding menu
-  Set right to true for animation sliding in from right
   Place contents of menu in slot
 -->
-<div class="settings-section" class:display class:right>
+<div class="settings-section" class:display>
   <div class="section-title d-flex flex-row align-items-center p-2">
     <div class="d-flex">
       <button class="back d-flex align-items-center justify-content-center rounded-circle" type="button" disabled={!display} on:click>
@@ -34,8 +32,8 @@ export let title;
   height: 100%;
   width: var(--side-bar-length);
   position: absolute;
-  left: -100%;
-  right: initial;
+  left: initial;
+  right: -100%;
   z-index: 1;
   background-color: var(--white);
   overflow-x: hidden;
@@ -44,16 +42,6 @@ export let title;
 
 .display {
   visibility: visible;
-  left: 0;
-}
-
-.right {
-  left: initial;
-  right: -100%;
-}
-
-.right.display {
-  left: initial;
   right: 0;
 }
 
