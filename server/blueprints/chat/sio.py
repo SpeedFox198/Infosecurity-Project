@@ -6,7 +6,7 @@ from db_access.block import (db_check_block, db_create_block_entry,
                              db_delete_block_entry, db_get_blocked)
 from db_access.globals import async_session
 from db_access.message import (db_get_room_id_of_message, db_get_room_messages,
-                               db_remove_messages)
+                               db_remove_messages, set_messages_as_received, set_message_as_malicious)
 from db_access.room import db_get_room_if_user_verified, db_update_disappearing
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
@@ -15,7 +15,7 @@ from db_access.sio import (add_sio_connection, get_existing_room,
                            set_online_status)
 from db_access.user import get_user_details
 from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
-                    Message, Room)
+                    Message, Room, MessageStatus)
 from models.error import VirusTotalError
 from models.request_data import GroupMetadataBody, ScanURLBody
 from models.response_data import URLResultData
@@ -160,6 +160,8 @@ async def send_message(sid: str, data: dict):
             encrypted=room.encrypted
         )
 
+        message.status = MessageStatus(message.message_id, message.room_id)
+
         # Add message to database
         async with session.begin():
             session.add(message)
@@ -188,7 +190,9 @@ async def send_message(sid: str, data: dict):
         "time": to_unix(message.time),
         "content": message.content,
         "encrypted": message.encrypted,
-        "type": message.type
+        "type": message.type,
+        "received": message.status.received,
+        "malicious": message.status.malicious
     }, room=message_data["room_id"], skip_sid=sid)
 
     # Return timestamp and message_id to client
@@ -207,7 +211,7 @@ async def send_message(sid: str, data: dict):
 
     # Check virus total if file attached and message not e2ee
     if message.type != "text" and file and not message.encrypted:
-        file_id  = await upload_file(file)
+        file_id = await upload_file(file)
         file_hash = await get_file_analysis(file_id)
         await check_malicious_file(file_hash, message.message_id)
 
@@ -229,6 +233,16 @@ async def get_room_messages(sid: str, data: dict):
         "room_id": room_id,
         "room_messages": room_messages
     }, to=sid)
+
+
+@sio.event
+async def messages_received(sid: str, data: dict):
+    received: list[str] = data.get("messages")
+
+    if not received:
+        return
+
+    await set_messages_as_received(received)
 
 
 # TODO(medium)(SpeedFox198): delete media if exists
@@ -501,7 +515,6 @@ async def remove_friend(sid: str, data: dict):
 
 @sio.event
 async def message_friend(sid: str, data: dict):
-
     friend_user_id: str | None = data.get("user")
     if friend_user_id is None:
         await sio.emit(MESSAGE_FRIEND_ERROR, {
@@ -547,7 +560,7 @@ async def message_friend(sid: str, data: dict):
         await session.commit()
 
     await sio.emit(MESSAGE_FRIEND_SUCCESS, to=sid)
-    
+
     for user_id in relationship:
         user_sids = await get_sids_from_sio_connection(user_id)
         if not user_sids:
@@ -563,7 +576,6 @@ async def message_friend(sid: str, data: dict):
 
 @sio.event
 async def set_disappearing(sid: str, data: dict):
-
     disappearing = data["disappearing"]
     room_id = data["room_id"]
 
@@ -576,8 +588,8 @@ async def set_disappearing(sid: str, data: dict):
     exists = False
     for room in rooms:
         if (
-            room_id == room["room_id"] and
-            (room["type"] == "direct" or room["is_admin"] == True)
+                room_id == room["room_id"] and
+                (room["type"] == "direct" or room["is_admin"] == True)
         ):
             exists = True
             room["disappearing"] = disappearing
@@ -594,7 +606,6 @@ async def set_disappearing(sid: str, data: dict):
 
 @sio.event
 async def scan_hash(sid: str, data: dict):
-
     file_hash = data.get("hash", "")
     message_id = data.get("message_id", "")
 
@@ -604,7 +615,6 @@ async def scan_hash(sid: str, data: dict):
 
 @sio.event
 async def block_user(sid: str, data: dict):
-
     block_id = data["block_id"]
     room_id = data["room_id"]
 
@@ -634,7 +644,6 @@ async def block_user(sid: str, data: dict):
 
 @sio.event
 async def unblock_user(sid: str, data: dict):
-
     block_id = data["block_id"]
     room_id = data["room_id"]
 
@@ -674,20 +683,27 @@ async def check_safe_url(sid: str, data: dict):
         error_message = error_list[0]
         return
 
-    try:
-        data_id = await upload_url(url_request.url)
-        url_id = await get_url_analysis(data_id)
-        results = URLResultData(**await get_url_report(url_id))
-    except VirusTotalError:
-        return
+    is_malicious = False
+
+    for url in url_request.urls:
+        try:
+            data_id = await upload_url(url)
+            url_id = await get_url_analysis(data_id)
+            results = URLResultData(**await get_url_report(url_id))
+        except VirusTotalError:
+            return
+
+        if results.malicious > 0 or results.suspicious > 0:
+            is_malicious = True
+            await set_message_as_malicious(url_request.message_id)
+            break
 
     room_origin = await db_get_room_id_of_message(url_request.message_id)
 
-    if results.malicious > 0 or results.suspicious > 0:
-        await sio.emit("malicious_check", {
-            "message_id": url_request.message_id,
-            "malicious": True
-        }, room=room_origin)
+    await sio.emit("malicious_check", {
+        "message_id": url_request.message_id,
+        "malicious": is_malicious
+    }, room=room_origin)
 
 
 async def save_user(sid: str, user: AuthedUser) -> None:

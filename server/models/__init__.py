@@ -16,3 +16,4 @@ from .OTP import OTP
 from .BackupCodes import BackupCodes
 from .SioConnection import SioConnection
 from .Block import Block
+from .MessageStatus import MessageStatus

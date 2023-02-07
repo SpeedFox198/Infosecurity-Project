@@ -1,6 +1,8 @@
 from datetime import datetime
 from uuid import uuid4
 
+from sqlalchemy.orm import relationship
+
 from db_access.globals import Base
 from models import Room, User
 from sqlalchemy import CHAR, TIMESTAMP, VARCHAR, Column, ForeignKey
@@ -27,5 +29,6 @@ class Message(Base):
     content = Column(VARCHAR(2000))
     reply_to = Column(CHAR(36))
     type = Column(ENUM("image", "document", "video", "text"))
-
     encrypted = Column(BOOLEAN, default=False)
+
+    status = relationship("MessageStatus", back_populates="message", uselist=False, lazy="joined")

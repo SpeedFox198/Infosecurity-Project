@@ -188,11 +188,18 @@ async function submitTwoFA () {
   </div>
   <hr>
   {#if (displayFilesRequested)}
-  <form action="" on:submit={sendDataRequest}>
-    <button class="btn req-data"><i class="fa-solid fa-file"></i>Request personal data</button>
-  </form>
+    <form action="" on:submit={sendDataRequest}>
+      <div class="d-grid mx-3">
+        <button class="d-flex justify-content-center align-items-center req-data py-2">
+          <i class="fa-solid fa-file"></i>
+          <span>
+            Request personal data
+          </span>
+        </button>
+      </div>
+    </form>
   {:else}
-  <div><p class="requested-data">Report sent. It will be sent to your email shortly.</p></div>
+    <div><p class="requested-data">Report sent. It will be sent to your email shortly.</p></div>
   {/if}
   <hr>
   <div class="p-data">
@@ -230,18 +237,19 @@ async function submitTwoFA () {
   padding-left: 2rem;
   padding-right: 2rem;
 }
+
 .req-data {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  font-size: 1.2rem;
-  width: 100%;
+  border: 1 solid black;
+  border-radius: 0.5rem;
+  background-color: inherit;
 }
+
 .fa-solid {
   font-size: 2.5rem;
   margin-right: 10px;
   padding-left:1rem;
 } 
+
 .file-icon {
   display: flex;
   align-items: center;
@@ -251,11 +259,13 @@ async function submitTwoFA () {
   padding-left: 2rem;
   padding-right: 2rem;
 }
+
 .requested-data{
   opacity: 0.7;
   font-size: 1rem;
   text-align: center;
 }
+
 .QR2fa {
   width: 150px;
   height: 150px;

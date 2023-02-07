@@ -32,6 +32,7 @@ $: hideChatDetails = animateHideChatDetails && !displayChatDetails;
 $: currentRoom = $roomStorage?.[$room_id] || {};
 
 const SEPARATOR = ";";
+const URL_PATTERN = /(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z.-]{2,256})(\.[a-z]{2,6})(\.[a-z]{2})?/g;
 const dispatch = createEventDispatcher();
 const flash = getFlash(page)
 
@@ -73,8 +74,15 @@ onMount(async () => {
 
   socket.on("receive_message", async data => {
     count.nextExtra(data.room_id);  // Increase count of received messages
-    addMsg(data, undefined, true);  // Add message to storage
-    // newly_received is hacky, cuz rn no read receipt
+    const receivedInSameRoom = currentRoom === $roomStorage[data.room_id]
+
+    if (receivedInSameRoom) {
+      addMsg(data, undefined, true);  // Add message to storage
+      socket.emit("messages_received", { messages: [data.message_id] })
+    } else {
+      addMsg(data, undefined, false)
+    }
+    
   });
 
 
@@ -89,7 +97,9 @@ onMount(async () => {
   });
 
 
-  socket.on("receive_room_messages", addMsgBatch);
+  socket.on("receive_room_messages", async data => {
+    await addMsgBatch(data)
+  });
 
 
   socket.on("message_deleted", async data => {
@@ -284,12 +294,9 @@ async function addMsg(data, filename, newly_received) {
   }
   
   if (newly_received) {
-    const urlRegex = /(http:\/\/|https:\/\/)?(www\.)?([0-9A-Za-z]{2,256})(\.[a-z]{2,6})/g
-    const urls = msg.content.match(urlRegex)
+    const urls = msg.content.match(URL_PATTERN)
     if (urls) {
-      urls.forEach((url) => {
-        socket.emit("check_safe_url", { url, message_id }) 
-      })
+      socket.emit("check_safe_url", { urls, message_id })
     }
   }
 
@@ -307,18 +314,23 @@ async function addMsg(data, filename, newly_received) {
 async function addMsgBatch(data) {
   let messageInfoList = [];
   let room_messages = {};
-  let msg, message_id, user_id_, prevMsg, prev_id;
+  let unreceivedMessages = [];
+  let msg, message_id, user_id_, prevMsg, prev_id, file;
 
   // Go through messages and format them for display in JavaScript
   for (let i=0; i < data.room_messages.length; i++) {
     // Get message and message_id
-    ({ msg, message_id, user_id_ } = await formatMsg(data.room_messages[i], prev_id, data.room_id));
+    ({ msg, message_id, user_id_, file } = await formatMsg(data.room_messages[i], prev_id, data.room_id));
     messageInfoList.push({ user_id: user_id_, message_id });   // Add message_id to list
     delete msg.message_id;                            // Remove message_id property from message
     room_messages[message_id] = msg;                  // Add message to object
     if (prev_id === user_id_) delete prevMsg.corner;  // Delete corner if not consecutive message 
     prevMsg = msg;
     prev_id = user_id_;
+    
+    if (msg.received !== true && user_id_ !== currentUser.user_id) {
+      unreceivedMessages.push({ message_id, content: msg.content })
+    }
   }
 
   // Update current most top message accordingly
@@ -336,12 +348,33 @@ async function addMsgBatch(data) {
   lockScroll.unlock();
   await allMsgs.addMsg(messageInfoList, data.room_id, true);
   lockScroll.lock();
+  
+  // Send unreceived messages for server to review
+  const unreceivedMessageIds = unreceivedMessages.map(message => message.message_id)
+
+  if (unreceivedMessageIds.length) {
+    socket.emit("messages_received", { messages: unreceivedMessageIds })
+  }
+  
+  if (currentUser.malware_scan && unreceivedMessageIds) {
+    for (const message of unreceivedMessages) {
+      const urls = message.content.match(URL_PATTERN) 
+      if (urls) {
+        socket.emit("check_safe_url", { urls, message_id: message.message_id }) 
+      }
+    }
+    
+    if (file) {
+      const hash = await digestMessage(file)
+      socket.emit("scan_hash", { message_id: message.message_id, hash })
+    }
+  }
 }
 
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path } = data;
+  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path, received, malicious } = data;
   const room_id = room_id__ || room_id_;
   const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
@@ -352,7 +385,7 @@ async function formatMsg(data, prev_id, room_id_) {
   if (prev_id && prev_id === user_id_) {
 
     // Continuous messages have no avatar
-    msg = { sent, time, content, reply_to, type, corner };
+    msg = { sent, time, content, reply_to, type, corner, received, malicious };
 
   } else {
 
@@ -362,7 +395,7 @@ async function formatMsg(data, prev_id, room_id_) {
     const avatar = user.avatar;
     const username = user.username;
  
-    msg = { sent, username, avatar, time, content, reply_to, type, corner };
+    msg = { sent, username, avatar, time, content, reply_to, type, corner, received, malicious };
 
   }
 
