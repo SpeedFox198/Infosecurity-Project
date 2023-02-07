@@ -76,6 +76,9 @@ async def db_remove_messages(messages: list[str], room_id: str, user_id: str) ->
         statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(messages))
         await session.execute(statement)
 
+        statement = sa.delete(MessageStatus).where(MessageStatus.message_id.in_(messages))
+        await session.execute(statement)
+
         statement = sa.delete(Message).where(Message.message_id.in_(messages))
         await session.execute(statement)
 

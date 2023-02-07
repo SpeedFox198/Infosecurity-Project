@@ -1,8 +1,8 @@
 import sqlalchemy as sa
 import os
 from db_access.globals import async_session
-from models import Membership, Media
-from quart import Blueprint, abort, current_app, send_from_directory
+from models import Membership, Media, Message
+from quart import Blueprint, abort, current_app, send_from_directory, send_file
 from quart_auth import current_user, login_required
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm.exc import NoResultFound
@@ -38,7 +38,15 @@ async def attachments(room_id: str, message_id: str, filename: str):
         if filename != result[0]:
             abort(404)  # If not a filename not in results, do not let user know file exist
 
+        file_type_statement = sa.select(Message.type).where(Message.message_id == message_id)
+        file_type = (await session.execute(file_type_statement)).scalar()
+
     directory = os.path.join(current_app.config["ATTACHMENTS_PATH"], room_id, message_id)
+
+    if file_type in ("document", "text"):
+        # Download file when they visit the url
+        directory = os.path.join(directory, secure_filename(filename))
+        return await send_file(directory, as_attachment=True)
 
     # Secure filename just in case
     return await send_from_directory(directory, secure_filename(filename))

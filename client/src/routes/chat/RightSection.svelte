@@ -351,9 +351,8 @@ async function addMsgBatch(data) {
   
   // Send unreceived messages for server to review
   const unreceivedMessageIds = unreceivedMessages.map(message => message.message_id)
-  console.log("Unreceived message Ids", unreceivedMessageIds)
-  
-  if (unreceivedMessageIds) {
+
+  if (unreceivedMessageIds.length) {
     socket.emit("messages_received", { messages: unreceivedMessageIds })
   }
   

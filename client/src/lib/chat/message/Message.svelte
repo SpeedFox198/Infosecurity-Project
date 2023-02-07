@@ -21,6 +21,8 @@ hours = hours % 12;
 hours = hours ? hours : 12;
 
 const time = `${hours}:${padZero(t.getMinutes())} ${ampm}`;
+// Find last segment of file path to get file name
+$: msgFileName = msg && msg.path && msg.path.substring(msg.path.lastIndexOf('/') + 1)
 
 
 // Selecting message logic
@@ -33,6 +35,7 @@ function selectMsg() {
   if ($selectMode && !clicked) select();
   clicked = false;
 }
+
 </script>
 
 
@@ -87,10 +90,14 @@ function selectMsg() {
       {/if}
         
       {#if msg.type === "document"}
-        <div class="file-container file-wrapper">
-          <i class="fa-solid fa-file"></i>
-          <div class="file-info">
-          </div>
+        <div class="d-flex file-info border border-1 { msg.sent ? "border-light info-sent-bg" : "border-dark info-received-bg" } rounded p-2 align-items-center">
+          <i class="fa-solid fa-file fs-3"></i>
+          <span class="px-2">
+            {msgFileName}
+          </span>
+            <a href={msg.path} class="{ msg.sent ? "text-white" : "text-black" }">
+              <i class="fa-solid fa-download fs-3"></i>
+            </a>
         </div>
       {/if}
 
@@ -299,6 +306,18 @@ span {
 img {
   border-radius: 1rem;
   background-color: var(--white);
+}
+
+.file-info {
+  margin-right: 2rem;
+}
+
+.info-sent-bg {
+  background-color: #186170;
+}
+
+.info-received-bg {
+  background-color: var(--grey); 
 }
 
 .malware-message {
