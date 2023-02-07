@@ -6,9 +6,11 @@ import { selectedMsgs } from "$lib/stores/select";
 import { page } from "$app/stores"
 import ChatSettings from "./ChatSettings.svelte";
 import SlidingMenu_ from "./SlidingMenu_.svelte";
+	import { space } from "svelte/internal";
 
 
 export let socket;
+export let encryption;
 export let displayChatDetails;
 export let closeChatDetails;
 export let animateHideChatDetails;
@@ -27,16 +29,34 @@ const disappearingText = {
 let disappearing;
 let displayNone = true;
 let _displayDisappearing = false;
+let _displayVerifyCode = false;
+let securityCode = [];
 
 $: currentChat = $roomStorage?.[$room_id] || {};
 $: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 150);
 $: hide = animateHideChatDetails && !displayChatDetails;
 $: displayDisappearing = _displayDisappearing && displayChatDetails;
+$: displayVerifyCode = _displayVerifyCode && displayChatDetails && getSecurityCode();
 
 
 const setDisappearing = () => socket.emit("set_disappearing", { disappearing, room_id: $room_id });
 const blockUser = () => socket.emit("block_user", { block_id: currentChat.user_id, room_id: $room_id });
 const unblockUser = () => socket.emit("unblock_user", { block_id: currentChat.user_id, room_id: $room_id });
+
+async function getSecurityCode() {
+  const rawCode = await encryption.generateSecurityCode();
+  let temp, line;
+  securityCode = [];
+  for (let i=0; i<4; i++) {
+    temp = rawCode.substring(i*16, (i*16)+16);
+    line = [];
+    for (let i=0; i<4; i++) {
+      line.push(temp.substring(i*4, (i*4)+4))
+    }
+    securityCode.push(line);
+  }
+  return true;
+}
 
 function toggleDisappearing() {
   if (currentChat.blocked) {
@@ -47,6 +67,8 @@ function toggleDisappearing() {
   }
   _displayDisappearing = !_displayDisappearing;
 }
+
+const toggleVerifyCode = () => _displayVerifyCode = !_displayVerifyCode;
 
 onMount(() => {
   socket.on("user_online", async data => roomStorage.updateOnlineStatus(data.user_id, true));
@@ -99,12 +121,12 @@ onMount(() => {
           name="Encryption"
           green={currentChat.encrypted}
           orange={!currentChat.encrypted}
-          on:click
+          on:click={toggleVerifyCode}
         >
           {#if currentChat.type === "group"}
             End-to-end encryption is not available for group chats yet. Click to learn more.
           {:else if currentChat.encrypted}
-            Messages in this chat are end-to-end encrypted. Click to learn more.
+            Messages in this chat are end-to-end encrypted. Click to learn verify.
           {:else}
             End-to-end encryption is not enabled for this chat. Click to learn more.
           {/if}
@@ -155,7 +177,7 @@ onMount(() => {
   on:click={toggleDisappearing}
 >
   <div class="d-flex flex-column p-4">
-    <div class="mb-3" style="color: var(--primary);">
+    <div class="mb-3 green">
       Enabling this feature makes messages in this chat disappear after the set amount of time.
     </div>
     <div class="mb-3">Anyone in the chat can change this setting.</div>
@@ -183,6 +205,32 @@ onMount(() => {
         disabled={disappearing === undefined || disappearing === currentChat.disappearing}
       >Set disappearing time</button>
     </form>
+  </div>
+</SlidingMenu_>
+
+
+<SlidingMenu_
+  title="Verify Security Code"
+  display={displayVerifyCode}
+  on:click={toggleVerifyCode}
+>
+  <div class="d-flex flex-column p-4">
+    <div class="mb-3">
+      <div class="px-3">
+        {#each securityCode as a}
+          <div class="space-a">
+            {#each a as b}
+              <span class="space-b">
+                {#each b as c}
+                  <span class="space-c">{c}</span>
+                {/each}
+              </span>
+            {/each}
+          </div>
+        {/each}
+      </div>
+      Lorem ipsum.
+    </div>
   </div>
 </SlidingMenu_>
 
@@ -242,6 +290,22 @@ onMount(() => {
 .btn {
   background-color: var(--primary);
   color: var(--white);
+}
+
+.space-a {
+  margin: 0.1em auto;
+}
+
+.space-b {
+  padding: 0 0.5em;
+}
+
+.space-c {
+  padding: 0 0.1em;
+}
+
+.green {
+  color: var(--primary);
 }
 
 

@@ -18,10 +18,9 @@ import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
 import BlockingMessage from "$lib/chat/message/BlockingMessage.svelte";
-import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 import OpenCV, { processImage } from "$lib/opencv/OpenCV.svelte"
 
-// SocketIO instance
+export let encryption;
 export let socket;
 export let getRoomMsgs;
 export let animateHideChatDetails;
@@ -538,11 +537,6 @@ async function removeMsg(message_id, room_id) {
 
   <!-- Chat Info Section -->
   <ChatInfo on:click={openChatDetails}/>
-
-  <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
-  {#if currentUser.e2ee}
-    <E2EE/>
-  {/if}
 
   {#if $room_id}
     <!-- Messages Display Section -->

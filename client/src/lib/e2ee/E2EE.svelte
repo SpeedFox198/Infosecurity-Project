@@ -140,6 +140,13 @@ encryption.decryptImage = async (image, iv) => {
 }
 
 
+encryption.generateSecurityCode = async () => {
+  const key = await getRoomKey();
+  if (key === undefined) return;
+  return await e2ee.generateSecurityCode(await e2ee.exportRoomKey(key));
+}
+
+
 async function getRoomKey() {
   let key = $roomKeys[$room_id];
   if (key === undefined) {

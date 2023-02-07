@@ -255,6 +255,25 @@ async function decryptImage(encryptedImage, key, iv) {
 }
 
 
+/**
+ * Generates a security code for verifying secret code
+ * @param {string} key Base64 encoded key
+ * @returns {string} security code
+ */
+async function generateSecurityCode(key) {
+  const data = decode(key);
+  const hashBuffer = await SubtleCrypto.digest("SHA-512", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => {
+    const hex = b.toString(16).padStart(2, "0");
+    const hex0 = isNaN(hex[0]) ? parseInt(hex[0], 16).toString(10)[1] : hex[0];
+    const hex1 = isNaN(hex[1]) ? parseInt(hex[1], 16).toString(10)[1] : hex[1];
+    return hex0 + hex1;
+  }).join("");
+  return hashHex;
+}
+
+
 // Export functions for svelte components to use
 export const e2ee = {
   generateKeyPair,
@@ -269,5 +288,6 @@ export const e2ee = {
   decryptMessage,
   encryptFile,
   decryptFile,
-  decryptImage
+  decryptImage,
+  generateSecurityCode
 };

@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 import Sidebar from "./Sidebar.svelte";
 import RightSection from "./RightSection.svelte";
 import ChatDetails from "$lib/chat/info/ChatDetails.svelte";
+import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 import { page } from "$app/stores";
 import { user_id } from "$lib/stores/user";
 import { deviceStore } from "$lib/stores/device";
@@ -76,12 +77,20 @@ const openChatDetails = () => {
 <main class="d-flex flex-nowrap h-100 overflow-hidden" class:d-none={!appLoaded}>
   <Sidebar {socket} {getRoomMsgs}/>
   <RightSection
-    {socket} {getRoomMsgs}
+    {socket} {getRoomMsgs} {encryption}
     {displayChatDetails} {openChatDetails} {animateHideChatDetails}
     on:load={() => appLoaded = true}
   />
-  <ChatDetails {socket} {displayChatDetails} {closeChatDetails} {animateHideChatDetails}/>
+  <ChatDetails
+    {socket} {displayChatDetails} {encryption}
+    {closeChatDetails} {animateHideChatDetails}
+  />
 </main>
+
+<!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
+{#if $page.data.user.e2ee}
+  <E2EE/>
+{/if}
 
 
 <style>
