@@ -107,7 +107,7 @@ async def OTP(data: OTPBody):
             session.add(user)
 
     await delete_otp(email)
-    await log_info(f"User {user.username} has been created using {user.email}")
+    await log_info(f"User {user.username} has been created")
 
     return {"message": "User successfully created"}, 200
 
@@ -130,7 +130,7 @@ async def login(data: LoginBody):
 
     if not existing_user:
         await log_info(
-            f"Login using Username/email {data.username} has failed to login in using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+            f"Login with {data.username} has failed to login in using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
         )
         return invalid_cred_response
 
@@ -192,6 +192,7 @@ async def two_fa(data: TwoFABody):
         return {"message": "login success"}, 200
     else:
         return {"message": "Invalid 2FA code"}, 400
+
 
 @auth_bp.post("/backupcode")
 @validate_request(BackupCodeBody)
