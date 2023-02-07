@@ -74,13 +74,13 @@ onMount(async () => {
 
   socket.on("receive_message", async data => {
     count.nextExtra(data.room_id);  // Increase count of received messages
-    addMsg(data, undefined, true);  // Add message to storage
-    // newly_received is hacky, cuz rn no read receipt
-    const sentByOtherUsersInSameRoom = data.user_id !== currentUser.user_id &&
-                                        currentRoom === $roomStorage[data.room_id]
+    const receivedInSameRoom = currentRoom === $roomStorage[data.room_id]
 
-    if (sentByOtherUsersInSameRoom) {
+    if (receivedInSameRoom) {
+      addMsg(data, undefined, true);  // Add message to storage
       socket.emit("messages_received", { messages: [data.message_id] })
+    } else {
+      addMsg(data, undefined, false)
     }
     
   });
