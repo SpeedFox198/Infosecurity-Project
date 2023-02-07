@@ -34,7 +34,7 @@
     left: 50%;
     transform: translateX(-50%);
     top: 2rem;
-    z-index: 5;
+    z-index: 11;
   }
   
   .header {
