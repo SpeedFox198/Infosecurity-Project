@@ -1,5 +1,9 @@
 <script>
   import { ocrStatus } from "$lib/stores/ocr.js"
+  
+  export let runId
+  
+  $: progress = $ocrStatus.get(runId)
 </script>
 
 <div class="message d-flex sent corner">
@@ -9,8 +13,8 @@
     <div class="bubble">
       Sending... This may take a while we are making sure your message is safe to send.
       <div class="progress">
-        <div class="progress-bar bar-bg" role="progressbar" style="width: {$ocrStatus}%" aria-valuenow={ $ocrStatus } aria-valuemin="0" aria-valuemax="100">
-          {$ocrStatus}%
+        <div class="progress-bar bar-bg" role="progressbar" style="width: { progress }%" aria-valuenow={ progress } aria-valuemin="0" aria-valuemax="100">
+          { progress }%
         </div>
       </div>
     </div>

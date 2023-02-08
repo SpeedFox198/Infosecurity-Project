@@ -22,12 +22,16 @@ export const cleanSensitiveMessage = async (message) => {
 }
 
 /**
- * 
+ * @param {string} runId
  * @param {File | Blob | HTMLImageElement | HTMLCanvasElement} image 
  * @returns {Promise<boolean>} result whether is it sensitive
  */
-export const detectSensitiveImage = async (image) => {
+export const detectSensitiveImage = async (runId, image) => {
   const patterns = [CREDIT_CARD_NUMBER_PATTERN, NRIC_PATTERN]
+  ocrStatus.update(map => {
+    map.set(runId, 0)
+    return map
+  })
 
   const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
   const lowerCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVXYZ".toLowerCase()
@@ -39,7 +43,10 @@ export const detectSensitiveImage = async (image) => {
     {
       logger: m => {
         if (m.status === "recognizing text") {
-          ocrStatus.set((m.progress * 100).toFixed())
+          ocrStatus.update(map => {
+            map.set(runId, (m.progress * 100).toFixed())
+            return map
+          })
         }
       }
     }
@@ -57,6 +64,11 @@ export const detectSensitiveImage = async (image) => {
 
   const isSensitive = patterns.some((pattern) => {
     return data.match(pattern)
+  })
+  
+  ocrStatus.update(map => {
+    map.delete(runId)
+    return map
   })
   
   return isSensitive

@@ -160,17 +160,15 @@ async function sendMsg(event) {
 
     if (type === "image") {
       // TODO show message loading animation or something while sending
-      ocrLoading = true
       const imageUrl = URL.createObjectURL(file)
+      const ocrRunId = crypto.randomUUID()
       openCvImage.src = imageUrl
       
       await sleep(200) // Hacky way to let the image src set before processImage bc race condition
       
       await processImage(openCvImage, openCvCanvas)
-      isSensitiveImage = await detectSensitiveImage(openCvCanvas);
+      isSensitiveImage = await detectSensitiveImage(ocrRunId, openCvCanvas);
       URL.revokeObjectURL(imageUrl)
-      ocrStatus.set(0)
-      ocrLoading = false
     }
   }
   
@@ -548,7 +546,7 @@ async function removeMsg(message_id, room_id) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay {getRoomMsgs} {ocrLoading} blocked={currentRoom.blocked}/>
+    <MessageDisplay {getRoomMsgs} blocked={currentRoom.blocked}/>
 
     {#if currentRoom.blocked === "blocking"}
       <BlockingMessage name={currentRoom.name}/>

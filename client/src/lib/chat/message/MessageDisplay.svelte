@@ -7,13 +7,13 @@ import { user_id } from "$lib/stores/user"
 import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs } from "$lib/stores/select";
+import { ocrStatus } from "$lib/stores/ocr"
 
 import Message from "$lib/chat/message/Message.svelte";
 import LoadingMessage from "$lib/chat/LoadingMessage.svelte";
 
 
 export let getRoomMsgs;
-export let ocrLoading;
 export let blocked;
 
 $: roomMsgs = $allMsgs?.[$room_id] || [];
@@ -77,8 +77,10 @@ function selectMsg(message_id, user_id_) {
       select={() => selectMsg(messageInfo.message_id, messageInfo.user_id)}/>
   {/each}
   
-  {#if ocrLoading}
-    <LoadingMessage />
+  {#if $ocrStatus.size}
+    {#each [...$ocrStatus] as [runId, _] (runId)}
+      <LoadingMessage {runId} />
+    {/each}
   {/if}
 
   <!-- Anchor page to bottom when at bottom -->

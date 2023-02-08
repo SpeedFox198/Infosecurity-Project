@@ -1,4 +1,4 @@
 import { writable } from "svelte/store"
 
-/** @type {import('svelte/store').Writable<number>} */
-export const ocrStatus = writable(0)
+/** @type {import('svelte/store').Writable<Map<string, number>} */
+export const ocrStatus = writable(new Map())
