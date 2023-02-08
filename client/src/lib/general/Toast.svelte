@@ -19,7 +19,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="p-2">
+	<div class="p-2 msg-body">
 		{message}
 	</div>
 </div>
@@ -60,5 +60,9 @@
     border: 0;
     color: inherit;
     background-color: inherit;
+  }
+
+  .msg-body {
+    white-space: pre-line;
   }
 </style>

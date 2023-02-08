@@ -36,7 +36,7 @@ const messageFriend = async (user_id) => {
 
 onMount(async () => {
   socket.on("remove_friend_failed", async (data) => {
-    $flash = {type: 'failure', message: `Friend failed to remove! Reason: ${data.message}`}
+    $flash = {type: 'failure', message: `Friend failed to remove!\nReason: ${data.message}`}
   })
   
   socket.on("friend_removed", async () => {
@@ -44,7 +44,7 @@ onMount(async () => {
   })
   
   socket.on("message_friend_error", async (data) => {
-    $flash = {type: 'failure', message: `Failed to message friend! Reason: ${data.message}`}
+    $flash = {type: 'failure', message: `Failed to message friend!\nReason: ${data.message}`}
     dispatch("message-friend")
   })
   

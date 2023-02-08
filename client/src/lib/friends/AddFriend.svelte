@@ -59,7 +59,7 @@
   
   onMount(async () => {
     socket.on("friend_request_failed", async (data) => {
-      $flash = {type: 'failure', message: `Friend request failed to send! Reason: ${data.message}`}
+      $flash = {type: 'failure', message: `Friend request failed to send!\nReason: ${data.message}`}
     })
     
     socket.on("friend_request_sent", async (data) => {

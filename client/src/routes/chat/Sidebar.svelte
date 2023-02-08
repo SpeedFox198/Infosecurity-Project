@@ -63,7 +63,7 @@ onMount(() => {
   });
   
   socket.on("create_group_error", async (data) => {
-    $flash = {type: 'failure', message: `Group failed to create! Reason: ${data.message}`}
+    $flash = {type: 'failure', message: `Group failed to create!\nReason: ${data.message}`}
   });
   
   socket.on("group_invite", async (data) => {
