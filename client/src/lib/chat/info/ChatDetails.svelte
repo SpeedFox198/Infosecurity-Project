@@ -5,8 +5,7 @@ import { room_id, roomStorage } from "$lib/stores/room";
 import { selectedMsgs } from "$lib/stores/select";
 import { page } from "$app/stores"
 import ChatSettings from "./ChatSettings.svelte";
-import SlidingMenu_ from "./SlidingMenu_.svelte";
-	import { space } from "svelte/internal";
+import RightSlidingMenu from "./RightSlidingMenu.svelte";
 
 
 export let socket;
@@ -33,10 +32,11 @@ let _displayVerifyCode = false;
 let securityCode = [];
 
 $: currentChat = $roomStorage?.[$room_id] || {};
-$: displayChatDetails ? (() => displayNone=false)() : setTimeout(() => displayNone=true, 150);
+$: displayChatDetails ? (() => displayNone = false)() : setTimeout(() => displayNone = true, 150);
 $: hide = animateHideChatDetails && !displayChatDetails;
 $: displayDisappearing = _displayDisappearing && displayChatDetails;
 $: displayVerifyCode = _displayVerifyCode && displayChatDetails && getSecurityCode();
+$: !currentChat.encrypted && (() => _displayVerifyCode = false)();
 
 
 const setDisappearing = () => socket.emit("set_disappearing", { disappearing, room_id: $room_id });
@@ -44,7 +44,7 @@ const blockUser = () => socket.emit("block_user", { block_id: currentChat.user_i
 const unblockUser = () => socket.emit("unblock_user", { block_id: currentChat.user_id, room_id: $room_id });
 
 async function getSecurityCode() {
-  const rawCode = await encryption.generateSecurityCode();
+  const rawCode = await encryption.generateSecurityCode($room_id);
   let temp, line;
   securityCode = [];
   for (let i=0; i<4; i++) {
@@ -68,7 +68,13 @@ function toggleDisappearing() {
   _displayDisappearing = !_displayDisappearing;
 }
 
-const toggleVerifyCode = () => _displayVerifyCode = !_displayVerifyCode;
+function toggleVerifyCode() {
+  if (currentChat.encrypted) {
+    _displayVerifyCode = !_displayVerifyCode;
+  } else {
+    // Do "Click to learn more" feature
+  }
+}
 
 onMount(() => {
   socket.on("user_online", async data => roomStorage.updateOnlineStatus(data.user_id, true));
@@ -104,7 +110,7 @@ onMount(() => {
           <img
             class="rounded-circle p-4" alt=""
             src={
-              (currentChat.icon || "").startsWith("media/") ?
+              currentChat.icon?.startsWith("media/") ?
               `https://localhost:8443/api/${currentChat.icon}` :
               currentChat.icon
             }
@@ -171,7 +177,7 @@ onMount(() => {
   </div>
 </div>
 
-<SlidingMenu_
+<RightSlidingMenu
   title="Disappearing Messages"
   display={displayDisappearing}
   on:click={toggleDisappearing}
@@ -206,16 +212,20 @@ onMount(() => {
       >Set disappearing time</button>
     </form>
   </div>
-</SlidingMenu_>
+</RightSlidingMenu>
 
 
-<SlidingMenu_
+<RightSlidingMenu
   title="Verify Security Code"
   display={displayVerifyCode}
   on:click={toggleVerifyCode}
 >
   <div class="d-flex flex-column p-4">
     <div class="mb-3">
+      <div class="user-select-none">
+        Compare the number below with <strong class="green">{currentChat.name}</strong>
+        to verify that messages in this chat are end-to-end encrypted.
+      </div>
       <div class="px-3">
         {#each securityCode as a}
           <div class="space-a">
@@ -229,10 +239,10 @@ onMount(() => {
           </div>
         {/each}
       </div>
-      Lorem ipsum.
     </div>
   </div>
-</SlidingMenu_>
+</RightSlidingMenu>
+
 
 <style>
 .chat-details-section {
@@ -293,7 +303,7 @@ onMount(() => {
 }
 
 .space-a {
-  margin: 0.1em auto;
+  margin: 0.1em 0;
 }
 
 .space-b {

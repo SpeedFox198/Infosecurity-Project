@@ -6,7 +6,6 @@ export const encryption = {};
 <script>
 import GDrive, { service } from "$lib/google/GDrive.svelte";
 import { masterKey, roomKeys } from "$lib/stores/key";
-import { room_id } from "$lib/stores/room";
 import { user_id } from "$lib/stores/user";
 import { e2ee } from "./e2ee";
 
@@ -105,52 +104,52 @@ async function uploadPublicKey(public_key) {
 }
 
 
-encryption.encryptMessage = async message => {
-  const key = await getRoomKey();
+encryption.encryptMessage = async (message, room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.encryptMessage(message, key);
 };
 
 
-encryption.decryptMessage = async message => {
-  const key = await getRoomKey();
+encryption.decryptMessage = async (message, room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.decryptMessage(message, key);
 };
 
 
-encryption.encryptFile = async image => {
-  const key = await getRoomKey();
+encryption.encryptFile = async (image, room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.encryptFile(image, key);
 }
 
 
-encryption.decryptFile = async (image, iv) => {
-  const key = await getRoomKey();
+encryption.decryptFile = async (image, iv, room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.decryptFile(image, key, iv);
 }
 
 
-encryption.decryptImage = async (image, iv) => {
-  const key = await getRoomKey();
+encryption.decryptImage = async (image, iv, room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.decryptImage(image, key, iv);
 }
 
 
-encryption.generateSecurityCode = async () => {
-  const key = await getRoomKey();
+encryption.generateSecurityCode = async (room_id) => {
+  const key = await getRoomKey(room_id);
   if (key === undefined) return;
   return await e2ee.generateSecurityCode(await e2ee.exportRoomKey(key));
 }
 
 
-async function getRoomKey() {
-  let key = $roomKeys[$room_id];
+async function getRoomKey(room_id) {
+  let key = $roomKeys[room_id];
   if (key === undefined) {
-    key = await createAndSaveRoomKey($room_id, $user_id);
+    key = await createAndSaveRoomKey(room_id, $user_id);
     if (key === undefined) return;
   }
   return await e2ee.importRoomKey(key);

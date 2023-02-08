@@ -152,6 +152,7 @@ async function sendMsg(event) {
   let { content, file, type } = event.detail;
   let messageChanged = false;
   let isSensitiveImage = false;
+  const room_id_ = $room_id;
 
   if (currentUser.censor) {
     ({ content, messageChanged } = await cleanSensitiveMessage(content));
@@ -184,7 +185,7 @@ async function sendMsg(event) {
   const msg = {
     message_id,
     user_id: $user_id,
-    room_id: $room_id,
+    room_id: room_id_,
     time: Math.floor(Date.now()/1000),
     content,
     // TODO(low)(SpeedFox198): will we be doing "reply"? (rmb to search and replace all occurences)
@@ -200,8 +201,8 @@ async function sendMsg(event) {
   if (file) delete msg.path;
 
   // Encrypt message before sending
-  if ($roomStorage[$room_id].encrypted) {
-    const encryptedContent = await encryption.encryptMessage(content);
+  if ($roomStorage[room_id_].encrypted) {
+    const encryptedContent = await encryption.encryptMessage(content, room_id_);
     if (encryptedContent === undefined) {
       $flash = { type: "failure", message: "Please sign in to google to access end-to-end-encrypted chats!" };
       return;
@@ -210,7 +211,7 @@ async function sendMsg(event) {
 
     // Encrypt file if exists
     if (file) {
-      const { encrypted: encryptedFile, iv } = await encryption.encryptFile(file);
+      const { encrypted: encryptedFile, iv } = await encryption.encryptFile(file, room_id_);
       file = encryptedFile;
       msg.content += SEPARATOR + iv;
     }
@@ -333,7 +334,7 @@ async function addMsgBatch(data) {
   }
 
   // Update current most top message accordingly
-  let msgInfo = ($allMsgs[data.room_id] || [])[0];
+  let msgInfo = $allMsgs[data.room_id]?.[0];
   if (msgInfo && msgInfo.user_id == prev_id) {
     msg = $msgStorage[msgInfo.message_id];
     delete msg.username;
@@ -399,7 +400,7 @@ async function formatMsg(data, prev_id, room_id_) {
   }
 
   if (encrypted) {
-    msg.content = await encryption.decryptMessage(content);
+    msg.content = await encryption.decryptMessage(content, room_id);
   }
   // If message contains media, get media path
   let file;
@@ -411,11 +412,11 @@ async function formatMsg(data, prev_id, room_id_) {
       if (encrypted) {
         const iv = content.split(SEPARATOR)[2];
         if (type === "image") {
-          file = await getEncryptedImage(msg.path, message_id, iv);
+          file = await getEncryptedImage(msg.path, message_id, iv, room_id);
           // msg.path = "/loading.gif";
         } else if (type === "document") {
           // TODO(high)(SpeedFox198): decrypt document?
-          file = await getEncryptedDocument(msg.path, message_id, iv);
+          file = await getEncryptedDocument(msg.path, iv, room_id);
         }
       }
     }
@@ -425,19 +426,19 @@ async function formatMsg(data, prev_id, room_id_) {
 }
 
 
-async function getEncryptedImage(path, message_id, iv) {
-  const file = await _getEncryptedFile(path, encryption.decryptImage, iv);
+async function getEncryptedImage(path, message_id, iv, room_id) {
+  const file = await _getEncryptedFile(path, encryption.decryptImage, iv, room_id);
   setImagePathFromBlob(message_id, file);
   return file;
 }
 
 
-async function getEncryptedDocument(path, message_id, iv) {
-  return await _getEncryptedFile(path, encryption.decryptImage, iv);
+async function getEncryptedDocument(path, iv, room_id) {
+  return await _getEncryptedFile(path, encryption.decryptFile, iv, room_id);
 }
 
 
-async function _getEncryptedFile(path, decryptFunction, iv) {
+async function _getEncryptedFile(path, decryptFunction, iv, room_id) {
   let content;
   try {
     const response = await fetch(path, { method: "POST", credentials: "include" });
@@ -446,7 +447,7 @@ async function _getEncryptedFile(path, decryptFunction, iv) {
   } catch (error) {
     console.error(error);
   }
-  return await decryptFunction(content, iv);
+  return await decryptFunction(content, iv, room_id);
 }
 
 

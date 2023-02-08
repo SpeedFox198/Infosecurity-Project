@@ -258,7 +258,7 @@ async function decryptImage(encryptedImage, key, iv) {
 /**
  * Generates a security code for verifying secret code
  * @param {string} key Base64 encoded key
- * @returns {string} security code
+ * @returns {Promise<string>} security code
  */
 async function generateSecurityCode(key) {
   const data = decode(key);
