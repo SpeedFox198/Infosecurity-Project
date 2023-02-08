@@ -41,10 +41,13 @@ MAX_HTTP_BUFFER_SIZE = 5000000  # 5 megabyte payload limit
 SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
+
+mgr = socketio.AsyncRedisManager("redis://SocketIOServer:nOF1w!n35QCm1C3M7YfW3u_fIyuI0x~eg77H-SXJtByYWl!x4uSCUuP@redis-18687.c263.us-east-1-2.ec2.cloud.redislabs.com:18687")
 sio = socketio.AsyncServer(
     async_mode=ASYNC_MODE,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
-    max_http_buffer_size=MAX_HTTP_BUFFER_SIZE
+    max_http_buffer_size=MAX_HTTP_BUFFER_SIZE,
+    client_manager=mgr
 )
 
 sio_auth_manager = SioAuthManager()  # Authentication Manager
