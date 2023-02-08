@@ -10,6 +10,7 @@ import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
+import { ocrStatus } from "$lib/stores/ocr"
 import { digestMessage } from "$lib/chat/message/malware-detection";
 
 import Welcome from "$lib/chat/Welcome.svelte";
@@ -168,6 +169,7 @@ async function sendMsg(event) {
       await processImage(openCvImage, openCvCanvas)
       isSensitiveImage = await detectSensitiveImage(openCvCanvas);
       URL.revokeObjectURL(imageUrl)
+      ocrStatus.set(0)
       ocrLoading = false
     }
   }
