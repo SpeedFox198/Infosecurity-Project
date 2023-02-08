@@ -1,6 +1,9 @@
 import { writable } from "svelte/store";
 
 
+export const keysInited = writable(false);
+
+
 /**
  * Stores the master key for end-to-end encryption
  * 

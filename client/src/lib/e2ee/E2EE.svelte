@@ -5,14 +5,12 @@ export const encryption = {};
 
 <script>
 import GDrive, { service } from "$lib/google/GDrive.svelte";
-import { masterKey, roomKeys } from "$lib/stores/key";
+import { keysInited, masterKey, roomKeys } from "$lib/stores/key";
 import { user_id } from "$lib/stores/user";
 import { e2ee } from "./e2ee";
 
 const MASTER_KEY_FILE_NAME = "master_key.json";
 const ROOM_KEYS_FILE_NAME = "room_keys.json";
-
-let keysInited = false;
 
 
 /**
@@ -21,7 +19,7 @@ let keysInited = false;
  */
 async function initKeys() {
   // Ensure only initialise once
-  if (keysInited) return;
+  if ($keysInited) return;
 
   let file, error;
 
@@ -77,8 +75,11 @@ async function initKeys() {
 
   // When all keys initiated successfully,
   // set flag to true to prevent multiple calls
-  keysInited = true;
+  keysInited.set(true);
 }
+
+
+encryption.initKeys = initKeys;
 
 
 async function uploadPublicKey(public_key) {

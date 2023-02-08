@@ -10,6 +10,7 @@ import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
+import { keysInited } from "$lib/stores/key"
 import { ocrStatus } from "$lib/stores/ocr"
 import { digestMessage } from "$lib/chat/message/malware-detection";
 
@@ -18,6 +19,7 @@ import ChatInfo from "$lib/chat/info/ChatInfo.svelte";
 import MessageDisplay from "$lib/chat/message/MessageDisplay.svelte";
 import MessageInput from "$lib/chat/message/MessageInput.svelte";
 import SelectMenu from "$lib/chat/message/SelectMenu.svelte";
+import EncryptionError from "$lib/chat/EncryptionError.svelte";
 import BlockingMessage from "$lib/chat/message/BlockingMessage.svelte";
 import OpenCV, { processImage } from "$lib/opencv/OpenCV.svelte"
 
@@ -98,7 +100,7 @@ onMount(async () => {
 
 
   socket.on("receive_room_messages", async data => {
-    await addMsgBatch(data)
+    await addMsgBatch(data);
   });
 
 
@@ -538,7 +540,13 @@ async function removeMsg(message_id, room_id) {
   <!-- Chat Info Section -->
   <ChatInfo on:click={openChatDetails}/>
 
-  {#if $room_id}
+  {#if !$room_id}
+    <!-- Welcome page -->
+    <Welcome {currentUser}/>
+  {:else if currentRoom.encrypted && !$keysInited}
+    <!-- Prompt for enable pop-up and login to google to view end-to-end encrypted chat -->
+    <EncryptionError initKeys={encryption.initKeys}/>
+  {:else}
     <!-- Messages Display Section -->
     <MessageDisplay {getRoomMsgs} blocked={currentRoom.blocked}/>
 
@@ -551,9 +559,6 @@ async function removeMsg(message_id, room_id) {
       <!-- Messages Display Section -->
       <MessageInput on:message={sendMsg}/>
     {/if}
-  {:else}
-    <!-- Welcome page -->
-    <Welcome {currentUser}/>
   {/if}
   <OpenCV bind:openCv={openCvImage} bind:canvas={openCvCanvas} on:load={()=>{openCvLoaded=true;dispatchLoadEvent();}}/>
 </div>

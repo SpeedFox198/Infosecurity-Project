@@ -220,25 +220,23 @@ onMount(() => {
   display={displayVerifyCode}
   on:click={toggleVerifyCode}
 >
-  <div class="d-flex flex-column p-4">
-    <div class="mb-3">
-      <div class="user-select-none">
-        Compare the number below with <strong class="green">{currentChat.name}</strong>
-        to verify that messages in this chat are end-to-end encrypted.
-      </div>
-      <div class="px-3">
-        {#each securityCode as a}
-          <div class="space-a">
-            {#each a as b}
-              <span class="space-b">
-                {#each b as c}
-                  <span class="space-c">{c}</span>
-                {/each}
-              </span>
-            {/each}
-          </div>
-        {/each}
-      </div>
+  <div class="d-flex flex-column justify-content-center p-4">
+    <div class="smaller-text user-select-none mb-4">
+      Compare the number below with <strong class="green">{currentChat.name}</strong>
+      to verify that messages sent in this chat are end-to-end encrypted:
+    </div>
+    <div class="text-center">
+      {#each securityCode as a}
+        <div class="space-a">
+          {#each a as b}
+            <span class="space-b">
+              {#each b as c}
+                <span class="space-c">{c}</span>
+              {/each}
+            </span>
+          {/each}
+        </div>
+      {/each}
     </div>
   </div>
 </RightSlidingMenu>
@@ -302,8 +300,13 @@ onMount(() => {
   color: var(--white);
 }
 
+.smaller-text {
+  font-size: 90%;
+}
+
 .space-a {
-  margin: 0.1em 0;
+  display: inline-block;
+  margin: 0.1em auto;
 }
 
 .space-b {

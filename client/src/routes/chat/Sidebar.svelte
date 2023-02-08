@@ -8,6 +8,7 @@ import { room_id, roomStorage, roomList } from '$lib/stores/room';
 import { count } from '$lib/stores/count';
 import { selectedMsgs } from '$lib/stores/select';
 import { allMsgs } from "$lib/stores/message";
+import { keysInited } from "$lib/stores/key";
 
 import Group from '$lib/chat/group/Group.svelte';
 import Nav from './Nav.svelte';
@@ -20,17 +21,17 @@ import Friends from '$lib/settings/Friends.svelte';
 export let socket;
 export let getRoomMsgs;
 
-const flash = getFlash(page)
+const flash = getFlash(page);
 
 let displaySettings = false;
 let displayNewGroup = false;
 let displayFriends = false;
-let roomSearchInput = "" 
+let roomSearchInput = "";
 
 $: unfilteredRooms = $roomList.map(room_id => $roomStorage[room_id]);
 $: currentRooms = unfilteredRooms.filter(room => room.name
                                           .toLowerCase()
-                                          .includes(roomSearchInput))
+                                          .includes(roomSearchInput));
 
 
 async function selectGrp(new_room) {
@@ -41,7 +42,7 @@ async function selectGrp(new_room) {
   selectedMsgs.clear();
 
   // Get room messages via socket if n is 0
-  if (!$count[$room_id]?.n) {
+  if (!$count[$room_id]?.n && !($roomStorage[new_room].encrypted && !$keysInited)) {
     const { n, extra } = count.nextN($room_id);
     getRoomMsgs($room_id, n, extra);
   }
@@ -53,9 +54,9 @@ const toggleFriends = async () => displayFriends = !displayFriends;
 
 
 const sendNewGroup = async (event) => {
-  let { group_metadata } = event.detail
-  socket.emit("create_group", group_metadata)
-}
+  let { group_metadata } = event.detail;
+  socket.emit("create_group", group_metadata);
+};
 
 onMount(() => {
   socket.on("group_created", async () => {
@@ -63,7 +64,7 @@ onMount(() => {
   });
   
   socket.on("create_group_error", async (data) => {
-    $flash = {type: 'failure', message: `Group failed to create!\nReason: ${data.message}`}
+    $flash = {type: 'failure', message: `Group failed to create!\nReason: ${data.message}`};
   });
   
   socket.on("group_invite", async (data) => {
