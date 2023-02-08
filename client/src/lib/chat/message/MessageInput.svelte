@@ -99,12 +99,6 @@ async function onSend(event) {
         labelMaxFileSizeExceeded="File is too large"
         labelMaxTotalFileSizeExceeded="Total file size is too large"
 
-        allowFileTypeValidation={true}
-        acceptedFileTypes={['image/*', 'video/*', 'audio/*', 'application/pdf', 'text/*']}
-        labelFileTypeNotAllowed="File type is not allowed"
-        fileValidateTypeLabelExpectedTypes="Expects image/*, video/*, audio/*, application/pdf, text/* files"
-        fileValidateTypeLabelExpectedTypesMap={null}
-
         allowImagePreview={true}
         imagePreviewMinHeight={50}
         imagePreviewMaxHeight={200}
