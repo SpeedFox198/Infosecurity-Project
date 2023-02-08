@@ -35,7 +35,7 @@ from models.response_data import UserData
 from security_functions.cryptography import pw_hash, pw_verify
 from db_access.twoFA import get_2fa
 from models.request_data import TwoFABody
-from db_access.backup_codes import get_2fa_backup_codes, delete_2fa_backup_codes 
+from db_access.backup_codes import get_2fa_backup_codes, delete_2fa_backup_codes
 from utils.logging import log_info, log_warning, log_exception
 from .functions import (
     generate_otp,
@@ -150,9 +150,7 @@ async def login(data: LoginBody):
 
     # Check if user has 2FA enabled
     if await get_2fa_backup_codes(existing_user.user_id):
-        print(await get_2fa_backup_codes(existing_user.user_id))
         auth_session["login_existing_user"] = existing_user.user_id
-        print(auth_session["login_existing_user"])
         return {"message": "2FA required"}, 200
 
     logged_in_user = existing_user
@@ -169,11 +167,13 @@ async def login(data: LoginBody):
 @validate_request(TwoFABody)
 async def two_fa(data: TwoFABody):
     user_id = auth_session.get("login_existing_user")
-    print(user_id)
+
     if auth_session.get("login_existing_user") is None:
         return {"message": "Invalid request"}, 401
+
     async with async_session() as session:
         existing_user: User = (await session.execute(sa.select(User).where(User.user_id == user_id))).scalars().first()
+
     device_id = str(uuid4())
     browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
                                 await get_location_from_ip(request.remote_addr))
@@ -181,6 +181,7 @@ async def two_fa(data: TwoFABody):
     secret_token = twoFA_code.secret
     OTP_check = data.twofacode
     verified = pyotp.TOTP(secret_token).verify(OTP_check)
+
     if verified:
         logged_in_user = existing_user
         await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
@@ -208,9 +209,8 @@ async def backupcode(data: BackupCodeBody):
         for bc in await get_2fa_backup_codes(existing_user.user_id)
     ]
     for i in backup_code:
-        print(i)
         if data.backupcode == i:
-            #If the backup code is in the list, delete the backup code from the list
+            # If the backup code is in the list, delete the backup code from the list
             await delete_2fa_backup_codes(existing_user.user_id, data.backupcode)
             logged_in_user = existing_user
             await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)

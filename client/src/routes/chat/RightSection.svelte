@@ -10,6 +10,7 @@ import { count } from "$lib/stores/count";
 import { lockScroll } from "$lib/stores/scroll";
 import { selectedMsgs, selectMode } from "$lib/stores/select";
 import { cleanSensitiveMessage, detectSensitiveImage } from "$lib/chat/message/sensitive-detection";
+import { ocrStatus } from "$lib/stores/ocr"
 import { digestMessage } from "$lib/chat/message/malware-detection";
 
 import Welcome from "$lib/chat/Welcome.svelte";
@@ -159,28 +160,15 @@ async function sendMsg(event) {
 
     if (type === "image") {
       // TODO show message loading animation or something while sending
-      // ocrLoading = true
-      const ocrLoadingMessageId = crypto.randomUUID();
-      const ocrLoadingMsg = {
-        message_id: ocrLoadingMessageId,
-        user_id: $user_id,
-        room_id: room_id_,
-        time: Math.floor(Date.now()/1000),
-        content: "Sending... This may take a while we are making sure your message is safe to send.",
-        type: "text",
-        received: true
-      };
-      await addMsg(ocrLoadingMsg);
       const imageUrl = URL.createObjectURL(file)
+      const ocrRunId = crypto.randomUUID()
       openCvImage.src = imageUrl
       
       await sleep(200) // Hacky way to let the image src set before processImage bc race condition
       
       await processImage(openCvImage, openCvCanvas)
-      isSensitiveImage = await detectSensitiveImage(openCvCanvas);
+      isSensitiveImage = await detectSensitiveImage(ocrRunId, openCvCanvas);
       URL.revokeObjectURL(imageUrl)
-      // ocrLoading = false
-      await removeMsg(ocrLoadingMessageId, room_id_);
     }
   }
   
@@ -552,7 +540,7 @@ async function removeMsg(message_id, room_id) {
 
   {#if $room_id}
     <!-- Messages Display Section -->
-    <MessageDisplay {getRoomMsgs} {ocrLoading} blocked={currentRoom.blocked}/>
+    <MessageDisplay {getRoomMsgs} blocked={currentRoom.blocked}/>
 
     {#if currentRoom.blocked === "blocking"}
       <BlockingMessage name={currentRoom.name}/>

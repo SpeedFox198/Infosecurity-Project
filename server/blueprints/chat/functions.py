@@ -32,7 +32,6 @@ def get_display_dimensions(picture: bytes):
         return 400, 400  # TODO(high)(SpeedFox198): remove hardcoded values, check on client side instead
     width = image.width
     height = image.height
-    print(f"\n\nwidth: {width}, height: {height}\n\n")
 
     ratio = height / width
     if ratio > 1:
