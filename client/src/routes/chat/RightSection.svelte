@@ -331,7 +331,7 @@ async function addMsgBatch(data) {
     prev_id = user_id_;
     
     if (msg.received !== true && user_id_ !== currentUser.user_id) {
-      unreceivedMessages.push({ message_id, content: msg.content })
+      unreceivedMessages.push({ message_id, content: msg.content, file })
     }
   }
 
@@ -364,11 +364,11 @@ async function addMsgBatch(data) {
       if (urls) {
         socket.emit("check_safe_url", { urls, message_id: message.message_id }) 
       }
-    }
-    
-    if (file) {
-      const hash = await digestMessage(file)
-      socket.emit("scan_hash", { message_id: message.message_id, hash })
+      
+      if (message.file) {
+        const hash = await digestMessage(message.file)
+        socket.emit("scan_hash", { message_id: message.message_id, hash })
+      }
     }
   }
 }
@@ -422,7 +422,7 @@ async function formatMsg(data, prev_id, room_id_) {
       }
     }
   }
-
+  
   return { user_id_, message_id, msg, room_id, file };
 }
 
