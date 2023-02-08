@@ -81,7 +81,7 @@ async def add_users(session):
     async with session.begin():
         alice = User("alice", "alice@yahoo.com", pw_hash("alice456"))
         bob = User("bob", "bob@gmail.com", pw_hash("bob123"))
-        clarence = User("clarence", "clarence@outlook.com", pw_hash("clarencelovescats!"))
+        clarence = User("clarence", "clarence@outlook.com", pw_hash("cats!"))
         daniel = User("daniel", "daniel@dynamicprogramming.com", pw_hash("daniel123"))
         eden = User("eden", "eden@joker.com", pw_hash("eden789"))
 

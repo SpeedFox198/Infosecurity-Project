@@ -159,7 +159,18 @@ async function sendMsg(event) {
 
     if (type === "image") {
       // TODO show message loading animation or something while sending
-      ocrLoading = true
+      // ocrLoading = true
+      const ocrLoadingMessageId = crypto.randomUUID();
+      const ocrLoadingMsg = {
+        message_id: ocrLoadingMessageId,
+        user_id: $user_id,
+        room_id: room_id_,
+        time: Math.floor(Date.now()/1000),
+        content: "Sending... This may take a while we are making sure your message is safe to send.",
+        type: "text",
+        received: true
+      };
+      await addMsg(ocrLoadingMsg);
       const imageUrl = URL.createObjectURL(file)
       openCvImage.src = imageUrl
       
@@ -168,7 +179,8 @@ async function sendMsg(event) {
       await processImage(openCvImage, openCvCanvas)
       isSensitiveImage = await detectSensitiveImage(openCvCanvas);
       URL.revokeObjectURL(imageUrl)
-      ocrLoading = false
+      // ocrLoading = false
+      await removeMsg(ocrLoadingMessageId, room_id_);
     }
   }
   
@@ -292,11 +304,11 @@ async function addMsg(data, filename, newly_received) {
     delete prevMsg.corner;
     await msgStorage.updateMsg(prevMsg, prevInfo.message_id);
   }
-  
+
   if (newly_received) {
-    const urls = msg.content.match(URL_PATTERN)
+    const urls = msg.content.match(URL_PATTERN);
     if (urls) {
-      socket.emit("check_safe_url", { urls, message_id })
+      socket.emit("check_safe_url", { urls, message_id });
     }
   }
 
@@ -305,7 +317,7 @@ async function addMsg(data, filename, newly_received) {
     const hash = await digestMessage(file);
     socket.emit("scan_hash", { message_id, hash });
   }
-  
+
   await msgStorage.updateMsg(msg, message_id);
   await allMsgs.addMsg({ user_id: user_id_, message_id }, room_id);
 }
@@ -374,9 +386,8 @@ async function addMsgBatch(data) {
 
 async function formatMsg(data, prev_id, room_id_) {
   // parameter `room_id_` is optional, used when room_id is not in data
-  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path, received, malicious } = data;
+  const { message_id, room_id: room_id__, time, content, reply_to, type, filename, encrypted, path, received, malicious, user_id: user_id_ } = data;
   const room_id = room_id__ || room_id_;
-  const user_id_ = data.user_id;
   const sent = user_id_ === $user_id;
   const corner = true;  // For styling corner of last consecutive message
   let msg;
