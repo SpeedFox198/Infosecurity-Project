@@ -102,6 +102,7 @@ async def connect(sid, environ, auth):
             await sio.emit(USER_ONLINE, {"user_id": current_user_id}, to=room_id)
 
     # Send room_ids that client belongs to
+    sio.enter_room(sid, "PLSWORK")
     await sio.emit(ROOMS_JOINED, rooms, to=sid)
 
 
