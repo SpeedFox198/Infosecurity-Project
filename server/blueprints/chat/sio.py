@@ -34,6 +34,7 @@ from .functions import (delete_expired_messages, get_room, messages_queue_5s,
                         messages_queue_24h, messages_queue_30d, save_file,
                         save_group_icon)
 from .sio_auth_manager import SioAuthManager
+from .sio_redis_manager import SioRedisManager
 
 ASYNC_MODE = "asgi"
 CORS_ALLOWED_ORIGINS = "https://localhost"
@@ -42,7 +43,7 @@ SIO_SESSION_USER_KEY = "user"
 MESSAGE_LOAD_NUMBER = 20  # Number of messages to load at once
 
 
-mgr = socketio.AsyncRedisManager("redis://SocketIOServer:nOF1w!n35QCm1C3M7YfW3u_fIyuI0x~eg77H-SXJtByYWl!x4uSCUuP@redis-18687.c263.us-east-1-2.ec2.cloud.redislabs.com:18687")
+mgr = SioRedisManager("redis://SocketIOServer:nOF1w!n35QCm1C3M7YfW3u_fIyuI0x~eg77H-SXJtByYWl!x4uSCUuP@redis-18687.c263.us-east-1-2.ec2.cloud.redislabs.com:18687")
 sio = socketio.AsyncServer(
     async_mode=ASYNC_MODE,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,

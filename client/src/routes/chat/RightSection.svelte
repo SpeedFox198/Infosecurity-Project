@@ -48,7 +48,6 @@ let openCvImage;
 let openCvCanvas;
 
 onMount(async () => {
-  socket.on("TEST", data => alert(data));
   // Receive from server list of rooms that client belongs to
   socket.on("rooms_joined", async data => {
 
