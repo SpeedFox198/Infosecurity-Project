@@ -130,9 +130,7 @@ async def get_account_information():
     os.makedirs(export_path, exist_ok=True)
     # write to json file
     with open(export_path + "/account_data.json", "w") as outfile:
-        outfile.write("Your account information\n")
         outfile.write(user_json + "\n\n")
-        outfile.write("Your device information\n")
         outfile.write(device_json)
 
     # with open(export_path + "/account_data.json", "a") as outfile:
