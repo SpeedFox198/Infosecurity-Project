@@ -51,3 +51,13 @@ async def delete_2fa_all(user_id):
         except SQLAlchemyError as err:
             await session.rollback()
             await log_exception(err)
+
+
+async def have_valid_2fa(user_id: str, secret_token: str) -> bool:
+    async with async_session() as session:
+        statement = sa.select(TwoFA).where(
+            (TwoFA.user_id == user_id) &
+            (TwoFA.secret == secret_token)
+        )
+        result = (await session.execute(statement)).first()
+        return bool(result)
