@@ -97,6 +97,9 @@ async def add_users(session):
         bob.e2ee = True
         clarence.e2ee = True
 
+        alice.user_id = "7773099b-666c-4dd2-b494-ea51715afe97"
+        bob.user_id = "2eba00ba-5d53-4fb9-b316-3f346bd830e7"
+
         session.add(bob)
         session.add(alice)
         session.add(clarence)
