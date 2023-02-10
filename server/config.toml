@@ -1,5 +1,5 @@
 access_log_format = "%(h)s %(r)s %(s)s %(b)s %(D)s"
 accesslog = "-"
-bind = "127.0.0.1:8443"
-debug = 1
+bind = "0.0.0.0:5000"
+debug = 0
 errorlog = "-"
