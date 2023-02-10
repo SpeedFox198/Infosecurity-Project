@@ -37,6 +37,10 @@ async def add_rooms(session):
     rooms = [Room("off", type_="group") for _ in range(ROOM_GROUP_NUM)]
     rooms.extend([Room("off") for _ in range(ROOM_DIRECT_NUM)])
     rooms[-1].encrypted = True
+
+    # hardcode alice-bob direct message
+    rooms[3].room_id = "95389c76-ad62-41c4-9993-006f1b9a1bc4"
+
     async with session.begin():
         for room in rooms:
             session.add(room)
