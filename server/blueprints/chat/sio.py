@@ -133,7 +133,7 @@ async def disconnect(sid):
 @sio.event
 async def send_message(sid: str, data: dict):
     # print(f"Received {data}")  # TODO(medium)(SpeedFox198): change to log later
-    await sio.emit("TEST", data="test", room="PLSWORK")
+    await sio.emit("TEST", data="test")#, room="PLSWORK")
 
     message_data = data["message"]
     file = data.get("file", None)
