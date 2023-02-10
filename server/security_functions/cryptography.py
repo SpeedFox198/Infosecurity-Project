@@ -1,8 +1,14 @@
-from argon2 import PasswordHasher
-from Crypto.Cipher import AES
 import os
 
-from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHash
+from argon2 import PasswordHasher
+from argon2.exceptions import (InvalidHash, VerificationError,
+                               VerifyMismatchError)
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+NONCE_LEN = 12
+TAG_LEN = 16
+KEY = os.environ.get("", None) or b"\xc0\xb7&\xdc\x82@\xf3\xf3\x07R\xab\xda\xbd\x8c\xafP\xd7~\xd5\x1c:\xef\xd4\xe6\xd8\xce\xa0$vH\x94\xb5"
 
 ph = PasswordHasher()
 
@@ -31,60 +37,28 @@ def pw_rehash(hashed, pw):
         return ph.hash(pw)
 
 
-""" Generate a key and save it into a file """
+
+def encrypt(data: bytes) -> bytes:
+    """ Encrypts data using AES in GCM mode """
+    nonce = get_random_bytes(NONCE_LEN)
+
+    cipher = AES.new(KEY, AES.MODE_GCM, nonce=nonce)
+
+    ciphertext, tag = cipher.encrypt_and_digest(data)  # write encrypted data below the nonce
+
+    return b"".join([nonce, ciphertext, tag])
 
 
-def generate_key():
-    key = os.urandom(32)
-    with open('key.key', 'wb') as key_file:
-        key_file.write(key)
-    key_file.close()
-
-
-""" AES Encryption """
-
-
-# file_out will have 3 lines:
-# 1. nonce
-# 2. encrypted data
-# 3. tag
-def encrypt(data: str):
-    """ Encrypts data with AES """
-    with open('key.key', 'rb') as key_file:
-        key = key_file.read()
-
-    data_byte = data.encode()
-
-    cipher = AES.new(key, AES.MODE_GCM)
-    nonce = cipher.nonce
-
-    ciphertext, tag = cipher.encrypt_and_digest(data_byte)  # write encrypted data below the nonce
-    result = b''.join([nonce, ciphertext, tag])  # write nonce, encrypted data, and tag
-
-    return result
-
-
-def decrypt(result: bytes):
-    """ Decrypts data with AES """
-
-    # read key
-    with open('key.key', 'rb') as key_file:
-        key = key_file.read()
+def decrypt(data: bytes) -> bytes | None:
+    """ Decrypts data using AES in GCM mode """
 
     # read nonce and generate cipher
-    nonce = result[:16]
-    ciphertext = result[16:-16]
-    tag = result[-16:]
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    nonce = data[:NONCE_LEN]
+    ciphertext = data[NONCE_LEN:-TAG_LEN]
+    tag = data[-TAG_LEN:]
 
-    # decrypt data
-    plaintext_bytes = cipher.decrypt_and_verify(ciphertext, tag)
-    plaintext = plaintext_bytes.decode()
-
-    return plaintext
-
-# Test
-# generate_key()
-# result = encrypt(data)
-# print(result)
-# print(decrypt(result))
+    cipher = AES.new(KEY, AES.MODE_GCM, nonce=nonce)
+    try:
+        return cipher.decrypt_and_verify(ciphertext, tag)
+    except ValueError:
+        return None
