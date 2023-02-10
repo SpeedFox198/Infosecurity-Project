@@ -47,6 +47,7 @@ sio = socketio.AsyncServer(
     async_mode=ASYNC_MODE,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
     max_http_buffer_size=MAX_HTTP_BUFFER_SIZE,
+    logger=True,
     client_manager=mgr
 )
 
