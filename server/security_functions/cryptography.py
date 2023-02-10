@@ -8,7 +8,8 @@ from Crypto.Random import get_random_bytes
 
 NONCE_LEN = 12
 TAG_LEN = 16
-KEY = os.environ.get("", None) or b"\xc0\xb7&\xdc\x82@\xf3\xf3\x07R\xab\xda\xbd\x8c\xafP\xd7~\xd5\x1c:\xef\xd4\xe6\xd8\xce\xa0$vH\x94\xb5"
+ENCRYPT_KEY = os.environ.get("ENCRYPT_KEY", "c0b726dc8240f3f30752abdabd8caf50d77ed51c3aefd4e6d8cea024764894b5")
+KEY = bytes.fromhex(ENCRYPT_KEY)
 
 ph = PasswordHasher()
 
