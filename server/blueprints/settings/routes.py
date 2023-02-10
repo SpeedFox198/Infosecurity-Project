@@ -7,11 +7,11 @@ import sqlalchemy as sa
 from itsdangerous import SignatureExpired
 import qrcode
 import qrcode.image.svg
-from quart import Blueprint, render_template, current_app, send_file, Response
+from quart import Blueprint, render_template, current_app, send_file, Response, abort
 from quart_schema import validate_request
 from models.request_data import TwoFABody
 from models import Device
-from db_access.twoFA import create_2fa, get_2fa, delete_2fa_all
+from db_access.twoFA import create_2fa, get_2fa, delete_2fa_all, have_valid_2fa
 from db_access.globals import async_session
 from db_access.user import get_user_details
 from quart_auth import current_user, login_required
@@ -145,7 +145,7 @@ async def get_account_information():
                                           malware_scan=user_results[5],
                                           friends_only=user_results[6],
                                           censor=user_results[7],
-                                          twofa_status=user_results[8],
+                                          google_account=user_results[8],
                                           disappearing=user_results[9],
                                           device_list=device_json_list
                                           )
@@ -170,7 +170,7 @@ async def get_account_information():
     url_serialiser = current_app.config["url_serialiser"]
     email = user_results[1]
     token = url_serialiser.dumps(email)
-    link = f"https://localhost:8443/api/settings/{token}/{await current_user.user_id}/account_data.zip"
+    link = f"https://localhost:8443/api/settings/account-report/{token}/{await current_user.user_id}/account_data.zip"
 
     # email the link to the user
     subject = "Your Bubbles Account - Requested Account Report"
@@ -185,20 +185,26 @@ async def get_account_information():
     return {"message": "Getting account report"}
 
 
-@settings_bp.get("/<string:token>/<string:user_id>/<string:file_name>")
+@settings_bp.get("/account-report/<string:token>/<string:user_id>/<string:file_name>")
 async def get_account_report(token: str, user_id: str, file_name: str):
     url_serialiser = current_app.config["url_serialiser"]
     try:
         email = url_serialiser.loads(token, max_age=2592000)
-        directory = os.path.join(os.getcwd(), f"media/exports/{user_id}/{file_name}")
-        return await send_file(directory, as_attachment=True)
+        if not email:
+            abort(401)
     except SignatureExpired:
-        return {"message": "The link has expired"}, 400
+        return {"message": "The link has expired"}, 404
+
+    directory = os.path.join(os.getcwd(), f"media/exports/{user_id}/{file_name}")
+    return await send_file(directory, as_attachment=True)
 
 
 @settings_bp.get("/2fa/qr-code/<string:secret_token>")
 @login_required
 async def two_fa_qr_code(secret_token: str):
+    if not await have_valid_2fa(await current_user.user_id, secret_token):
+        abort(404)
+
     otp_link = pyotp.totp.TOTP(secret_token).provisioning_uri(name=await current_user.username,
                                                               issuer_name='Bubbles')
     qr = qrcode.QRCode(
