@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import models
 from db_access.globals import async_session
 from models import BackupCodes
-from blueprints.auth.functions import generate_otp
+from blueprints.auth.functions import generate_backupcode
 from utils.logging import log_exception
 
 
@@ -12,7 +12,7 @@ from utils.logging import log_exception
 async def create_2fa_backup_codes(user_id) -> None:
     async with async_session() as session:
         for _ in range(6):
-            code = await generate_otp()
+            code = await generate_backupcode()
             statement = sa.insert(models.BackupCodes).values(user_id=user_id, code=code)
             try:
                 await session.execute(statement)

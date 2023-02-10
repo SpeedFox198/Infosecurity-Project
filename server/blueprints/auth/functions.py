@@ -72,6 +72,9 @@ async def generate_otp() -> str:
     # Generate a 6 digit OTP
     return "".join(secrets.choice(string.digits) for _ in range(6))
 
+async def generate_backupcode() -> str:
+    # Generate a 16 character backup code
+    return "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
 
 def send_otp_email(email: str, otp: str):
     subject = "OTP for registration"

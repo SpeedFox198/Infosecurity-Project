@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column,
-    INTEGER,
+    CHAR,
     VARCHAR
 )
 
@@ -16,5 +16,5 @@ class OTP(Base):
         self.password = password
 
     email = Column(VARCHAR(255), unique=True, nullable=False, primary_key=True)
-    otp = Column(INTEGER, nullable=False)
+    otp = Column(CHAR(6), nullable=False)
     password = Column(VARCHAR(255), nullable=False)
