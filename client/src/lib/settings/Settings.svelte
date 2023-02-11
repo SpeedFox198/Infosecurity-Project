@@ -11,6 +11,8 @@ export let toggleSettings;
 
 let displayGeneral = false;
 let displaySecurity = false;
+let displayEncryption = false;
+let displayEncryptionConfirm = false;
 let displaySusFiles = false;  // Scan suspicious files menu 
 let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑°༥°๑)
 let displayData = false;
@@ -22,6 +24,7 @@ let displayFilesRequested = true;
 
 const toggleGeneral = async () => displayGeneral = !displayGeneral;
 const toggleSecurity = async () => displaySecurity = !displaySecurity;
+const toggleEncryption = async () => displayEncryption = !displayEncryption;
 const toggleSusFiles = async () => displaySusFiles = !displaySusFiles;
 const toggleMagic = async () => displayMagic = !displayMagic;
 const toggleData = async () => displayData = !displayData;
@@ -101,6 +104,9 @@ async function submitTwoFA () {
   }
 }
 
+async function enableEncryption() {
+  alert("enabled");
+}
 </script>
 
 <SlidingMenu title="Settings" display={displaySettings} on:click={toggleSettings}>
@@ -159,9 +165,38 @@ async function submitTwoFA () {
 </SlidingMenu>
 
 <SlidingMenu title="Privacy and Security" display={displaySecurity} on:click={toggleSecurity}>
+  <Option name="End-to-end encryption" icon="lock" on:click={toggleEncryption}/>
   <Option name="Scan incoming files" icon="file-shield" on:click={toggleSusFiles}/>
   <Option name="Disappearing messages" icon="stopwatch" on:click={toggleMagic}/>
   <Option name="Request personal data" icon="file-zipper" on:click={toggleData}/>
+</SlidingMenu>
+<SlidingMenu title="End-to-end encryption" display={displayEncryption} on:click={() => {displayEncryptionConfirm = false; toggleEncryption()}}>
+  <div class="info-box e2ee-section">
+    <p>
+      End-to-end encryption keeps your messages from being accessed by outsiders. Not even Bubbles can know what your messages are. <span class="green">To turn on this feature, you have to bind this account to your Google account.</span>
+    </p>
+    <p>
+      The secret keys for encrypting your messages will be stored in your Google Drive, where only you can access it.
+      <span class="red">
+        You must <strong>NOT</strong> clear the Bubbles app data stored in your Google Drive. Doing so will result in the loss of your keys and consequently your messages as well.
+      </span>
+    </p>
+    {#if undefined}
+      <!--  -->
+    {:else if displayEncryptionConfirm}
+      <strong>Note: this action is irreversible!</strong>
+      <button class="btn w-100 mb-1" on:click={() => {enableEncryption();displayEncryptionConfirm = false;}}>
+        Enable
+      </button>
+      <button class="btn red w-100" on:click={() => displayEncryptionConfirm = false}>
+        Cancel
+      </button>
+    {:else}
+      <button class="btn w-100" on:click={() => displayEncryptionConfirm = true}>
+        Enable end-to-end encryption.
+      </button>
+    {/if}
+  </div>
 </SlidingMenu>
 <SlidingMenu title="Scan incoming files" display={displaySusFiles} on:click={toggleSusFiles}>
   <div class="info-box">
@@ -173,7 +208,7 @@ async function submitTwoFA () {
 <SlidingMenu title="Disappearing messages" display={displayMagic} on:click={toggleMagic}>
   <div class="info-box">
     <p>
-      Messages sent will automatically delete themselves after a certain amount of time. This is to prevent messages from potentially being leaked and read by others. This is highly recommended for all accounts and on by default
+      Messages sent will automatically delete themselves after a certain amount of time. This is to prevent messages from potentially being leaked and read by others. This feature can be enabled in direct chats by either user, and in group chats by administrators.
     </p>
   </div>
 </SlidingMenu>
@@ -279,5 +314,44 @@ async function submitTwoFA () {
   align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.e2ee-section p {
+  text-align: justify;
+}
+
+.e2ee-section .btn {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.e2ee-section .btn:hover {
+  background-color: var(--primary-highlight);
+}
+
+.e2ee-section .btn:active {
+  background-color: var(--highlight-primary);
+  color: var(--primary);
+}
+
+.e2ee-section .btn.red {
+  background-color: var(--red);
+}
+
+.e2ee-section .btn.red:hover {
+  background-color: var(--red-highlight);
+}
+
+.e2ee-section .btn.red:active{
+  background-color: var(--red-light-background);
+  color: var(--red);
+}
+
+.green {
+  color: var(--primary);
+}
+
+.red {
+  color: var(--red);
 }
 </style>
