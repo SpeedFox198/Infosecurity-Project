@@ -13,11 +13,13 @@ export const room_id = (() => {
  * Structure:
  * {
  *   <room_id>: {
+ *     room_id: string;
  *     disappearing: string;
  *     type: string;
  *     encrypted: boolean;
  *     is_admin: boolean;
  *     icon: string;
+ *     name: string;
  *     user_id?: string;
  *     online?: boolean;
  *     blocked?: string;

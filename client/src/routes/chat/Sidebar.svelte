@@ -76,7 +76,7 @@ onMount(() => {
     data.forEach(room => {
       newRoomStorage[room.room_id] = room
     });
-    
+
 
     // Initialise rooms
     roomList.set(newRoomList);          // Set list of room_id
@@ -106,8 +106,8 @@ onMount(() => {
   <!-- Settings Display Section -->
   <Settings {displaySettings} {toggleSettings}/>
   <NewGroup {displayNewGroup} {toggleNewGroup} on:create-group={sendNewGroup}/>
-  <Friends {displayFriends} {toggleFriends} socket={socket}/>
-  <BlockedUsers {displayBlockedUsers} {toggleBlockedUsers} socket={socket}/>
+  <Friends {displayFriends} {toggleFriends} {socket}/>
+  <BlockedUsers {displayBlockedUsers} {toggleBlockedUsers} {socket}/>
   <!-- Profile & Settings Section -->
   <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}/>
 
