@@ -53,7 +53,7 @@ async def get_user_id(email: str) -> str | None:
         return result.scalar()
 
 
-async def set_user_public_key(user_id: str, public_key: str):
+async def db_set_user_public_key(user_id: str, public_key: str):
     async with async_session() as session:
         statement = sa.update(User).where(User.user_id == user_id).values(public_key=public_key)
         await session.execute(statement)
@@ -66,3 +66,10 @@ async def db_reset_all_users_online_status():
     async with async_session() as session:
         async with session.begin():
             await session.execute(statement)
+
+
+async def db_enable_user_e2ee(user_id: str):
+    async with async_session() as session:
+        statement = sa.update(User).where(User.user_id == user_id).values(e2ee=True)
+        await session.execute(statement)
+        await session.commit()

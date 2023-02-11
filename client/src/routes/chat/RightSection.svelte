@@ -206,7 +206,7 @@ async function sendMsg(event) {
   if ($roomStorage[room_id_].encrypted) {
     const encryptedContent = await encryption.encryptMessage(content, room_id_);
     if (encryptedContent === undefined) {
-      $flash = { type: "failure", message: "Please sign in to google to access end-to-end-encrypted chats!" };
+      $flash = { type: "failure", message: "Please sign in to google to access end-to-end encrypted chats!" };
       return;
     }
     msg.content = encryptedContent;

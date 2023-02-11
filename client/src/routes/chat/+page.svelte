@@ -7,7 +7,7 @@ import RightSection from "./RightSection.svelte";
 import ChatDetails from "$lib/chat/info/ChatDetails.svelte";
 import E2EE, { encryption } from "$lib/e2ee/E2EE.svelte";
 import { page } from "$app/stores";
-import { user_id } from "$lib/stores/user";
+import { globalUser, user_id } from "$lib/stores/user";
 import { deviceStore } from "$lib/stores/device";
 import { twoFACheckStore } from "$lib/stores/twofa-check.js";
 import { friends } from "$lib/stores/friend";
@@ -28,6 +28,7 @@ let displayChatDetails = false;
 let animateHideChatDetails = false
 
 // Get and set user_id and device_id according to cookie data
+globalUser.set($page.data.user);
 user_id.set($page.data.user.user_id);
 $: friends.set(data.friends.friendsList);
 $: friendRequestsStore.set(data.friendRequests.friendRequestsList)
@@ -75,7 +76,7 @@ const openChatDetails = () => {
 
 
 <main class="d-flex flex-nowrap h-100 overflow-hidden" class:d-none={!appLoaded}>
-  <Sidebar {socket} {getRoomMsgs}/>
+  <Sidebar {socket} {getRoomMsgs} {encryption}/>
   <RightSection
     {socket} {getRoomMsgs} {encryption}
     {displayChatDetails} {openChatDetails} {animateHideChatDetails}
@@ -88,7 +89,7 @@ const openChatDetails = () => {
 </main>
 
 <!-- Enable end-to-end-encryption if user has public key (meaning e2ee is enabled) -->
-{#if $page.data.user.e2ee}
+{#if $globalUser.e2ee}
   <E2EE/>
 {/if}
 

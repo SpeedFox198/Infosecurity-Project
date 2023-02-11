@@ -17,7 +17,7 @@ export let currentUser;
   </div>
 
   <div class="mx-2">
-    End-to-end-encrypted are labelled with a green lock <i class="icon fa-solid fa-lock"></i>
+    End-to-end encrypted are labelled with a green lock <i class="icon fa-solid fa-lock"></i>
   </div>
 
 </div>

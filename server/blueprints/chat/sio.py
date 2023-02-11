@@ -8,13 +8,13 @@ from db_access.globals import async_session
 from db_access.message import (db_get_room_id_of_message, db_get_room_messages,
                                db_remove_messages, set_message_as_malicious,
                                set_messages_as_received)
-from db_access.room import db_get_room_if_user_verified, db_update_disappearing
+from db_access.room import db_get_room_if_user_verified, db_update_disappearing, db_check_and_set_room_encrypted
 from db_access.sio import (add_sio_connection, get_existing_room,
                            get_sids_from_sio_connection, has_disappearing,
                            have_e2ee_enabled, have_relationship,
                            remove_friend_request, remove_sio_connection,
                            set_online_status)
-from db_access.user import get_user_details
+from db_access.user import get_user_details, db_enable_user_e2ee
 from models import (AuthedUser, Friend, FriendRequest, Group, Membership,
                     Message, MessageStatus, Room)
 from models.error import VirusTotalError
@@ -77,6 +77,8 @@ async def connect(sid, environ, auth):
     # Add client to their respective rooms
     rooms = await get_room(current_user_id)
     blocked = await db_get_blocked(current_user_id)
+
+    enter_room(sid, current_user_id)
 
     for room in rooms:
         room_id = room["room_id"]
@@ -683,6 +685,20 @@ async def unblock_user(sid: str, data: dict):
 
     # Update user blocked status
     await sio.emit(ROOM_UNBLOCKED, {"room_id": room_id}, room=room_id)
+
+
+@sio.event
+async def enable_e2ee(sid: str):
+    current_user = await get_user(sid)
+    current_user_id = await current_user.user_id
+
+    await db_enable_user_e2ee(current_user_id)
+    room_ids = await db_check_and_set_room_encrypted(current_user_id)
+
+    for room_id in room_ids:
+        await sio.emit("room_encrypted", {"room_id": room_id}, room=room_id)
+
+    await sio.emit("e2ee_enabled", room=current_user_id)
 
 
 @sio.event

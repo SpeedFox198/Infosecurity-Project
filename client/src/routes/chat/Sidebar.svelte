@@ -3,7 +3,7 @@ import { onMount } from 'svelte';
 import { getFlash } from "sveltekit-flash-message/client"
 import { page } from "$app/stores"
 
-import { user_id } from "$lib/stores/user";
+import { globalUser, user_id } from "$lib/stores/user";
 import { room_id, roomStorage, roomList } from '$lib/stores/room';
 import { count } from '$lib/stores/count';
 import { selectedMsgs } from '$lib/stores/select';
@@ -20,6 +20,7 @@ import BlockedUsers from '$lib/settings/BlockedUsers.svelte';
 // SocketIO instance
 /** @type {import('socket.io-client').Socket}*/
 export let socket;
+export let encryption;
 export let getRoomMsgs;
 
 const flash = getFlash(page);
@@ -97,6 +98,10 @@ onMount(() => {
     delete room.blocked;
     roomStorage.addRoom(room_id, room);
   });
+
+  socket.on("room_encrypted", async data => roomStorage.onEncryption(data.room_id));
+
+  socket.on("e2ee_enabled", globalUser.enableEncryption);
 });
 </script>
 
@@ -104,12 +109,16 @@ onMount(() => {
 <div class="d-flex flex-column flex-shrink-0 sidebar">
 
   <!-- Settings Display Section -->
-  <Settings {displaySettings} {toggleSettings}/>
+  <Settings {displaySettings} {toggleSettings} {socket}/>
   <NewGroup {displayNewGroup} {toggleNewGroup} on:create-group={sendNewGroup}/>
   <Friends {displayFriends} {toggleFriends} {socket}/>
   <BlockedUsers {displayBlockedUsers} {toggleBlockedUsers} {socket}/>
   <!-- Profile & Settings Section -->
-  <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}/>
+  <Nav
+    bind:roomSearchInput={roomSearchInput}
+    {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}
+    gDriveHandleSignoutClick={encryption.handleSignoutClick}
+  />
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">

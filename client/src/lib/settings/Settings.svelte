@@ -4,8 +4,9 @@ import Option from "$lib/settings/templates/Option.svelte";
 import DevicesMenu from "$lib/devices/DevicesMenu.svelte";
 import { twoFACheckStore } from "$lib/stores/twofa-check.js";
 import { invalidate } from "$app/navigation";
-import { page } from "$app/stores";
+import { globalUser } from "$lib/stores/user";
 
+export let socket;
 export let displaySettings;
 export let toggleSettings;
 
@@ -13,6 +14,7 @@ let displayGeneral = false;
 let displaySecurity = false;
 let displayEncryption = false;
 let displayEncryptionConfirm = false;
+let encryptionButtonDisabled = false;
 let displaySusFiles = false;  // Scan suspicious files menu 
 let displayMagic = false;     // Disappearing messages menu, *MAGIC! POOF!* (๑°༥°๑)
 let displayData = false;
@@ -32,7 +34,7 @@ const toggleTwoFactor = async () => displayTwoFactor = !displayTwoFactor;
 const toggleTwoFactorEnabling = async () => displayTwoFactorEnabling = !displayTwoFactorEnabling;
 const toggleBackupCode = async () => displayBackupCode = !displayBackupCode;
 const toggleFilesRequested = async () => displayFilesRequested = !displayFilesRequested;
-const currentUser = $page.data.user;
+const currentUser = $globalUser;
 let twoFaSecretToken;
 let twoFAInput = "";
 let backupCodes = "";
@@ -105,7 +107,7 @@ async function submitTwoFA () {
 }
 
 async function enableEncryption() {
-  alert("enabled");
+  socket.emit("enable_e2ee");
 }
 </script>
 
@@ -176,23 +178,30 @@ async function enableEncryption() {
       End-to-end encryption keeps your messages from being accessed by outsiders. Not even Bubbles can know what your messages are. <span class="green">To turn on this feature, you have to bind this account to your Google account.</span>
     </p>
     <p>
+      Currently only direct chats supports end-to-end encryption. End-to-end encryption will only be active if both users in the direct chat has end-to-end encryption enabled. Chats that are end-to-end encrypted will be labelled with a green lock <i class="fa-solid fa-lock green"></i>.
+    </p>
+    <p>
       The secret keys for encrypting your messages will be stored in your Google Drive, where only you can access it.
       <span class="red">
         You must <strong>NOT</strong> clear the Bubbles app data stored in your Google Drive. Doing so will result in the loss of your keys and consequently your messages as well.
       </span>
     </p>
-    {#if undefined}
-      <!--  -->
+    {#if $globalUser.e2ee}
+      <strong class="green">End-to-end encryption is already enabled :)</strong>
     {:else if displayEncryptionConfirm}
       <strong>Note: this action is irreversible!</strong>
-      <button class="btn w-100 mb-1" on:click={() => {enableEncryption();displayEncryptionConfirm = false;}}>
+      <button class="btn w-100 mb-1" on:click={() => {
+        enableEncryption();
+        encryptionButtonDisabled = true;
+        displayEncryptionConfirm = false;
+      }}>
         Enable
       </button>
       <button class="btn red w-100" on:click={() => displayEncryptionConfirm = false}>
         Cancel
       </button>
     {:else}
-      <button class="btn w-100" on:click={() => displayEncryptionConfirm = true}>
+      <button class="btn w-100" on:click={() => displayEncryptionConfirm = true} disabled={encryptionButtonDisabled}>
         Enable end-to-end encryption.
       </button>
     {/if}
@@ -345,6 +354,12 @@ async function enableEncryption() {
 .e2ee-section .btn.red:active{
   background-color: var(--red-light-background);
   color: var(--red);
+}
+
+.e2ee-section i {
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
 }
 
 .green {

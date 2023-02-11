@@ -54,7 +54,19 @@ export const roomStorage = (() => {
     });
   }
 
-  return { subscribe, set, addRoom, updateOnlineStatus };
+  /**
+   * Update online status of user
+   * @param {string} user_id user id of user that went offline
+   * @param {boolean} status True if user is online
+   */
+  async function onEncryption(room_id) {
+    update(storage => {
+      storage[room_id].encrypted = true;
+      return storage;
+    });
+  }
+
+  return { subscribe, set, addRoom, updateOnlineStatus, onEncryption };
 })();
 
 

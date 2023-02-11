@@ -7,6 +7,18 @@ export const user_id = (() => {
 })();
 
 
+export const globalUser = (() => {
+  const { subscribe, update, set } = writable({});
+  async function enableEncryption() {
+    update(storage => {
+      storage.e2ee = true;
+      return storage;
+    });
+  }
+  return { subscribe, enableEncryption, set };
+})();
+
+
 // Collection of all users known/used
 export const allUsers = (() => {
   const { subscribe, update } = writable({});
