@@ -23,15 +23,21 @@ const selectUser = block_id => selectedBlocked = block_id;
 
 
 <SlidingMenu title="Blocked Users" display={displayBlockedUsers} on:click={toggleBlockedUsers}>
-  <div class="input-group">
-    <input
-      type="search"
-      class="form-control no-border m-3"
-      placeholder="Search..." 
-      aria-label="Search" 
-      bind:value={blockedSearchInput}
-    >
-  </div>
+  {#if currentBlocks.length === 0}
+    <div class="d-flex align-items-center justify-content-center p-3">
+      <span class="text-muted">No blocked users</span>
+    </div>
+  {:else}
+    <div class="input-group">
+        <input
+        type="search"
+        class="form-control no-border m-3"
+        placeholder="Search..." 
+        aria-label="Search" 
+        bind:value={blockedSearchInput}
+        >
+    </div>
+  {/if}
 
   {#each currentBlocks as blocked}
     <div class="friend d-flex py-2 px-3 user-select-none align-items-center">
