@@ -19,7 +19,7 @@ function authUser(callback) {
     if (callback !== undefined) callback();
   };
   // Request for client access token
-  tokenClient.requestAccessToken({ prompt: "" });
+  tokenClient.requestAccessToken({ prompt: "consent" });
 }
 
 

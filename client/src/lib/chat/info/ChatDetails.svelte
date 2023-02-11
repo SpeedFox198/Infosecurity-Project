@@ -35,7 +35,7 @@ $: currentChat = $roomStorage?.[$room_id] || {};
 $: displayChatDetails ? (() => displayNone = false)() : setTimeout(() => displayNone = true, 150);
 $: hide = animateHideChatDetails && !displayChatDetails;
 $: displayDisappearing = _displayDisappearing && displayChatDetails;
-$: displayVerifyCode = _displayVerifyCode && displayChatDetails && getSecurityCode();
+$: displayVerifyCode = $room_id && _displayVerifyCode && displayChatDetails && getSecurityCode();
 $: !currentChat.encrypted && (() => _displayVerifyCode = false)();
 
 
@@ -68,7 +68,7 @@ function toggleDisappearing() {
   _displayDisappearing = !_displayDisappearing;
 }
 
-function toggleVerifyCode() {
+function displayEncryptionDetails() {
   if (currentChat.encrypted) {
     _displayVerifyCode = !_displayVerifyCode;
   } else {
@@ -127,7 +127,7 @@ onMount(() => {
           name="Encryption"
           green={currentChat.encrypted}
           orange={!currentChat.encrypted}
-          on:click={toggleVerifyCode}
+          on:click={displayEncryptionDetails}
         >
           {#if currentChat.type === "group"}
             End-to-end encryption is not available for group chats yet. Click to learn more.
@@ -218,7 +218,7 @@ onMount(() => {
 <RightSlidingMenu
   title="Verify Security Code"
   display={displayVerifyCode}
-  on:click={toggleVerifyCode}
+  on:click={displayEncryptionDetails}
 >
   <div class="d-flex flex-column justify-content-center p-4">
     <div class="smaller-text user-select-none mb-4">

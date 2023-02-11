@@ -5,7 +5,7 @@ export const encryption = {};
 
 <script>
 import GDrive, { service } from "$lib/google/GDrive.svelte";
-import { keysInited, masterKey, roomKeys } from "$lib/stores/key";
+import { keysInited, masterKey, roomKeys, wrapKey } from "$lib/stores/key";
 import { user_id } from "$lib/stores/user";
 import { e2ee } from "./e2ee";
 
@@ -159,6 +159,66 @@ async function getRoomKey(room_id) {
 
 
 /**
+ * Get and returns the wrap key
+ * @param {string} user_id
+ * @returns {Promise<CryptoKey>}
+ */
+async function getWrapKey(user_id) {
+  if ($wrapKey.key) {
+    return await e2ee.importWrapKey($wrapKey.key);
+  }
+
+  const response = await fetch(
+    `https://localhost:8443/api/user/wrap-key/${user_id}`, {
+      method: "GET",
+      credentials: "include"
+    }
+  );
+  const { wrap_key, message } = await response.json();
+  if (message) throw new Error(message);
+
+  if (!wrap_key) {
+    return await createAndSaveWrapKey();
+  }
+
+  // Store value into stores
+  wrapKey.set({ key: wrap_key });
+
+  return await e2ee.importWrapKey(wrap_key);
+}
+
+
+async function createAndSaveWrapKey() {
+  const wrap_key = await e2ee.generateWrapKey();
+  uploadWrapKey(await e2ee.exportWrapKey(wrap_key));
+  return wrap_key;
+}
+
+
+async function uploadWrapKey(wrap_key) {
+  try {
+    const response = await fetch(
+      "https://localhost:8443/api/chat/upload-wrap-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ wrap_key })
+      }
+    );
+    if (!response.ok) {
+      setTimeout(() => uploadWrapKey(wrap_key), 100);
+      return;
+    }
+  } catch (err) {
+    setTimeout(() => uploadWrapKey(wrap_key), 100);
+    return;
+  }
+}
+
+
+/**
  * Creates and save the room key
  * @param {string} room_id current room id
  * @param {string} user_id current user id
@@ -210,17 +270,20 @@ async function saveRoomKey(room_id, key) {
 
 
 async function getNewMasterKey() {
+  const wrap_key = await getWrapKey($user_id);
   const key = await e2ee.generateKeyPair();
-  const privKey = await e2ee.exportPrivateKey(key.privateKey);
+  const { privKey, iv } = await e2ee.exportPrivateKey(key.privateKey, wrap_key);
   const pubKey = await e2ee.exportPublicKey(key.publicKey);
-  return { privKey, pubKey };
+  return { privKey, pubKey, iv };
 }
 
 
 async function deriveRoomKey(userPubKey) {
+  const wrap_key = await getWrapKey($user_id);
   const storedKey = $masterKey.privKey;
+  const iv = $masterKey.iv;
   if (storedKey === undefined) return;
-  const privKey = await e2ee.importPrivateKey(storedKey);
+  const privKey = await e2ee.importPrivateKey(storedKey, wrap_key, iv);
   const pubKey = await e2ee.importPublickey(userPubKey);
   const roomKey = await e2ee.deriveSecretKey(privKey, pubKey);;
   return await e2ee.exportRoomKey(roomKey);

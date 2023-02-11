@@ -7,6 +7,11 @@ const EcKeyGenParams = {
   name: "ECDH",
   namedCurve: "P-256"
 };
+const WRAP_ALGO = "AES-GCM";
+const WrapKeyGenParams  = {
+  name: WRAP_ALGO,
+  length: 256
+};
 
 
 /**
@@ -46,12 +51,25 @@ async function generateKeyPair() {
 
 
 /**
- * Exports the provided private key to a JSON string
- * @param {CryptoKey} key private key to be exported
- * @returns {Promise<string>}
+ * Generate a new wrap key
+ * 
+ * @returns {Promise<CryptoKey} private and public keys generated
  */
-async function exportPrivateKey(key) {
-  return JSON.stringify(await SubtleCrypto.exportKey("jwk", key));
+async function generateWrapKey() {
+  return await SubtleCrypto.generateKey(WrapKeyGenParams, true, ["wrapKey", "unwrapKey"]);
+}
+
+
+/**
+ * Exports the provided key to a Base64 string
+ * @param {CryptoKey} key private key to be exported
+ * @param {CryptoKey} wrapKey key to encrypt exported key
+ * @returns {Promise<{privKey: string; iv: string;}>}
+ */
+async function exportPrivateKey(key, wrapKey) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const privKey = encode(await SubtleCrypto.wrapKey("jwk", key, wrapKey, { name: WRAP_ALGO, iv }));
+  return { privKey, iv: encode(iv) };
 }
 
 
@@ -74,13 +92,26 @@ async function exportRoomKey(key) {
   return encode(await SubtleCrypto.exportKey("raw", key));
 }
 
+
 /**
- * Imports the JSON string private key
- * @param {string} keyData JSON string key to be imported
+ * Exports the provided key to a Base64 string
+ * @param {CryptoKey} key key to be exported
+ * @returns {Promise<string>}
+ */
+async function exportWrapKey(key) {
+  return encode(await SubtleCrypto.exportKey("raw", key));
+}
+
+
+/**
+ * Imports the Base64 string private key
+ * @param {string} keyData Base64 string key to be imported
+ * @param {CryptoKey} wrapKey key used for decrypting the encrypted key data
+ * @param {string} iv Base64 string of iv used for decrypting the key
  * @returns {Promise<CryptoKey>}
  */
-async function importPrivateKey(keyData) {
-  return await _importKey("jwk", JSON.parse(keyData), ["deriveKey"]);
+async function importPrivateKey(keyData, wrapKey, iv) {
+  return await _unwrapKey("jwk", decode(keyData), ["deriveKey"], wrapKey, decode(iv));
 }
 
 
@@ -105,6 +136,16 @@ async function importRoomKey(keyData) {
 
 
 /**
+ * Imports the Base64 string public key
+ * @param {string} keyData Base64 string key to be imported
+ * @returns {Promise<CryptoKey>}
+ */
+async function importWrapKey(keyData) {
+  return await SubtleCrypto.importKey("raw", decode(keyData), WRAP_ALGO, false, ["wrapKey", "unwrapKey"]);
+}
+
+
+/**
  * Imports the key from keyData using specified format
  * @param {"jwk" | "raw"} format format of key to be imported
  * @param {object} keyData data of key to be imported
@@ -113,6 +154,20 @@ async function importRoomKey(keyData) {
  */
 async function _importKey(format, keyData, usage) {
   return await SubtleCrypto.importKey(format, keyData, EcKeyGenParams, true, usage);
+}
+
+
+/**
+ * Imports the key from keyData using specified format
+ * @param {"jwk" | "raw" | "pkcs8" | "spki"} format format of key to be imported
+ * @param {object} keyData data of key to be imported
+ * @param {Array} usage usage of key to be imported
+ * @param {CryptoKey} wrapKey key used for decrypting the encrypted key data
+ * @param {string} iv Base64 string of iv used for decrypting the key
+ * @returns {Promise<CryptoKey>}
+ */
+async function _unwrapKey(format, keyData, usage, wrapKey, iv) {
+  return await SubtleCrypto.unwrapKey(format, keyData, wrapKey, {name:WRAP_ALGO, iv}, EcKeyGenParams, true, usage);
 }
 
 
@@ -277,12 +332,15 @@ async function generateSecurityCode(key) {
 // Export functions for svelte components to use
 export const e2ee = {
   generateKeyPair,
+  generateWrapKey,
   exportPrivateKey,
   exportPublicKey,
   exportRoomKey,
+  exportWrapKey,
   importPrivateKey,
   importPublickey,
   importRoomKey,
+  importWrapKey,
   deriveSecretKey,
   encryptMessage,
   decryptMessage,

@@ -4,6 +4,7 @@ from models import Membership, User
 from models.request_data import SearchUserBody
 from quart import Blueprint
 from quart_schema import validate_request
+from quart_auth import login_required
 from sqlalchemy.orm.exc import NoResultFound
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
@@ -66,3 +67,22 @@ async def user_public_key(room_id: str, user_id: str):
     return {
         "public_key": user[0]
     }
+
+
+@user_bp.get("/wrap-key/<string:user_id>")
+@login_required
+async def user_wrap_key(user_id: str):
+    if not user_id:
+        return {"message": "User not found."}, 404
+
+    async with async_session() as session:
+        # Currently only supports direct messages
+        statement = sa.select(User.wrap_key).where(
+            User.user_id == user_id
+        )
+        try:
+            wrap_key = (await session.execute(statement)).scalar()
+        except NoResultFound:
+            return {"message": "User not found."}, 404
+
+    return {"wrap_key": wrap_key}
