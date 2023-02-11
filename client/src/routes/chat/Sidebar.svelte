@@ -15,6 +15,7 @@ import Nav from './Nav.svelte';
 import Settings from '$lib/settings/Settings.svelte';
 import NewGroup from '$lib/settings/NewGroup.svelte';
 import Friends from '$lib/settings/Friends.svelte';
+import BlockedUsers from '$lib/settings/BlockedUsers.svelte';
 
 // SocketIO instance
 /** @type {import('socket.io-client').Socket}*/
@@ -26,6 +27,7 @@ const flash = getFlash(page);
 let displaySettings = false;
 let displayNewGroup = false;
 let displayFriends = false;
+let displayBlockedUsers = false;
 let roomSearchInput = "";
 
 $: unfilteredRooms = $roomList.map(room_id => $roomStorage[room_id]);
@@ -51,7 +53,7 @@ async function selectGrp(new_room) {
 const toggleSettings = async () => displaySettings = !displaySettings;
 const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
 const toggleFriends = async () => displayFriends = !displayFriends;
-
+const toggleBlockedUsers = async () => displayBlockedUsers = !displayBlockedUsers;
 
 const sendNewGroup = async (event) => {
   let { group_metadata } = event.detail;
@@ -105,8 +107,9 @@ onMount(() => {
   <Settings {displaySettings} {toggleSettings}/>
   <NewGroup {displayNewGroup} {toggleNewGroup} on:create-group={sendNewGroup}/>
   <Friends {displayFriends} {toggleFriends} socket={socket}/>
+  <BlockedUsers {displayBlockedUsers} {toggleBlockedUsers} socket={socket}/>
   <!-- Profile & Settings Section -->
-  <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends}/>
+  <Nav bind:roomSearchInput={roomSearchInput} {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}/>
 
   <!-- Chat List Section -->
   <div class="d-flex flex-column bottom-left">

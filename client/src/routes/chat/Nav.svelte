@@ -6,6 +6,7 @@ let currentUser = $page.data.user
 export let toggleSettings;
 export let toggleNewGroup;
 export let toggleFriends;
+export let toggleBlockedUsers;
 export let roomSearchInput
 
 const logoutUser = async () => {
@@ -69,7 +70,7 @@ const logoutUser = async () => {
           </button>
         </li>
         <li>
-          <button class="dropdown-item" type="button">
+          <button on:click={toggleBlockedUsers} class="dropdown-item" type="button">
             <i class="fa-solid fa-user-slash"></i>
             Blocked Users
           </button>
