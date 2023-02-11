@@ -144,17 +144,18 @@ encryption.decryptImage = async (image, iv, room_id) => {
 encryption.generateSecurityCode = async (room_id) => {
   const key = await getRoomKey(room_id);
   if (key === undefined) return;
-  return await e2ee.generateSecurityCode(await e2ee.exportRoomKey(key));
+  return await e2ee.generateSecurityCode(key);
 }
 
 
 async function getRoomKey(room_id) {
+  const wrap_key = await getWrapKey($user_id);
   let key = $roomKeys[room_id];
   if (key === undefined) {
     key = await createAndSaveRoomKey(room_id, $user_id);
     if (key === undefined) return;
   }
-  return await e2ee.importRoomKey(key);
+  return await e2ee.importRoomKey(key.roomKey, wrap_key, key.iv);
 }
 
 
@@ -208,11 +209,11 @@ async function uploadWrapKey(wrap_key) {
       }
     );
     if (!response.ok) {
-      setTimeout(() => uploadWrapKey(wrap_key), 100);
+      setTimeout(() => uploadWrapKey(wrap_key), 300);
       return;
     }
   } catch (err) {
-    setTimeout(() => uploadWrapKey(wrap_key), 100);
+    setTimeout(() => uploadWrapKey(wrap_key), 300);
     return;
   }
 }
@@ -286,7 +287,7 @@ async function deriveRoomKey(userPubKey) {
   const privKey = await e2ee.importPrivateKey(storedKey, wrap_key, iv);
   const pubKey = await e2ee.importPublickey(userPubKey);
   const roomKey = await e2ee.deriveSecretKey(privKey, pubKey);;
-  return await e2ee.exportRoomKey(roomKey);
+  return await e2ee.exportRoomKey(roomKey, wrap_key);
 }
 </script>
 

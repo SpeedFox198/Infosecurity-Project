@@ -55,6 +55,7 @@ const toggleSettings = async () => displaySettings = !displaySettings;
 const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
 const toggleFriends = async () => displayFriends = !displayFriends;
 const toggleBlockedUsers = async () => displayBlockedUsers = !displayBlockedUsers;
+const gDriveHandleSignoutClick = () => encryption?.handleSignoutClick();
 
 const sendNewGroup = async (event) => {
   let { group_metadata } = event.detail;
@@ -117,7 +118,7 @@ onMount(() => {
   <Nav
     bind:roomSearchInput={roomSearchInput}
     {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}
-    gDriveHandleSignoutClick={encryption.handleSignoutClick}
+    {gDriveHandleSignoutClick}
   />
 
   <!-- Chat List Section -->

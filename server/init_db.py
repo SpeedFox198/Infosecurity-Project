@@ -96,8 +96,10 @@ async def add_users(session):
         eden.avatar = "/ALL THE BEST EMOJI.png"
 
         # for now use same key LMAO cuz i lazy (if got time, prob not, change this)
-        bob.public_key = "BJxAiqrcKtVRgzxZHFj7UWlNqxtJ5+cRkyKLeCdb5XD9N0CIujBXkXxJz+BFOI23mmtZFv4jYccfXz4D60e0YUM="
-        clarence.public_key = "BJxAiqrcKtVRgzxZHFj7UWlNqxtJ5+cRkyKLeCdb5XD9N0CIujBXkXxJz+BFOI23mmtZFv4jYccfXz4D60e0YUM="
+        bob.public_key = "BN622nYtgKpTP6pZ0KuiKnfkf3tjMhHGkJnszp2yftjZfLFdDpvIKtgcCyV8dAr/CkPmF+bMErO3Hlj9QsfxZxc="
+        clarence.public_key = "BN622nYtgKpTP6pZ0KuiKnfkf3tjMhHGkJnszp2yftjZfLFdDpvIKtgcCyV8dAr/CkPmF+bMErO3Hlj9QsfxZxc="
+        bob.wrap_key = "MyXmW89SKTCpxiW6dFyR9pqijsoGWxs0HIfy0cdM4tY="
+        clarence.wrap_key = "MyXmW89SKTCpxiW6dFyR9pqijsoGWxs0HIfy0cdM4tY="
         bob.e2ee = True
         clarence.e2ee = True
 

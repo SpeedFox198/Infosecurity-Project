@@ -41,6 +41,16 @@ function deriveSecretKey(privateKey, publicKey) {
 
 
 /**
+ * Creates a random IV of specified length
+ * @param {number} length length of the IV (in bytes)
+ * @returns {Uint8Array} IV of specified length
+ */
+function generateIV(length) {
+  return crypto.getRandomValues(new Uint8Array(length));
+}
+
+
+/**
  * Generate a new pair of private and public keys
  * 
  * @returns {Promise<CryptoKeyPair} private and public keys generated
@@ -67,7 +77,7 @@ async function generateWrapKey() {
  * @returns {Promise<{privKey: string; iv: string;}>}
  */
 async function exportPrivateKey(key, wrapKey) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = generateIV(12);
   const privKey = encode(await SubtleCrypto.wrapKey("jwk", key, wrapKey, { name: WRAP_ALGO, iv }));
   return { privKey, iv: encode(iv) };
 }
@@ -79,17 +89,30 @@ async function exportPrivateKey(key, wrapKey) {
  * @returns {Promise<string>}
  */
 async function exportPublicKey(key) {
-  return encode(await SubtleCrypto.exportKey("raw", key));
+  return encode(await _exportRawKey(key));
 }
 
 
 /**
  * Exports the provided room key to a Base64 string
  * @param {CryptoKey} key room key to be exported
- * @returns {Promise<string>}
+ * @param {CryptoKey} wrapKey key to encrypt exported room key
+ * @returns {Promise<{roomKey: string; iv: string;}>}
  */
-async function exportRoomKey(key) {
-  return encode(await SubtleCrypto.exportKey("raw", key));
+async function exportRoomKey(key, wrapKey) {
+  const iv = generateIV(12);
+  const roomKey = encode(await SubtleCrypto.wrapKey("raw", key, wrapKey, { name: WRAP_ALGO, iv }));
+  return { roomKey, iv: encode(iv) };
+}
+
+
+/**
+ * Exports the provided public key to an ArrayBuffer
+ * @param {CryptoKey} key public key to be exported
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function _exportRawKey(key) {
+  return await SubtleCrypto.exportKey("raw", key);
 }
 
 
@@ -111,7 +134,7 @@ async function exportWrapKey(key) {
  * @returns {Promise<CryptoKey>}
  */
 async function importPrivateKey(keyData, wrapKey, iv) {
-  return await _unwrapKey("jwk", decode(keyData), ["deriveKey"], wrapKey, decode(iv));
+  return await _unwrapKey("jwk", decode(keyData), EcKeyGenParams, wrapKey, decode(iv), ["deriveKey"]);
 }
 
 
@@ -128,10 +151,12 @@ async function importPublickey(keyData) {
 /**
  * Imports the Base64 string room key
  * @param {string} keyData Base64 string key to be imported
+ * @param {CryptoKey} wrapKey key used for decrypting the encrypted key data
+ * @param {string} iv Base64 string of iv used for decrypting the key
  * @returns {Promise<CryptoKey>}
  */
-async function importRoomKey(keyData) {
-  return await SubtleCrypto.importKey("raw", decode(keyData), "AES-GCM", true, ["encrypt", "decrypt"]);
+async function importRoomKey(keyData, wrapKey, iv) {
+  return await _unwrapKey("raw", decode(keyData), AES_MODE, wrapKey, decode(iv), ["encrypt", "decrypt"]);
 }
 
 
@@ -161,13 +186,14 @@ async function _importKey(format, keyData, usage) {
  * Imports the key from keyData using specified format
  * @param {"jwk" | "raw" | "pkcs8" | "spki"} format format of key to be imported
  * @param {object} keyData data of key to be imported
- * @param {Array} usage usage of key to be imported
+ * @param {object} keyAlgo object representing algorithm of key to be imported
  * @param {CryptoKey} wrapKey key used for decrypting the encrypted key data
  * @param {string} iv Base64 string of iv used for decrypting the key
+ * @param {Array} usage usage of key to be imported
  * @returns {Promise<CryptoKey>}
  */
-async function _unwrapKey(format, keyData, usage, wrapKey, iv) {
-  return await SubtleCrypto.unwrapKey(format, keyData, wrapKey, {name:WRAP_ALGO, iv}, EcKeyGenParams, true, usage);
+async function _unwrapKey(format, keyData, keyAlgo, wrapKey, iv, usage) {
+  return await SubtleCrypto.unwrapKey(format, keyData, wrapKey, { name: WRAP_ALGO, iv }, keyAlgo, true, usage);
 }
 
 
@@ -224,7 +250,7 @@ async function _decrypt(ciphertext, key) {
  * @returns {Promise<{ encrypted: ArrayBuffer; iv: ArrayBuffer; }>} encrypted data and IV separated by a separator
  */
 async function _encryptRaw(data, key) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = generateIV(12);
   const encrypted = await SubtleCrypto.encrypt({ name: AES_MODE, iv }, key, data);
   return { encrypted, iv };
 }
@@ -312,11 +338,11 @@ async function decryptImage(encryptedImage, key, iv) {
 
 /**
  * Generates a security code for verifying secret code
- * @param {string} key Base64 encoded key
+ * @param {CryptoKey} key key object to be used in generating security code
  * @returns {Promise<string>} security code
  */
 async function generateSecurityCode(key) {
-  const data = decode(key);
+  const data = await _exportRawKey(key);
   const hashBuffer = await SubtleCrypto.digest("SHA-512", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => {

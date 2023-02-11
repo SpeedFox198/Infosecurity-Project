@@ -19,7 +19,7 @@ function authUser(callback) {
     if (callback !== undefined) callback();
   };
   // Request for client access token
-  tokenClient.requestAccessToken({ prompt: "consent" });
+  tokenClient.requestAccessToken({ prompt: "" });
 }
 
 
@@ -31,9 +31,6 @@ function handleSignoutClick() {
   if (token !== null) {
     google.accounts.oauth2.revoke(token.access_token);
     gapi.client.setToken("");
-    message = "";
-    authButtonText = "Authorise";
-    displaySignOut  = false;
   }
 }
 
