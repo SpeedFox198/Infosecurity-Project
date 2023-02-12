@@ -1,14 +1,21 @@
 import sqlalchemy as sa
+from sqlalchemy.exc import SQLAlchemyError
+
 from db_access.globals import async_session
 from models import Membership, Room, User
 from sqlalchemy.orm.exc import NoResultFound
 
+from utils.logging import log_exception
+
 
 async def db_update_disappearing(disappearing: str, room_id: str):
     async with async_session() as session:
-        statement = sa.update(Room).where(Room.room_id == room_id).values(disappearing=disappearing)
-        await session.execute(statement)
-        await session.commit()
+        try:
+            statement = sa.update(Room).where(Room.room_id == room_id).values(disappearing=disappearing)
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
 
 async def db_get_room_if_user_verified(room_id: str, user_id: str) -> Room | None:
@@ -57,12 +64,14 @@ async def db_check_and_set_room_encrypted(user_id: str) -> list[str]:
 
         room_ids = [room_id for room_id, user_id in result if user_id in user_ids]
 
-        statement = sa.update(Room).where(
-            Room.room_id.in_(room_ids)
-        ).values(encrypted=True)
-        print("but why")
+        try:
+            statement = sa.update(Room).where(
+                Room.room_id.in_(room_ids)
+            ).values(encrypted=True)
 
-        await session.execute(statement)
-        await session.commit()
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
     return room_ids

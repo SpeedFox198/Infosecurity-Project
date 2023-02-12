@@ -27,6 +27,7 @@ from security_functions.virustotal import (get_file_analysis, get_url_analysis,
                                            upload_file, upload_url)
 from socketio.exceptions import ConnectionRefusedError
 from utils import remove_tree_directory, to_unix
+from utils.logging import log_warning, log_exception
 
 from .events import *
 from .functions import (delete_expired_messages, get_room, messages_queue_5s,
@@ -291,6 +292,7 @@ async def create_group(sid: str, data: dict):
     try:
         group_metadata = GroupMetadataBody(**data)
     except ValidationError as err:
+        await log_exception(err)
         error_list = [error["msg"] for error in err.errors()]
         error_message = error_list[0]
         await sio.emit(CREATE_GROUP_ERROR, {
@@ -305,6 +307,9 @@ async def create_group(sid: str, data: dict):
         is_image_sensitive = ocr_scan(icon_path)
         if is_image_sensitive:
             await remove_tree_directory(os.path.dirname(icon_path))
+            await log_warning(
+                f"User {await current_user.username} tried to upload a sensitive image when creating group"
+            )
             await sio.emit(CREATE_GROUP_ERROR, {
                 "message": "Group icon contains sensitive data"
             })
@@ -706,8 +711,7 @@ async def check_safe_url(sid: str, data: dict):
     try:
         url_request = ScanURLBody(**data)
     except ValidationError as err:
-        error_list = [error["msg"] for error in err.errors()]
-        error_message = error_list[0]
+        await log_exception(err)
         return
 
     is_malicious = False
@@ -717,12 +721,16 @@ async def check_safe_url(sid: str, data: dict):
             data_id = await upload_url(url)
             url_id = await get_url_analysis(data_id)
             results = URLResultData(**await get_url_report(url_id))
-        except VirusTotalError:
+        except VirusTotalError as err:
+            await log_exception(err)
             return
 
         if results.malicious > 0 or results.suspicious > 0:
             is_malicious = True
             await set_message_as_malicious(url_request.message_id)
+            await log_warning(
+                f"Message {url_request.message_id} detected to have malicious URL(s)"
+            )
             break
 
     room_origin = await db_get_room_id_of_message(url_request.message_id)
@@ -768,6 +776,9 @@ async def check_malicious_file(file_hash, message_id):
     score = await scan_file_hash(file_hash)
     if score > 0:
         malicious = True
+        await log_warning(
+            f"Message {message_id} is detected to have a malicious file."
+        )
 
     room_id = await db_get_room_id_of_message(message_id)
 

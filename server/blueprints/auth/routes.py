@@ -43,7 +43,8 @@ from .functions import (
     get_user_agent_data,
     send_otp_email,
     send_password_recovery_email,
-    evaluate_failed_attempts
+    evaluate_failed_attempts,
+    send_login_alert_email
 )
 
 FORGET_PASSWORD_SALT = b'\x80\x1c\rqn\xb2\x7f\x03\x90\xeeA\x18ex\x0e\xc1\x14\xf7\xf3A\x8b\xbc\\]\x1ag\xd8\xcbk\xd3\x9a\x9a3\xce\x14\xbe\xc7\x1ak^K>\xb5jyu,:\xdaF\xc2\x08\xae5\xcf$\x90M[\xcd&\xc1\x90\x06\xa5i\x81\xfd70\xd3\x1d\x03\x06\xf4(Up6\x08b\xb6avj\x0b\x18\xcd\xb8\xb6=J\x190[\xa9b\r\xc1\r\x98v\xf3\xd7q\x13\xf3{W\xa2\x1b\xaa\x8b\xf2\xe6\xcf\xe8M|&\x86\x03\xe6Pfa\xea\x03'
@@ -79,6 +80,7 @@ async def sign_up(data: SignUpBody):
 
         auth_session["otp_username"] = user.username
         auth_session["otp_email"] = user.email
+        await log_info(f"User {user.username} has signed up.")
         return {"message": "Sign up completed, move to OTP"}, 200
 
 
@@ -155,8 +157,7 @@ async def login(data: LoginBody):
 
     logged_in_user = existing_user
     await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-    # TODO(br1ght) re-enable when needed
-    # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+    await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
     login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
     await log_info(
         f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
@@ -185,13 +186,16 @@ async def two_fa(data: TwoFABody):
     if verified:
         logged_in_user = existing_user
         await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-        # TODO(br1ght) re-enable when needed
-        # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+        await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
         login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
         await log_info(
-            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
+            f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "login success"}, 200
     else:
+        await log_info(
+            f"User {existing_user.username} has failed to login with 2fa using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "Invalid 2FA code"}, 400
 
 
@@ -214,25 +218,38 @@ async def backupcode(data: BackupCodeBody):
             await delete_2fa_backup_codes(existing_user.user_id, data.backupcode)
             logged_in_user = existing_user
             await add_logged_in_device(session, device_id, logged_in_user.user_id, browser_data)
-            # TODO(br1ght) re-enable when needed
-            # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
+            await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
             login_user(AuthedUser(f"{logged_in_user.user_id}.{device_id}"))
             await log_info(
                 f"User {logged_in_user.username} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}")
             return {"message": "login success"}, 200
+
+    await log_info(
+        f"User {existing_user.username} has failed to log in with invalid backup code using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+    )
     return {"message": "Invalid backup code"}, 400
 
 
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
 async def forgot_password(data: ForgotPasswordBody):
+    browser_data = BrowsingData(*await get_user_agent_data(request.user_agent.string),
+                                await get_location_from_ip(request.remote_addr))
     if get_user_id(data.email) is None:
+        await log_info(
+            f"Invalid forgot password request of {data.email} using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "Email sent"}, 200
+
     url_serialiser = current_app.config["url_serialiser"]
     email = data.email
     token = url_serialiser.dumps(email, FORGET_PASSWORD_SALT)
     send_password_recovery_email(email, token)
+    await log_info(
+        f"Forgot password request of {data.email} sent using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+    )
     return {"message": "Email Sent"}, 200
+
 
 @auth_bp.post("/reset-password")
 @validate_request(ResetPasswordBody)
@@ -256,6 +273,9 @@ async def reset_password(data: ResetPasswordBody):
     user_id = await get_user_id(email)
     await delete_lockout(user_id)
     await delete_failed_attempt(user_id)
+    await log_info(
+        f"User {user_id}'s password has been reset"
+    )
     return {"message": "Password reset"}, 200
 
 
@@ -276,9 +296,15 @@ async def google_callback(data: GoogleCallBackBody):
         google_flow.fetch_token(authorization_response=authorization_response)
     except Exception as err:
         await log_exception(err)
+        await log_info(
+            f"Invalid Google login using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "Error occurred while login with Google"}, 404
 
     if google_state != state_from_parameters:
+        await log_info(
+            f"Invalid Google login using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "Invalid Google Login"}, 401
 
     credentials = google_flow.credentials
@@ -290,6 +316,9 @@ async def google_callback(data: GoogleCallBackBody):
                                                15)
     except ValueError as err:
         await log_exception(err)
+        await log_info(
+            f"Invalid Google login using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
+        )
         return {"message": "Invalid token or something went wrong with the process"}, 401
 
     # ID token is valid. Get the user's Google Account ID from the decoded token.
@@ -308,8 +337,6 @@ async def google_callback(data: GoogleCallBackBody):
 
     await add_logged_in_device(session, device_id, user_id, browser_data)
     login_user(AuthedUser(f"{user_id}.{device_id}"))
-    # TODO(br1ght) re-enable when needed
-    # await send_login_alert_email(logged_in_user, browser_data, request.remote_addr)
     await log_info(
         f"User {name} has logged in using {browser_data.browser}, {browser_data.os} from {browser_data.location}"
     )
@@ -333,7 +360,8 @@ async def logout():
     try:
         await remove_logged_in_device(await current_user.device_id, await current_user.user_id)
         logout_user()
-    except RuntimeError:
+    except RuntimeError as err:
+        await log_exception(err)
         return {"message": "Failed to logout"}, 500
 
     return {"message": "Successful logout"}, 200
