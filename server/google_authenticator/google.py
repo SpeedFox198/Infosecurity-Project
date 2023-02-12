@@ -45,9 +45,7 @@ def get_google_oauth_flow() -> Flow:
     flow = Flow.from_client_secrets_file('credentials.json', [
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email",
-        "openid",
-        "https://www.googleapis.com/auth/gmail.send",
-        "https://www.googleapis.com/auth/gmail.readonly"
+        "openid"
     ])
     flow.redirect_uri = "https://localhost/google-callback"
     return flow

@@ -1,7 +1,7 @@
 <script>
 import { onMount, createEventDispatcher } from "svelte";
 
-const client_id = "758319541478-8edtd31bks6n2vesongu1ahhbv0765iu.apps.googleusercontent.com";
+const client_id = "390880222434-ful7luuffhume6sd8g7vbdaeerani7m3.apps.googleusercontent.com";
 const scope = "https://www.googleapis.com/auth/drive.appdata";
 const discoveryDocs = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const dispatch = createEventDispatcher();
