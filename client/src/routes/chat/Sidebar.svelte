@@ -20,7 +20,6 @@ import BlockedUsers from '$lib/settings/BlockedUsers.svelte';
 // SocketIO instance
 /** @type {import('socket.io-client').Socket}*/
 export let socket;
-export let encryption;
 export let getRoomMsgs;
 
 const flash = getFlash(page);
@@ -55,7 +54,6 @@ const toggleSettings = async () => displaySettings = !displaySettings;
 const toggleNewGroup = async () => displayNewGroup = !displayNewGroup;
 const toggleFriends = async () => displayFriends = !displayFriends;
 const toggleBlockedUsers = async () => displayBlockedUsers = !displayBlockedUsers;
-const gDriveHandleSignoutClick = () => encryption?.handleSignoutClick();
 
 const sendNewGroup = async (event) => {
   let { group_metadata } = event.detail;
@@ -118,7 +116,7 @@ onMount(() => {
   <Nav
     bind:roomSearchInput={roomSearchInput}
     {toggleSettings} {toggleNewGroup} {toggleFriends} {toggleBlockedUsers}
-    {gDriveHandleSignoutClick}
+    on:signout
   />
 
   <!-- Chat List Section -->

@@ -1,22 +1,27 @@
 <script>
+import { createEventDispatcher } from "svelte";
 import { page } from "$app/stores"
+
+const dispatch = createEventDispatcher();
 
 let currentUser = $page.data.user
 
-export let gDriveHandleSignoutClick;
 export let toggleSettings;
 export let toggleNewGroup;
 export let toggleFriends;
 export let toggleBlockedUsers;
 export let roomSearchInput
 
+const sleep = async ms => new Promise(resolve => setTimeout(resolve, ms));
+
 const logoutUser = async () => {
   try {
-    gDriveHandleSignoutClick();
+    dispatch("signout");
   } catch (err) {
     console.error(err);
   }
   localStorage.clear();
+  await sleep(300);
   await fetch("https://localhost:8443/api/auth/logout", {
     method: "POST",
     credentials: "include",

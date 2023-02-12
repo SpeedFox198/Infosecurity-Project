@@ -12,7 +12,9 @@ import { e2ee } from "./e2ee";
 const MASTER_KEY_FILE_NAME = "master_key.json";
 const ROOM_KEYS_FILE_NAME = "room_keys.json";
 
-encryption.handleSignoutClick = () => service?.handleSignoutClick();
+encryption.handleSignoutClick = () => {
+  service?.handleSignoutClick();
+};
 
 /**
  * Initialise keys from localStorage if possible,

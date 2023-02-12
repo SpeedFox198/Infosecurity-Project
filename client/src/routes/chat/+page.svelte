@@ -67,6 +67,10 @@ const openChatDetails = () => {
   displayChatDetails = true;
   animateHideChatDetails = true;
 };
+
+function handleSignOut() {
+  encryption.handleSignoutClick()
+}
 </script>
 
 
@@ -76,7 +80,7 @@ const openChatDetails = () => {
 
 
 <main class="d-flex flex-nowrap h-100 overflow-hidden" class:d-none={!appLoaded}>
-  <Sidebar {socket} {getRoomMsgs} {encryption}/>
+  <Sidebar {socket} {getRoomMsgs} on:signout={handleSignOut}/>
   <RightSection
     {socket} {getRoomMsgs} {encryption}
     {displayChatDetails} {openChatDetails} {animateHideChatDetails}
