@@ -21,6 +21,7 @@ from google_authenticator.google_email_send import gmail_send
 from db_access.backup_codes import get_2fa_backup_codes
 from db_access.twoFA import check_2fa_exists
 from db_access.backup_codes import create_2fa_backup_codes, delete_2fa_backup_codes_all
+from utils.logging import log_info
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
@@ -69,6 +70,9 @@ async def google_authenticator(data: TwoFABody):
                 bc.code
                 for bc in await get_2fa_backup_codes(await current_user.user_id)
             ]
+            await log_info(
+                f"User {await current_user.username} has enabled 2FA"
+            )
             return {"message": "2FA enabled", "backup_codes": backup_codes}, 200
         else:
             return {"message": "Invalid 2FA code"}, 400
@@ -80,6 +84,9 @@ async def delete_2fa():
     if await get_2fa_backup_codes(await current_user.user_id):
         await delete_2fa_all(await current_user.user_id)
         await delete_2fa_backup_codes_all(await current_user.user_id)
+        await log_info(
+            f"User {await current_user.username} has disabled 2FA"
+        )
         return {"message": "2FA disabled"}, 200
     else:
         return {"message": "2FA not enabled"}, 400
@@ -180,6 +187,9 @@ async def get_account_information():
                                     link=link
                                     )
     gmail_send(email, subject, message)
+    await log_info(
+        f"User {await current_user.username} has requested for account information report"
+    )
     return {"message": "Getting account report"}
 
 

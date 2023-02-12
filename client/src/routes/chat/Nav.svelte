@@ -11,7 +11,11 @@ export let toggleBlockedUsers;
 export let roomSearchInput
 
 const logoutUser = async () => {
-  gDriveHandleSignoutClick();
+  try {
+    gDriveHandleSignoutClick();
+  } catch (err) {
+    console.error(err);
+  }
   localStorage.clear();
   await fetch("https://localhost:8443/api/auth/logout", {
     method: "POST",

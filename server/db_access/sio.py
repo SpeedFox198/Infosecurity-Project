@@ -9,6 +9,7 @@ from models import (
     FriendRequest,
     Friend, Room, Membership
 )
+from utils.logging import log_exception
 
 
 async def set_online_status(user_id: str, status: bool) -> None:
@@ -17,15 +18,19 @@ async def set_online_status(user_id: str, status: bool) -> None:
             statement = sa.update(User).where(User.user_id == user_id).values(online=status)
             await session.execute(statement)
             await session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as err:
+            await log_exception(err)
             await session.rollback()
 
 
 async def add_sio_connection(sid: str, user_id: str) -> None:
     async with async_session() as session:
-        connection = SioConnection(sid, user_id)
-        session.add(connection)
-        await session.commit()
+        try:
+            connection = SioConnection(sid, user_id)
+            session.add(connection)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
 
 async def remove_sio_connection(sid: str, user_id: str) -> None:
@@ -36,7 +41,8 @@ async def remove_sio_connection(sid: str, user_id: str) -> None:
             )
             await session.execute(statement)
             await session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as err:
+            await log_exception(err)
             await session.rollback()
 
 
@@ -58,12 +64,15 @@ async def have_relationship(relationship: list[str, str] | tuple[str, str]) -> F
 
 async def remove_friend_request(sender_user_id: str, recipient_user_id: str) -> None:
     async with async_session() as session:
-        statement = sa.delete(FriendRequest).where(
-            (FriendRequest.sender == sender_user_id) &
-            (FriendRequest.recipient == recipient_user_id)
-        )
-        await session.execute(statement)
-        await session.commit()
+        try:
+            statement = sa.delete(FriendRequest).where(
+                (FriendRequest.sender == sender_user_id) &
+                (FriendRequest.recipient == recipient_user_id)
+            )
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
 
 async def have_e2ee_enabled(user_id: str) -> bool:
@@ -104,4 +113,7 @@ async def db_clear_sio_connections():
     statement = sa.delete(SioConnection)
     async with async_session() as session:
         async with session.begin():
-            await session.execute(statement)
+            try:
+                await session.execute(statement)
+            except SQLAlchemyError as err:
+                await log_exception(err)

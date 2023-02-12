@@ -1,7 +1,10 @@
 import sqlalchemy as sa
+from sqlalchemy.exc import SQLAlchemyError
+
 from db_access.globals import async_session
 from models import Disappearing, Media, Membership, Message, Room, MessageStatus
 from utils import to_unix
+from utils.logging import log_exception
 
 
 async def db_get_room_messages(room_id: str, limit: int, offset: int) -> list[dict]:
@@ -70,19 +73,22 @@ async def db_remove_messages(messages: list[str], room_id: str, user_id: str) ->
         messages = [row[0] for row in result]
 
         # Delete messages from database
-        statement = sa.delete(Media).where(Media.message_id.in_(messages))
-        await session.execute(statement)
+        try:
+            statement = sa.delete(Media).where(Media.message_id.in_(messages))
+            await session.execute(statement)
 
-        statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(messages))
-        await session.execute(statement)
+            statement = sa.delete(Disappearing).where(Disappearing.message_id.in_(messages))
+            await session.execute(statement)
 
-        statement = sa.delete(MessageStatus).where(MessageStatus.message_id.in_(messages))
-        await session.execute(statement)
+            statement = sa.delete(MessageStatus).where(MessageStatus.message_id.in_(messages))
+            await session.execute(statement)
 
-        statement = sa.delete(Message).where(Message.message_id.in_(messages))
-        await session.execute(statement)
+            statement = sa.delete(Message).where(Message.message_id.in_(messages))
+            await session.execute(statement)
 
-        await session.commit()
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
     return messages
 
@@ -96,17 +102,23 @@ async def db_get_room_id_of_message(message_id: str) -> str:
 async def set_messages_as_received(message_ids: list[str]) -> None:
 
     async with async_session() as session:
-        statement = sa.update(MessageStatus).where(
-            MessageStatus.message_id.in_(message_ids)
-        ).values(received=True)
-        await session.execute(statement)
-        await session.commit()
+        try:
+            statement = sa.update(MessageStatus).where(
+                MessageStatus.message_id.in_(message_ids)
+            ).values(received=True)
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
 
 
 async def set_message_as_malicious(message_id: str) -> None:
     async with async_session() as session:
-        statement = sa.update(MessageStatus).where(
-            MessageStatus.message_id == message_id
-        ).values(malicious=True)
-        await session.execute(statement)
-        await session.commit()
+        try:
+            statement = sa.update(MessageStatus).where(
+                MessageStatus.message_id == message_id
+            ).values(malicious=True)
+            await session.execute(statement)
+            await session.commit()
+        except SQLAlchemyError as err:
+            await log_exception(err)
