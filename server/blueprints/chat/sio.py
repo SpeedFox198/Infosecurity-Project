@@ -619,7 +619,7 @@ async def set_disappearing(sid: str, data: dict):
     await db_update_disappearing(disappearing, room_id)
 
     # Send room_ids that client belongs to
-    await sio.emit(GROUP_INVITE, rooms, to=sid)
+    await sio.emit(UPDATE_DISAPPEARING, {"room_id": room_id, "disappearing": disappearing}, room=room_id)
 
 
 @sio.event
@@ -701,9 +701,9 @@ async def enable_e2ee(sid: str):
     room_ids = await db_check_and_set_room_encrypted(current_user_id)
 
     for room_id in room_ids:
-        await sio.emit("room_encrypted", {"room_id": room_id}, room=room_id)
+        await sio.emit(ROOM_ENCRYPTED, {"room_id": room_id}, room=room_id)
 
-    await sio.emit("e2ee_enabled", room=current_user_id)
+    await sio.emit(E2EE_ENABLED, room=current_user_id)
 
 
 @sio.event

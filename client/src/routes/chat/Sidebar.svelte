@@ -98,6 +98,10 @@ onMount(() => {
     roomStorage.addRoom(room_id, room);
   });
 
+  socket.on("update_disappearing", async data => {
+    roomStorage.updateDisappearing(data.room_id, data.disappearing);
+  });
+
   socket.on("room_encrypted", async data => roomStorage.onEncryption(data.room_id));
 
   socket.on("e2ee_enabled", globalUser.enableEncryption);

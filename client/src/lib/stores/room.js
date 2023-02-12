@@ -66,7 +66,14 @@ export const roomStorage = (() => {
     });
   }
 
-  return { subscribe, set, addRoom, updateOnlineStatus, onEncryption };
+  async function updateDisappearing(room_id, disappearing) {
+    update(storage => {
+      storage[room_id].disappearing = disappearing;
+      return storage;
+    });
+  }
+
+  return { subscribe, set, addRoom, updateOnlineStatus, onEncryption, updateDisappearing };
 })();
 
 
