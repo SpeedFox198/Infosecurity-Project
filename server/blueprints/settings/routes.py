@@ -187,7 +187,7 @@ async def get_account_information():
 async def get_account_report(token: str, user_id: str, file_name: str):
     url_serialiser = current_app.config["url_serialiser"]
     try:
-        email = url_serialiser.loads(token, max_age=2592000)
+        email = url_serialiser.loads(token, max_age=2592000) # 30 days=2592000
         if not email:
             abort(401)
     except SignatureExpired:
