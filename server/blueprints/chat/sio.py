@@ -776,6 +776,7 @@ async def check_malicious_file(file_hash, message_id):
     score = await scan_file_hash(file_hash)
     if score > 0:
         malicious = True
+        await set_message_as_malicious(message_id)
         await log_warning(
             f"Message {message_id} is detected to have a malicious file."
         )
