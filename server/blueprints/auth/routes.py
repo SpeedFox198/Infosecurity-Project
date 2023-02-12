@@ -226,12 +226,13 @@ async def backupcode(data: BackupCodeBody):
 @auth_bp.post("/forgot-password")
 @validate_request(ForgotPasswordBody)
 async def forgot_password(data: ForgotPasswordBody):
+    if get_user_id(data.email) is None:
+        return {"message": "Email sent"}, 200
     url_serialiser = current_app.config["url_serialiser"]
     email = data.email
     token = url_serialiser.dumps(email, FORGET_PASSWORD_SALT)
     send_password_recovery_email(email, token)
     return {"message": "Email Sent"}, 200
-
 
 @auth_bp.post("/reset-password")
 @validate_request(ResetPasswordBody)
