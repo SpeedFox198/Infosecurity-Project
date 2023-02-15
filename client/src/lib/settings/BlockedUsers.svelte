@@ -48,7 +48,7 @@ const selectUser = block_id => selectedBlocked = block_id;
             <img
               class="rounded-circle"
               src={
-                blocked.icon.startsWith("media/") ?
+                blocked?.icon?.startsWith("media/") ?
                 `https://localhost:8443/api/${blocked.icon}` :
                 blocked.icon
               }

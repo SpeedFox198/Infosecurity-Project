@@ -25,7 +25,7 @@ const onClickEvent = () => {
       <!-- Chat Icon -->
       <div class="icon d-flex ms-3 me-1">
         <div class="img-wrapper img-1-1">
-          {#if !currentChat.icon.startsWith("media/")}
+          {#if !currentChat?.icon?.startsWith("media/")}
             <img class="rounded-circle p-2" src={currentChat.icon} alt="">
           {:else}
             <img class="rounded-circle p-2" src={`https://localhost:8443/api/${currentChat.icon}`} alt="">

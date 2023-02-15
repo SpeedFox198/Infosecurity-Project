@@ -33,7 +33,7 @@ const selectCurrentGroup = () => {
 >
   <div class="icon p-2">
     <div class="img-wrapper img-1-1">
-      {#if !grp.icon.startsWith("media/")}
+      {#if !grp?.icon?.startsWith("media/")}
         <img class="rounded-circle" src={grp.icon} alt="Group Icon">
       {:else}
         <img class="rounded-circle" src={group_icon} alt="Group Icon">
